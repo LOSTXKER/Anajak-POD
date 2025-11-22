@@ -32,7 +32,7 @@ async function main() {
 
   console.log(`Created user: ${user.email}`)
 
-  // 3. Create Products with Detailed Info
+  // 3. Create Products with Detailed Info (Ensuring all have colors & sizes)
   const productData = [
     { 
       title: 'Anajak Semi 32', 
@@ -44,8 +44,8 @@ async function main() {
       fabricGrade: 'Semi',
       fiberType: 'ฝ้าย 100%',
       thickness: 'No. 32 / 155-165 gsm',
-      sizes: ['S', 'M', 'L', 'XL', '2XL'],
-      colors: ['#FFFFFF', '#000000', '#1E3A8A', '#DC2626'],
+      sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'],
+      colors: ['#FFFFFF', '#000000', '#1E3A8A', '#DC2626', '#FBBF24', '#10B981'], // ขาว, ดำ, กรม, แดง, เหลือง, เขียว
       badge: 'ไม่มีขั้นต่ำ',
       suitableFor: 'ทำแบรนด์, เสื้อพนักงาน'
     },
@@ -60,7 +60,7 @@ async function main() {
       fiberType: 'Cotton 100%',
       thickness: 'No. 20 / 210 gsm',
       sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'],
-      colors: ['#000000', '#FFFFFF', '#374151'],
+      colors: ['#000000', '#FFFFFF', '#374151', '#4B5563', '#9CA3AF'], // ดำ, ขาว, เทาเข้ม, เทากลาง, เทาอ่อน
       badge: 'Premium',
       suitableFor: 'แบรนด์ Streetwear'
     },
@@ -74,8 +74,8 @@ async function main() {
       fabricGrade: 'Super Soft',
       fiberType: 'Cotton 100%',
       thickness: 'No. 20 / 220 gsm',
-      sizes: ['M', 'L', 'XL'],
-      colors: ['#000000', '#FFFFFF', '#BEF264'],
+      sizes: ['M', 'L', 'XL', '2XL'],
+      colors: ['#000000', '#FFFFFF', '#BEF264', '#A855F7', '#EC4899'], // ดำ, ขาว, เขียวนีออน, ม่วง, ชมพู
       badge: 'ขายดี 🔥',
       suitableFor: 'วัยรุ่น, แฟชั่น'
     },
@@ -89,10 +89,55 @@ async function main() {
       fabricGrade: 'Canvas',
       fiberType: 'Cotton Canvas',
       thickness: '12 oz',
-      sizes: ['12x14"', '14x16"'],
-      colors: ['#E5E5E5', '#171717'],
+      sizes: ['12x14"', '14x16"', '16x18"'],
+      colors: ['#E5E5E5', '#171717', '#F59E0B'], // ดิบ, ดำ, เหลือง
       badge: 'รักษ์โลก 🌱',
       suitableFor: 'แจก, ของชำร่วย'
+    },
+    { 
+      title: 'Anajak Polo Classic', 
+      description: 'โปโลทรงสวย ผ้า Kaneko ระบายอากาศดี ไม่ขึ้นขน', 
+      price: 220.00, 
+      sku: 'PL-CLS', 
+      isPublished: true, 
+      imageUrl: 'https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?q=80&w=2071&auto=format&fit=crop',
+      fabricGrade: 'Kaneko',
+      fiberType: 'TC',
+      thickness: '300 gsm',
+      sizes: ['S', 'M', 'L', 'XL', '2XL'],
+      colors: ['#FFFFFF', '#000000', '#1E3A8A', '#065F46'], // ขาว, ดำ, กรม, เขียวเข้ม
+      badge: 'Uniform',
+      suitableFor: 'ชุดยูนิฟอร์ม, ทางการ'
+    },
+    { 
+      title: 'Anajak Hoodie Heavy', 
+      description: 'ฮู้ดดี้ผ้าสำลี หนา นุ่ม กันหนาวได้จริง', 
+      price: 450.00, 
+      sku: 'HD-HV', 
+      isPublished: true, 
+      imageUrl: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=2070&auto=format&fit=crop',
+      fabricGrade: 'Fleece',
+      fiberType: 'Cotton/Poly',
+      thickness: '350 gsm',
+      sizes: ['Free Size', 'Oversize'],
+      colors: ['#000000', '#9CA3AF', '#6366F1'], // ดำ, เทา, ม่วง
+      badge: 'Winter',
+      suitableFor: 'กันหนาว, แฟชั่น'
+    },
+     { 
+      title: 'Anajak Kids Tee', 
+      description: 'เสื้อยืดเด็ก ผ้านุ่มพิเศษ ไม่ระคายเคืองผิว', 
+      price: 90.00, 
+      sku: 'TS-KIDS', 
+      isPublished: true, 
+      imageUrl: 'https://images.unsplash.com/photo-1519238263496-63439708dc80?q=80&w=2060&auto=format&fit=crop',
+      fabricGrade: 'Soft',
+      fiberType: 'Cotton 100%',
+      thickness: 'No. 32 / 150 gsm',
+      sizes: ['24"', '26"', '28"', '30"'],
+      colors: ['#FFFFFF', '#FCA5A5', '#93C5FD', '#FDE047'], // ขาว, ชมพูอ่อน, ฟ้าอ่อน, เหลืองอ่อน
+      badge: 'Kids',
+      suitableFor: 'เด็กเล็ก, โรงเรียน'
     },
   ]
 

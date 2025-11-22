@@ -1,6 +1,10 @@
 import DashboardLayout from '@/components/DashboardLayout';
-import { Search, SlidersHorizontal, Heart, ArrowRight, ChevronDown, ChevronRight } from 'lucide-react';
+import { Search, SlidersHorizontal, Heart, ArrowRight, ChevronDown, ChevronRight, Star } from 'lucide-react';
 import prisma from '@/lib/prisma';
+import Link from 'next/link';
+
+// Force dynamic rendering to ensure fresh data after seeding
+export const dynamic = 'force-dynamic';
 
 // Function to fetch products directly from DB (Server Side)
 async function getProducts() {
@@ -137,7 +141,7 @@ export default async function CatalogPage() {
             {/* Product Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {products.map((product) => (
-                <div key={product.id} className="group bg-white rounded-[1.5rem] border border-slate-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
+                <Link key={product.id} href={`/catalog/${product.id}`} className="group bg-white rounded-[1.5rem] border border-slate-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer">
                   
                   {/* Header: Image 1:1 Square */}
                   <div className="relative aspect-square w-full overflow-hidden bg-slate-100">
@@ -194,9 +198,18 @@ export default async function CatalogPage() {
                         <span className="text-slate-400 font-bold w-24">ไซส์:</span>
                         <span className="text-slate-700 font-medium text-right flex-1">{product.sizes?.join(', ') || '-'}</span>
                       </div>
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-slate-400 font-bold w-24">เหมาะสำหรับ:</span>
-                        <span className="text-slate-700 font-medium text-right flex-1">{product.suitableFor || '-'}</span>
+                      
+                      {/* Rating - New Line */}
+                      <div className="flex justify-between items-center pt-1">
+                         <span className="text-slate-400 font-bold w-24">รีวิว:</span>
+                         <div className="flex items-center justify-end flex-1 gap-1">
+                           <div className="flex text-yellow-400">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className="w-3 h-3 fill-current" />
+                              ))}
+                           </div>
+                           <span className="text-[10px] text-slate-400 font-medium">(4.9)</span>
+                         </div>
                       </div>
                       
                       {/* Colors - New Line */}
@@ -216,22 +229,21 @@ export default async function CatalogPage() {
                       </div>
                     </div>
 
-                    {/* Footer: Price & Small Button */}
+                    {/* Footer: Price */}
                     <div className="flex items-center justify-between pt-3 border-t border-slate-50 mt-auto">
                        <div className="flex flex-col">
-                         <p className="text-lg font-extrabold text-slate-800 leading-tight">฿{Number(product.price).toFixed(0)}</p>
+                         <p className="text-lg font-extrabold text-slate-800 leading-tight group-hover:text-ci-blue transition-colors">฿{Number(product.price).toFixed(0)}</p>
                          <div className="flex items-center gap-1 text-[10px] font-bold text-ci-blue bg-ci-blue/5 px-1.5 py-0.5 rounded mt-0.5 w-fit">
                             <span>สมาชิก ฿{(Number(product.price) * 0.9).toFixed(0)}</span>
                          </div>
                        </div>
-                       {/* Updated Button Style: Outline Blue */}
-                       <button className="px-4 py-1.5 bg-white text-ci-blue border-2 border-ci-blue/10 hover:border-ci-blue hover:bg-ci-blue hover:text-white text-xs font-bold rounded-lg transition-all shadow-sm">
-                         เลือกสินค้า
-                       </button>
+                       <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-ci-blue group-hover:text-white transition-all">
+                          <ChevronRight className="w-5 h-5" />
+                       </div>
                     </div>
 
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
 
