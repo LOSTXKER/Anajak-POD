@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  SELLER
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  products     Product[]
+  orders       Order[]
+  wallet       Wallet?
+  integrations Integration[]
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  imageUrl    String?
+  sku         String?  @unique
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // New Fields for Product Details
+  fabricGrade String?  // เกรดผ้า: Semi, Comb, Premium
+  fiberType   String?  // ประเภทเส้นใย: ฝ้าย 100%, TC, TK
+  thickness   String?  // เบอร์ผ้า/ความหนา: No.32 / 155-165 gsm
+  sizes       String[] // ไซส์: ["S", "M", "L", "XL"]
+  colors      String[] // สี: ["#FFFFFF", "#000000"]
+  badge       String?  // ป้าย: ไม่มีขั้นต่ำ, ขายดี
+  suitableFor String?  // เหมาะสำหรับ: ทำแบรนด์, แจก, ใส่เล่น (New Field)
+  
+  // Foreign Key
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  // Relations
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  orderNumber String      @unique
+  totalAmount Decimal     @db.Decimal(10, 2)
+  status      OrderStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Foreign Key
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  
+  // Relations
+  items       OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+  
+  // Foreign Keys
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  balance   Decimal  @default(0) @db.Decimal(10, 2)
+  updatedAt DateTime @updatedAt
+  
+  // Foreign Key
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  
+  // Relations
+  transactions Transaction[]
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  amount    Decimal  @db.Decimal(10, 2)
+  type      String   // DEPOSIT, WITHDRAWAL, SALE
+  createdAt DateTime @default(now())
+  
+  // Foreign Key
+  walletId  String
+  wallet    Wallet   @relation(fields: [walletId], references: [id])
+}
+
+model Integration {
+  id        String   @id @default(uuid())
+  platform  String   // e.g., SHOPEE, LAZADA, SHOPIFY
+  apiKey    String?
+  shopName  String?
+  isConnected Boolean @default(true)
+  createdAt DateTime @default(now())
+  
+  // Foreign Key
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
