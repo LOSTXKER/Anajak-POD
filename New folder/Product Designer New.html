@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anajak POD Design Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3973b2',
+                        secondary: '#fec91b',
+                        accent: '#e72f27',
+                        dark: '#0f172a',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans Thai', sans-serif;
+            overflow: hidden;
+        }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .app-grid {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            height: 100vh;
+        }
+        
+        .editor-grid {
+            display: grid;
+            grid-template-columns: 72px 320px 1fr 360px;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .tool-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.75rem;
+            color: #64748b;
+            font-size: 0.7rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .tool-btn:hover {
+            background: #f1f5f9;
+            color: #3973b2;
+        }
+        
+        .tool-btn.active {
+            background: linear-gradient(to bottom, rgba(57,115,178,0.1), rgba(254,201,27,0.1));
+            color: #3973b2;
+            font-weight: 600;
+        }
+        
+        .panel-content {
+            display: none;
+        }
+        
+        .panel-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .canvas-wrapper {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        
+        .print-zone {
+            position: absolute;
+            border: 2px dashed rgba(57,115,178,0.3);
+            background: rgba(57,115,178,0.02);
+            cursor: crosshair;
+            transition: all 0.3s;
+        }
+        
+        .print-zone:hover {
+            border-color: #3973b2;
+            background: rgba(57,115,178,0.05);
+        }
+        
+        .canvas-element {
+            position: absolute;
+            cursor: move;
+            user-select: none;
+        }
+        
+        .canvas-element.selected {
+            outline: 2px solid #3973b2;
+            outline-offset: 2px;
+        }
+        
+        .resize-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: white;
+            border: 2px solid #3973b2;
+            border-radius: 50%;
+            display: none;
+        }
+        
+        .canvas-element.selected .resize-handle {
+            display: block;
+        }
+        
+        .resize-nw { top: -5px; left: -5px; cursor: nw-resize; }
+        .resize-ne { top: -5px; right: -5px; cursor: ne-resize; }
+        .resize-sw { bottom: -5px; left: -5px; cursor: sw-resize; }
+        .resize-se { bottom: -5px; right: -5px; cursor: se-resize; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="app-grid">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-primary via-primary to-secondary text-white shadow-lg">
+            <div class="px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl font-bold backdrop-blur-sm">A</div>
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs uppercase tracking-widest opacity-75">POD Design Studio</span>
+                                <span class="px-2 py-1 bg-white/20 rounded-full text-xs font-semibold backdrop-blur-sm flex items-center gap-1">
+                                    <i data-lucide="zap" class="w-3 h-3"></i> Live
+                                </span>
+                            </div>
+                            <h1 class="text-xl font-bold">Anajak Custom T-Shirt</h1>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold backdrop-blur-sm transition flex items-center gap-2">
+                            <i data-lucide="share-2" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">แชร์</span>
+                        </button>
+                        <button class="px-4 py-2 bg-white text-primary hover:bg-gray-50 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Export</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Editor -->
+        <div class="editor-grid">
+            <!-- Tool Sidebar -->
+            <aside class="bg-white border-r border-gray-200 flex flex-col items-center py-4 gap-2">
+                <button class="tool-btn active" data-tool="product">
+                    <i data-lucide="shirt" class="w-6 h-6"></i>
+                    <span>สินค้า</span>
+                </button>
+                <button class="tool-btn" data-tool="text">
+                    <i data-lucide="type" class="w-6 h-6"></i>
+                    <span>ข้อความ</span>
+                </button>
+                <button class="tool-btn" data-tool="upload">
+                    <i data-lucide="upload" class="w-6 h-6"></i>
+                    <span>อัปโหลด</span>
+                </button>
+                <button class="tool-btn" data-tool="elements">
+                    <i data-lucide="shapes" class="w-6 h-6"></i>
+                    <span>องค์ประกอบ</span>
+                </button>
+                <button class="tool-btn" data-tool="templates">
+                    <i data-lucide="layout-template" class="w-6 h-6"></i>
+                    <span>เทมเพลต</span>
+                </button>
+                <button class="tool-btn" data-tool="ai">
+                    <i data-lucide="sparkles" class="w-6 h-6"></i>
+                    <span>AI</span>
+                </button>
+                <div class="flex-1"></div>
+                <button class="tool-btn" data-tool="layers">
+                    <i data-lucide="layers" class="w-6 h-6"></i>
+                    <span>เลเยอร์</span>
+                </button>
+            </aside>
+
+            <!-- Left Panel -->
+            <aside class="bg-gray-50 border-r border-gray-200 overflow-y-auto">
+                <div class="p-6">
+                    <!-- Product Panel -->
+                    <div id="panel-product" class="panel-content active">
+                        <div class="bg-white rounded-xl p-5 mb-4 border border-gray-200">
+                            <div class="flex items-start justify-between mb-4">
+                                <div>
+                                    <h3 class="font-bold text-gray-900">Premium Unisex Tee</h3>
+                                    <p class="text-sm text-gray-500">Cotton 100% · DTG Print</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div class="flex items-center gap-2 text-gray-600">
+                                    <i data-lucide="ruler" class="w-4 h-4 text-primary"></i>
+                                    <span>พื้นที่: 32×45 cm</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-gray-600">
+                                    <i data-lucide="truck" class="w-4 h-4 text-primary"></i>
+                                    <span>ส่งใน 48 ชม.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-5 mb-4 border border-gray-200">
+                            <h4 class="font-bold text-sm mb-3">สีเสื้อ (Colors)</h4>
+                            <div class="flex flex-wrap gap-3">
+                                <button class="color-option w-10 h-10 rounded-full bg-white border-2 border-primary shadow-sm" style="background: white;"></button>
+                                <button class="color-option w-10 h-10 rounded-full border-2 border-gray-200" style="background: #1e293b;"></button>
+                                <button class="color-option w-10 h-10 rounded-full border-2 border-gray-200" style="background: #334155;"></button>
+                                <button class="color-option w-10 h-10 rounded-full border-2 border-gray-200" style="background: #991b1b;"></button>
+                                <button class="color-option w-10 h-10 rounded-full border-2 border-gray-200" style="background: #d1d5db;"></button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-5 border border-gray-200">
+                            <h4 class="font-bold text-sm mb-3">ขนาด (Sizes)</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <button class="px-4 py-2 border-2 border-gray-200 rounded-lg font-semibold text-sm hover:border-primary hover:bg-primary hover:text-white transition">XS</button>
+                                <button class="px-4 py-2 border-2 border-gray-200 rounded-lg font-semibold text-sm hover:border-primary hover:bg-primary hover:text-white transition">S</button>
+                                <button class="px-4 py-2 border-2 border-primary bg-primary text-white rounded-lg font-semibold text-sm">M</button>
+                                <button class="px-4 py-2 border-2 border-gray-200 rounded-lg font-semibold text-sm hover:border-primary hover:bg-primary hover:text-white transition">L</button>
+                                <button class="px-4 py-2 border-2 border-gray-200 rounded-lg font-semibold text-sm hover:border-primary hover:bg-primary hover:text-white transition">XL</button>
+                                <button class="px-4 py-2 border-2 border-gray-200 rounded-lg font-semibold text-sm hover:border-primary hover:bg-primary hover:text-white transition">2XL</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Text Panel -->
+                    <div id="panel-text" class="panel-content">
+                        <div class="bg-white rounded-xl p-5 mb-4 border border-gray-200">
+                            <button onclick="addTextElement()" class="w-full py-3 bg-gradient-to-r from-primary to-blue-600 text-white rounded-lg font-bold hover:shadow-lg transition flex items-center justify-center gap-2">
+                                <i data-lucide="plus" class="w-5 h-5"></i>
+                                เพิ่มข้อความใหม่
+                            </button>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-5 mb-4 border border-gray-200">
+                            <h4 class="font-bold text-sm mb-3">ข้อความโค้ง (Curved Text)</h4>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button class="aspect-square border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-gray-50 transition flex flex-col items-center justify-center">
+                                    <i data-lucide="arrow-up" class="w-5 h-5 transform rotate-45"></i>
+                                    <span class="text-xs mt-1">Arch Up</span>
+                                </button>
+                                <button class="aspect-square border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-gray-50 transition flex flex-col items-center justify-center">
+                                    <i data-lucide="arrow-down" class="w-5 h-5 transform -rotate-45"></i>
+                                    <span class="text-xs mt-1">Arch Down</span>
+                                </button>
+                                <button class="aspect-square border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-gray-50 transition flex flex-col items-center justify-center">
+                                    <i data-lucide="circle" class="w-5 h-5"></i>
+                                    <span class="text-xs mt-1">Circle</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-5 border border-gray-200">
+                            <h4 class="font-bold text-sm mb-3">ฟอนต์ยอดนิยม</h4>
+                            <div class="space-y-2 max-h-96 overflow-y-auto">
+                                <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 transition" style="font-family: 'Arial Black', sans-serif; font-size: 18px;">Arial Black</button>
+                                <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 transition" style="font-family: 'Impact', sans-serif; font-size: 18px;">Impact</button>
+                                <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 transition" style="font-family: 'Georgia', serif; font-size: 18px;">Georgia</button>
+                                <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 transition" style="font-family: 'Courier New', monospace; font-size: 18px;">Courier New</button>
+                                <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 transition" style="font-family: 'Sarabun', sans-serif; font-size: 18px;">Sarabun</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Panel -->
+                    <div id="panel-upload" class="panel-content">
+                        <div class="bg-white rounded-xl p-5 mb-4 border border-gray-200">
+                            <label class="block cursor-pointer">
+                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-primary hover:bg-gray-50 transition">
+                                    <i data-lucide="upload-cloud" class="w-12 h-12 mx-auto mb-3 text-primary"></i>
+                                    <p class="font-semibold text-primary mb-1">คลิกเพื่ออัปโหลดรูปภาพ</p>
+                                    <p class="text-xs text-gray-500">PNG, JPG, SVG (สูงสุด 15MB)</p>
+                                </div>
+                                <input type="file" class="hidden" accept="image/*" onchange="handleImageUpload(event)">
+                            </label>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-5 border border-gray-200">
+                            <h4 class="font-bold text-sm mb-3">ไลบรารีของฉัน</h4>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="aspect-square border border-gray-200 rounded-lg bg-gray-50 flex items-center justify-center cursor-pointer hover:border-primary transition">
+                                    <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
+                                </div>
+                                <div class="aspect-square border border-gray-200 rounded-lg bg-gray-50 flex items-center justify-center cursor-pointer hover:border-primary transition">
+                                    <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
+                                </div>
+                                <div class="aspect-square border-2 border-dashed border-primary rounded-lg flex items-center justify-center cursor-pointer hover:bg-primary/5 transition">
+                                    <i data-lucide="plus" class="w-6 h-6 text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Elements Panel -->
+                    <div id="panel-elements" class="panel-content">
+                        <div class="bg-white rounded-xl p-5 mb-4 border border-gray-200">
+                            <h4 class="font-bold text-sm mb-3">รูปทรงพื้นฐาน</h4>
+                            <div class="grid grid-cols-3 gap-3">
+                                <button onclick="addShape('square')" class="aspect-square border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-gray-50 transition flex flex-col items-center justify-center">
+                                    <i data-lucide="square" class="w-8 h-8"></i>
+                                    <span class="text-xs mt-1">Square</span>
+                                </button>
+                                <button onclick="addShape('circle')" class="aspect-square border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-gray-50 transition flex flex-col items-center justify-center">
+                                    <i data-lucide="circle" class="w-8 h-8"></i>
+                                    <span class="text-xs mt-1">Circle</span>
+                                </button>
+                                <button onclick="addShape('triangle')" class="aspect-square border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-gray-50 transition flex flex-col items-center justify-center">
+                                    <i data-lucide="triangle" class="w-8 h-8"></i>
+                                    <span class="text-xs mt-1">Triangle</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-5 border border-gray-200">
+                            <h4 class="font-bold text-sm mb-3">ไอคอนและสัญลักษณ์</h4>
+                            <div class="grid grid-cols-4 gap-2">
+                                <button class="aspect-square border border-gray-200 rounded-lg hover:border-primary hover:bg-gray-50 transition flex items-center justify-center">
+                                    <i data-lucide="star" class="w-6 h-6"></i>
+                                </button>
+                                <button class="aspect-square border border-gray-200 rounded-lg hover:border-primary hover:bg-gray-50 transition flex items-center justify-center">
+                                    <i data-lucide="heart" class="w-6 h-6"></i>
+                                </button>
+                                <button class="aspect-square border border-gray-200 rounded-lg hover:border-primary hover:bg-gray-50 transition flex items-center justify-center">
+                                    <i data-lucide="zap" class="w-6 h-6"></i>
+                                </button>
+                                <button class="aspect-square border border-gray-200 rounded-lg hover:border-primary hover:bg-gray-50 transition flex items-center justify-center">
+                                    <i data-lucide="crown" class="w-6 h-6"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Templates Panel -->
+                    <div id="panel-templates" class="panel-content">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="aspect-[3/4] border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:border-primary hover:shadow-lg transition">
+                                <div class="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                                    <span class="text-white font-bold">Streetwear</span>
+                                </div>
+                            </div>
+                            <div class="aspect-[3/4] border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:border-primary hover:shadow-lg transition">
+                                <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                    <span class="text-white font-bold">Minimal</span>
+                                </div>
+                            </div>
+                            <div class="aspect-[3/4] border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:border-primary hover:shadow-lg transition">
+                                <div class="w-full h-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+                                    <span class="text-white font-bold">Sport</span>
+                                </div>
+                            </div>
+                            <div class="aspect-[3/4] border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:border-primary hover:shadow-lg transition">
+                                <div class="w-full h-full bg-gradient-to-br from-green-400 to-cyan-500 flex items-center justify-center">
+                                    <span class="text-white font-bold">Nature</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Panel -->
+                    <div id="panel-ai" class="panel-content">
+                        <div class="bg-white rounded-xl p-5 mb-4 border border-gray-200">
+                            <h4 class="font-bold text-sm mb-3 flex items-center gap-2">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-primary"></i>
+                                AI Image Generator
+                            </h4>
+                            <textarea class="w-full px-4 py-3 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary/50" rows="4" placeholder="อธิบายภาพที่คุณต้องการ เช่น 'Neon tiger with cyberpunk style'"></textarea>
+                            <button class="w-full mt-3 py-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-lg font-bold hover:shadow-lg transition flex items-center justify-center gap-2">
+                                <i data-lucide="zap" class="w-5 h-5"></i>
+                                สร้างภาพด้วย AI
+                            </button>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-5 border border-gray-200">
+                            <h4 class="font-bold text-sm mb-3">Prompt แนะนำ</h4>
+                            <div class="space-y-2">
+                                <button class="w-full text-left px-3 py-2 border border-gray-200 rounded-lg text-sm hover:border-primary hover:bg-gray-50 transition">Retro 80s neon style</button>
+                                <button class="w-full text-left px-3 py-2 border border-gray-200 rounded-lg text-sm hover:border-primary hover:bg-gray-50 transition">Minimalist line art</button>
+                                <button class="w-full text-left px-3 py-2 border border-gray-200 rounded-lg text-sm hover:border-primary hover:bg-gray-50 transition">Vintage badge design</button>
+                                <button class="w-full text-left px-3 py-2 border border-gray-200 rounded-lg text-sm hover:border-primary hover:bg-gray-50 transition">Cartoon mascot character</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Layers Panel -->
+                    <div id="panel-layers" class="panel-content">
+                        <div class="bg-white rounded-xl p-5 border border-gray-200">
+                            <h4 class="font-bold text-sm mb-3 flex items-center gap-2">
+                                <i data-lucide="layers" class="w-4 h-4"></i>
+                                เลเยอร์ทั้งหมด
+                            </h4>
+                            <div id="layers-list" class="space-y-2">
+                                <div class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                    <i data-lucide="type" class="w-4 h-4 text-gray-400"></i>
+                                    <span class="flex-1 text-sm font-medium">Text Layer 1</span>
+                                    <button class="p-1 hover:bg-gray-200 rounded">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Canvas Area -->
+            <main class="bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col overflow-hidden">
+                <!-- Canvas Toolbar -->
+                <div class="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-2 flex-wrap">
+                    <select id="font-select" class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <option>Arial Black</option>
+                        <option>Impact</option>
+                        <option>Georgia</option>
+                        <option>Courier New</option>
+                    </select>
+                    <input type="number" id="font-size" value="48" min="12" max="200" class="w-20 px-3 py-2 border border-gray-200 rounded-lg text-sm text-center bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <input type="color" id="text-color" value="#1e293b" class="w-12 h-10 border border-gray-200 rounded-lg cursor-pointer">
+                    <div class="w-px h-6 bg-gray-300"></div>
+                    <button onclick="applyBold()" class="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <i data-lucide="bold" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="applyItalic()" class="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <i data-lucide="italic" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="applyUnderline()" class="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <i data-lucide="underline" class="w-5 h-5"></i>
+                    </button>
+                    <div class="w-px h-6 bg-gray-300"></div>
+                    <button onclick="alignLeft()" class="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <i data-lucide="align-left" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="alignCenter()" class="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <i data-lucide="align-center" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="alignRight()" class="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <i data-lucide="align-right" class="w-5 h-5"></i>
+                    </button>
+                    <div class="flex-1"></div>
+                    <button onclick="deleteSelected()" class="p-2 border border-red-200 rounded-lg hover:bg-red-50 transition text-red-500">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Canvas Stage -->
+                <div class="flex-1 flex items-center justify-center p-8 overflow-auto">
+                    <div class="canvas-wrapper">
+                        <div id="canvas-container" class="relative" style="width: 600px; height: 750px;">
+                            <img id="mockup-img" src="https://placehold.co/600x750/ffffff/e2e8f0?text=T-Shirt+Mockup" class="w-full h-full object-contain pointer-events-none">
+                            <div id="print-zone" class="print-zone" style="top: 25%; left: 27.5%; width: 45%; height: 50%;">
+                                <!-- Canvas elements will be added here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Canvas Footer -->
+                <div class="bg-white border-t border-gray-200 px-6 py-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button onclick="zoomOut()" class="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                            <i data-lucide="minus" class="w-5 h-5"></i>
+                        </button>
+                        <span id="zoom-level" class="text-sm font-semibold w-12 text-center">100%</span>
+                        <button onclick="zoomIn()" class="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="flex gap-2 bg-gray-100 p-1 rounded-lg">
+                        <button class="view-tab px-4 py-2 rounded bg-white shadow-sm font-semibold text-sm" data-view="front">Front</button>
+                        <button class="view-tab px-4 py-2 rounded font-medium text-sm text-gray-600 hover:text-gray-900" data-view="back">Back</button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                            <i data-lucide="ruler" class="w-5 h-5"></i>
+                        </button>
+                        <button class="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                            <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Panel (Properties) -->
+            <aside class="bg-white border-l border-gray-200 flex flex-col overflow-hidden">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-gray-900">Properties</h3>
+                        <button class="px-4 py-2 bg-gray-100 rounded-lg text-sm font-semibold hover:bg-gray-200 transition">Edit</button>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-6">
+                    <div id="properties-panel">
+                        <!-- Product Overview -->
+                        <div class="bg-gradient-to-br from-primary to-purple-600 text-white rounded-xl p-5 mb-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs uppercase tracking-widest opacity-75">สถานะโปรเจกต์</span>
+                                <span class="px-2 py-1 bg-white/20 rounded-full text-xs font-semibold backdrop-blur-sm">Live</span>
+                            </div>
+                            <h4 class="text-lg font-bold mb-4">พร้อมเผยแพร่</h4>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-white/15 backdrop-blur-sm rounded-lg p-3">
+                                    <p class="text-xs opacity-75 mb-1">เลเยอร์ทั้งหมด</p>
+                                    <p class="text-xl font-bold">2</p>
+                                </div>
+                                <div class="bg-white/15 backdrop-blur-sm rounded-lg p-3">
+                                    <p class="text-xs opacity-75 mb-1">พื้นที่ปลอดภัย</p>
+                                    <p class="text-xl font-bold">95%</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Element Properties -->
+                        <div id="element-properties" class="space-y-4">
+                            <div class="bg-gray-50 border border-gray-200 rounded-xl p-5">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <i data-lucide="mouse-pointer-click" class="w-5 h-5 text-primary"></i>
+                                    <span class="font-semibold text-gray-900">คลิกเลือกองค์ประกอบ</span>
+                                </div>
+                                <p class="text-sm text-gray-600">เลือกข้อความหรือรูปภาพบน Canvas เพื่อแก้ไขคุณสมบัติ</p>
+                            </div>
+                        </div>
+
+                        <!-- Quick Tips -->
+                        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="lightbulb" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                                <div>
+                                    <h5 class="font-semibold text-sm text-blue-900 mb-2">เคล็ดลับ</h5>
+                                    <ul class="text-xs text-blue-800 space-y-1">
+                                        <li>• ใช้ Ctrl/Cmd + D เพื่อทำซ้ำ</li>
+                                        <li>• กด Delete เพื่อลบองค์ประกอบ</li>
+                                        <li>• ลาก Shift เพื่อย้ายแนวตรง</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6 border-t border-gray-200">
+                    <button class="w-full py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-bold hover:shadow-lg transition">
+                        บันทึกและส่งออก
+                    </button>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Tool switching
+        document.querySelectorAll('[data-tool]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const tool = btn.dataset.tool;
+                document.querySelectorAll('.panel-content').forEach(p => p.classList.remove('active'));
+                document.getElementById(`panel-${tool}`).classList.add('active');
+            });
+        });
+
+        // View switching
+        document.querySelectorAll('[data-view]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-view]').forEach(b => {
+                    b.classList.remove('bg-white', 'shadow-sm', 'font-semibold');
+                    b.classList.add('text-gray-600', 'font-medium');
+                });
+                btn.classList.add('bg-white', 'shadow-sm', 'font-semibold');
+                btn.classList.remove('text-gray-600', 'font-medium');
+                
+                const view = btn.dataset.view;
+                const mockupImg = document.getElementById('mockup-img');
+                if (view === 'back') {
+                    mockupImg.src = 'https://placehold.co/600x750/f0f0f0/cccccc?text=Back+View';
+                } else {
+                    mockupImg.src = 'https://placehold.co/600x750/ffffff/e2e8f0?text=T-Shirt+Mockup';
+                }
+            });
+        });
+
+        // Canvas functionality
+        let selectedElement = null;
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+        let elementCounter = 0;
+
+        function addTextElement() {
+            elementCounter++;
+            const printZone = document.getElementById('print-zone');
+            const element = document.createElement('div');
+            element.className = 'canvas-element text-element';
+            element.contentEditable = true;
+            element.textContent = 'NEW TEXT';
+            element.style.left = '50px';
+            element.style.top = '50px';
+            element.dataset.id = `text-${elementCounter}`;
+            
+            element.innerHTML += `
+                <div class="resize-handle resize-nw"></div>
+                <div class="resize-handle resize-ne"></div>
+                <div class="resize-handle resize-sw"></div>
+                <div class="resize-handle resize-se"></div>
+            `;
+            
+            printZone.appendChild(element);
+            setupElementInteraction(element);
+            selectElement(element);
+            
+            // Update layers
+            updateLayersList();
+        }
+
+        function addShape(type) {
+            elementCounter++;
+            const printZone = document.getElementById('print-zone');
+            const element = document.createElement('div');
+            element.className = 'canvas-element';
+            element.style.left = '100px';
+            element.style.top = '100px';
+            element.style.width = '100px';
+            element.style.height = '100px';
+            element.dataset.id = `shape-${elementCounter}`;
+            
+            if (type === 'square') {
+                element.style.background = '#3973b2';
+                element.style.borderRadius = '8px';
+            } else if (type === 'circle') {
+                element.style.background = '#fec91b';
+                element.style.borderRadius = '50%';
+            } else if (type === 'triangle') {
+                element.style.width = '0';
+                element.style.height = '0';
+                element.style.borderLeft = '50px solid transparent';
+                element.style.borderRight = '50px solid transparent';
+                element.style.borderBottom = '100px solid #e72f27';
+                element.style.background = 'transparent';
+            }
+            
+            element.innerHTML = `
+                <div class="resize-handle resize-nw"></div>
+                <div class="resize-handle resize-ne"></div>
+                <div class="resize-handle resize-sw"></div>
+                <div class="resize-handle resize-se"></div>
+            `;
+            
+            printZone.appendChild(element);
+            setupElementInteraction(element);
+            selectElement(element);
+            updateLayersList();
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    elementCounter++;
+                    const printZone = document.getElementById('print-zone');
+                    const element = document.createElement('div');
+                    element.className = 'canvas-element';
+                    element.style.left = '50px';
+                    element.style.top = '50px';
+                    element.dataset.id = `image-${elementCounter}`;
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'image-element';
+                    img.style.maxWidth = '200px';
+                    
+                    element.appendChild(img);
+                    element.innerHTML += `
+                        <div class="resize-handle resize-nw"></div>
+                        <div class="resize-handle resize-ne"></div>
+                        <div class="resize-handle resize-sw"></div>
+                        <div class="resize-handle resize-se"></div>
+                    `;
+                    
+                    printZone.appendChild(element);
+                    setupElementInteraction(element);
+                    selectElement(element);
+                    updateLayersList();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function setupElementInteraction(element) {
+            element.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('resize-handle')) return;
+                e.stopPropagation();
+                selectElement(element);
+                isDragging = true;
+                const rect = element.getBoundingClientRect();
+                const parentRect = element.parentElement.getBoundingClientRect();
+                dragOffset.x = e.clientX - rect.left;
+                dragOffset.y = e.clientY - rect.top;
+            });
+        }
+
+        function selectElement(element) {
+            if (selectedElement) {
+                selectedElement.classList.remove('selected');
+            }
+            selectedElement = element;
+            element.classList.add('selected');
+            showElementProperties(element);
+        }
+
+        function showElementProperties(element) {
+            const propertiesPanel = document.getElementById('element-properties');
+            const isText = element.classList.contains('text-element');
+            
+            propertiesPanel.innerHTML = `
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="font-bold text-sm mb-4 flex items-center gap-2">
+                        <i data-lucide="${isText ? 'type' : 'image'}" class="w-4 h-4 text-primary"></i>
+                        ${isText ? 'คุณสมบัติข้อความ' : 'คุณสมบัติรูปภาพ'}
+                    </h4>
+                    
+                    ${isText ? `
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase">ข้อความ</label>
+                                <textarea class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50" rows="2">${element.textContent}</textarea>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase">ขนาด</label>
+                                    <input type="number" value="48" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase">สี</label>
+                                    <input type="color" value="#1e293b" class="w-full h-10 border border-gray-200 rounded-lg cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase">ความกว้าง</label>
+                                    <input type="number" value="200" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase">ความสูง</label>
+                                    <input type="number" value="200" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase">ความทึบ</label>
+                                <input type="range" min="0" max="100" value="100" class="w-full">
+                            </div>
+                        </div>
+                    `}
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function updateLayersList() {
+            const layersList = document.getElementById('layers-list');
+            const elements = document.querySelectorAll('.canvas-element');
+            
+            layersList.innerHTML = '';
+            elements.forEach((el, index) => {
+                const isText = el.classList.contains('text-element');
+                const layerItem = document.createElement('div');
+                layerItem.className = 'flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100';
+                layerItem.innerHTML = `
+                    <i data-lucide="${isText ? 'type' : 'image'}" class="w-4 h-4 text-gray-400"></i>
+                    <span class="flex-1 text-sm font-medium">${isText ? 'Text' : 'Image'} ${index + 1}</span>
+                    <button class="p-1 hover:bg-gray-200 rounded">
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                `;
+                layerItem.addEventListener('click', () => selectElement(el));
+                layersList.appendChild(layerItem);
+            });
+            lucide.createIcons();
+        }
+
+        // Mouse events for dragging
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging && selectedElement) {
+                const parentRect = selectedElement.parentElement.getBoundingClientRect();
+                let x = e.clientX - parentRect.left - dragOffset.x;
+                let y = e.clientY - parentRect.top - dragOffset.y;
+                
+                x = Math.max(0, Math.min(x, parentRect.width - selectedElement.offsetWidth));
+                y = Math.max(0, Math.min(y, parentRect.height - selectedElement.offsetHeight));
+                
+                selectedElement.style.left = x + 'px';
+                selectedElement.style.top = y + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // Deselect on canvas click
+        document.getElementById('print-zone').addEventListener('click', (e) => {
+            if (e.target.id === 'print-zone') {
+                if (selectedElement) {
+                    selectedElement.classList.remove('selected');
+                    selectedElement = null;
+                }
+                document.getElementById('element-properties').innerHTML = `
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-5">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i data-lucide="mouse-pointer-click" class="w-5 h-5 text-primary"></i>
+                            <span class="font-semibold text-gray-900">คลิกเลือกองค์ประกอบ</span>
+                        </div>
+                        <p class="text-sm text-gray-600">เลือกข้อความหรือรูปภาพบน Canvas เพื่อแก้ไขคุณสมบัติ</p>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        });
+
+        // Toolbar functions
+        function deleteSelected() {
+            if (selectedElement) {
+                selectedElement.remove();
+                selectedElement = null;
+                updateLayersList();
+            }
+        }
+
+        function applyBold() {
+            if (selectedElement && selectedElement.classList.contains('text-element')) {
+                const currentWeight = selectedElement.style.fontWeight;
+                selectedElement.style.fontWeight = currentWeight === 'bold' ? 'normal' : 'bold';
+            }
+        }
+
+        function applyItalic() {
+            if (selectedElement && selectedElement.classList.contains('text-element')) {
+                const currentStyle = selectedElement.style.fontStyle;
+                selectedElement.style.fontStyle = currentStyle === 'italic' ? 'normal' : 'italic';
+            }
+        }
+
+        function applyUnderline() {
+            if (selectedElement && selectedElement.classList.contains('text-element')) {
+                const currentDecor = selectedElement.style.textDecoration;
+                selectedElement.style.textDecoration = currentDecor === 'underline' ? 'none' : 'underline';
+            }
+        }
+
+        function alignLeft() {
+            if (selectedElement && selectedElement.classList.contains('text-element')) {
+                selectedElement.style.textAlign = 'left';
+            }
+        }
+
+        function alignCenter() {
+            if (selectedElement && selectedElement.classList.contains('text-element')) {
+                selectedElement.style.textAlign = 'center';
+            }
+        }
+
+        function alignRight() {
+            if (selectedElement && selectedElement.classList.contains('text-element')) {
+                selectedElement.style.textAlign = 'right';
+            }
+        }
+
+        // Zoom controls
+        let zoomLevel = 100;
+        function zoomIn() {
+            if (zoomLevel < 200) {
+                zoomLevel += 10;
+                updateZoom();
+            }
+        }
+
+        function zoomOut() {
+            if (zoomLevel > 50) {
+                zoomLevel -= 10;
+                updateZoom();
+            }
+        }
+
+        function updateZoom() {
+            document.getElementById('zoom-level').textContent = zoomLevel + '%';
+            document.getElementById('canvas-container').style.transform = `scale(${zoomLevel / 100})`;
+        }
+
+        // Font select change
+        document.getElementById('font-select').addEventListener('change', (e) => {
+            if (selectedElement && selectedElement.classList.contains('text-element')) {
+                selectedElement.style.fontFamily = e.target.value;
+            }
+        });
+
+        // Font size change
+        document.getElementById('font-size').addEventListener('input', (e) => {
+            if (selectedElement && selectedElement.classList.contains('text-element')) {
+                selectedElement.style.fontSize = e.target.value + 'px';
+            }
+        });
+
+        // Text color change
+        document.getElementById('text-color').addEventListener('input', (e) => {
+            if (selectedElement && selectedElement.classList.contains('text-element')) {
+                selectedElement.style.color = e.target.value;
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' && selectedElement) {
+                deleteSelected();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                e.preventDefault();
+                if (selectedElement) {
+                    const clone = selectedElement.cloneNode(true);
+                    clone.style.left = (parseInt(selectedElement.style.left) + 20) + 'px';
+                    clone.style.top = (parseInt(selectedElement.style.top) + 20) + 'px';
+                    selectedElement.parentElement.appendChild(clone);
+                    setupElementInteraction(clone);
+                    selectElement(clone);
+                    updateLayersList();
+                }
+            }
+        });
+
+        // Color option clicks
+        document.querySelectorAll('.color-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.color-option').forEach(b => {
+                    b.classList.remove('border-primary', 'shadow-sm');
+                    b.classList.add('border-gray-200');
+                });
+                btn.classList.add('border-primary', 'shadow-sm');
+                btn.classList.remove('border-gray-200');
+                
+                // Update mockup color (in real app, would change actual product color)
+                const bgColor = btn.style.background;
+                document.getElementById('mockup-img').style.filter = bgColor === 'white' ? 'none' : 'brightness(0.8)';
+            });
+        });
+    </script>
+</body>
+</html>

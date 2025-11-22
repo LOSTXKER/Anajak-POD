@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anajak Storefront</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ci: {
+                            blue: '#3973b2',
+                            yellow: '#fec91b',
+                            red: '#e72f27',
+                            dark: '#0f172a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans Thai', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans Thai', sans-serif;
+            background-color: #f8fafc;
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(241, 245, 249, 0.8);
+        }
+        /* Custom styles for file upload */
+        .file-upload-box {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        .file-upload-box:hover {
+            border-color: #3973b2;
+            background-color: #f8fafc;
+        }
+        /* Tab styles */
+        .tab-button.active {
+            border-color: #3973b2;
+            color: #3973b2;
+            font-weight: 700;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="text-slate-600 antialiased">
+
+    <div class="flex h-screen overflow-hidden bg-slate-50">
+        <!-- ================= Unified Sidebar (Simplified) ================= -->
+        <aside class="w-72 bg-white border-r border-slate-100 hidden lg:flex flex-col z-20 shadow-[2px_0_20px_-10px_rgba(0,0,0,0.1)]">
+            <div class="h-20 flex items-center px-6 border-b border-slate-50">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-ci-blue/20" style="background: linear-gradient(135deg, #3973b2, #e72f27);">A</div>
+                    <span class="text-xl font-bold text-slate-800 tracking-tight">ANAJAK<span class="text-ci-blue">.POD</span></span>
+                </div>
+            </div>
+
+            <div class="p-4">
+                <div class="p-4 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border border-slate-200/60">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <img src="https://placehold.co/100x100/3973b2/ffffff?text=U" class="w-10 h-10 rounded-full border-2 border-white shadow-sm">
+                        <div class="overflow-hidden">
+                            <h4 class="font-bold text-slate-800 truncate text-sm">คุณลูกค้า</h4>
+                            <div class="flex items-center text-xs text-emerald-600 font-bold">
+                                <i data-lucide="check-circle-2" class="w-3 h-3 mr-1"></i> ได้รับราคาส่งแล้ว
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-[10px] font-medium">
+                            <span class="text-slate-500">ส่วนลดขั้นต่อไป: 3% (Pro)</span>
+                            <span class="text-ci-blue">12/50 ชิ้น</span>
+                        </div>
+                        <div class="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-ci-blue rounded-full" style="width: 24%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-1 overflow-y-auto py-2">
+                <!-- Main Menu (Everyone uses this) -->
+                <p class="px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">เมนูหลัก</p>
+                <!-- Dashboard Link (Inactive) -->
+                <a href="index11.html" class="flex items-center px-4 py-3 text-sm font-medium text-slate-600 rounded-xl hover:bg-slate-50 transition-all group">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-slate-400 group-hover:text-ci-blue"></i> ภาพรวม (Dashboard)
+                </a>
+                <a href="catalog.html" class="flex items-center px-4 py-3 text-sm font-medium text-slate-600 rounded-xl hover:bg-slate-50 transition-all group">
+                    <i data-lucide="library" class="w-5 h-5 mr-3 text-slate-400 group-hover:text-ci-blue"></i> แคตตาล็อกสินค้า
+                </a>
+                <!-- Orders Link (Inactive) -->
+                <a href="orders.html" class="flex items-center px-4 py-3 text-sm font-medium text-slate-600 rounded-xl hover:bg-slate-50 transition-all group">
+                    <i data-lucide="shopping-cart" class="w-5 h-5 mr-3 text-slate-400 group-hover:text-ci-blue"></i> รายการคำสั่งซื้อ
+                    <span class="ml-auto bg-rose-100 text-rose-600 py-0.5 px-2 rounded-full text-[10px] font-bold">3</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-slate-600 rounded-xl hover:bg-slate-50 transition-all group">
+                    <i data-lucide="folder-heart" class="w-5 h-5 mr-3 text-slate-400 group-hover:text-ci-blue"></i> ผลงานของฉัน
+                </a>
+
+                <!-- Seller Tools (Grouped but not separated by a hard line) -->
+                <p class="px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6">เครื่องมือผู้ขาย</p>
+                <!-- Storefront Link (Active) -->
+                <a href="storefront.html" class="flex items-center px-4 py-3 text-sm font-bold text-white rounded-xl transition-all shadow-md shadow-ci-blue/30" style="background: linear-gradient(to right, #3973b2, #4f86c6);">
+                    <i data-lucide="store" class="w-5 h-5 mr-3"></i> หน้าร้านของฉัน
+                </a>
+                <a href="integrations.html" class="flex items-center px-4 py-3 text-sm font-medium text-slate-600 rounded-xl hover:bg-slate-50 transition-all group">
+                    <i data-lucide="plug-zap" class="w-5 h-5 mr-3 text-slate-400 group-hover:text-ci-blue"></i> การเชื่อมต่อ
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-slate-600 rounded-xl hover:bg-slate-50 transition-all group">
+                    <i data-lucide="wallet" class="w-5 h-5 mr-3 text-slate-400 group-hover:text-ci-blue"></i> กระเป๋าเงิน & รายได้
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-slate-600 rounded-xl hover:bg-slate-50 transition-all group">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5 mr-3 text-slate-400 group-hover:text-ci-blue"></i> รายงานยอดขาย
+                </a>
+            </nav>
+
+             <div class="p-4 border-t border-slate-50">
+                <button class="w-full flex items-center px-4 py-3 text-sm font-medium text-slate-500 hover:bg-slate-50 rounded-xl transition-colors">
+                    <i data-lucide="log-out" class="w-5 h-5 mr-3"></i> ออกจากระบบ
+                </button>
+             </div>
+        </aside>
+
+        <!-- ================= Main Content ================= -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header stays the same -->
+            <header class="h-20 glass-effect sticky top-0 z-10 px-8 flex items-center justify-between">
+                <div class="hidden lg:block">
+                    <!-- Page-specific title -->
+                    <h1 class="text-xl font-bold text-slate-800">หน้าร้านของฉัน (Storefront)</h1>
+                    <p class="text-sm text-slate-500">ตั้งค่าและปรับแต่งหน้าเว็บ E-commerce ของคุณ</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <!-- Store Status Toggle -->
+                    <div class="flex items-center gap-2 mr-2">
+                        <span class="text-sm font-medium text-slate-700">ปิดร้าน</span>
+                        <input type="checkbox" class="sr-only peer" id="store-status" checked>
+                        <div class="relative w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-ci-blue peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:border-slate-300 after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                        <label for="store-status" class="text-sm font-bold text-emerald-600 cursor-pointer">เปิดร้าน</label>
+                    </div>
+                    <!-- Save Button -->
+                    <button class="flex items-center px-5 py-2.5 text-sm font-bold text-white rounded-xl shadow-lg shadow-ci-blue/20 hover:shadow-ci-blue/40 hover:-translate-y-0.5 transition-all active:scale-95" style="background: linear-gradient(135deg, #3973b2, #4f86c6);">
+                        <i data-lucide="save" class="w-5 h-5 mr-2"></i> บันทึกการเปลี่ยนแปลง
+                    </button>
+                </div>
+            </header>
+
+            <!-- ================= NEW MAIN CONTENT FOR STOREFRONT ================= -->
+            <main class="flex-1 overflow-y-auto p-6 lg:p-8">
+                <div class="max-w-6xl mx-auto">
+                    
+                    <!-- [NEW] Tab Navigation -->
+                    <div class="border-b border-slate-200 mb-6">
+                        <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                            <button class="tab-button active shrink-0 border-b-2 px-1 pb-4 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700" data-tab="general">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2 inline-block -mt-1"></i> ตั้งค่าทั่วไป
+                            </button>
+                            <button class="tab-button shrink-0 border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700" data-tab="products">
+                                <i data-lucide="package" class="w-4 h-4 mr-2 inline-block -mt-1"></i> สินค้า
+                            </button>
+                            <button class="tab-button shrink-0 border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700" data-tab="shipping">
+                                <i data-lucide="truck" class="w-4 h-4 mr-2 inline-block -mt-1"></i> การจัดส่ง
+                            </button>
+                            <button class="tab-button shrink-0 border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700" data-tab="marketing">
+                                <i data-lucide="megaphone" class="w-4 h-4 mr-2 inline-block -mt-1"></i> การตลาด
+                            </button>
+                            <button class="tab-button shrink-0 border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700" data-tab="pages">
+                                <i data-lucide="file-text" class="w-4 h-4 mr-2 inline-block -mt-1"></i> หน้าเพจ
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Tab Content Container -->
+                    <div class="max-w-4xl mx-auto">
+                        <!-- ================= TAB 1: GENERAL SETTINGS (Active by default) ================= -->
+                        <div id="tab-general" class="tab-content active space-y-8">
+                            <!-- 1. Store URL Card -->
+                            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 lg:p-8">
+                                <h2 class="text-lg font-bold text-slate-800 mb-1">ที่อยู่หน้าร้าน (Store URL)</h2>
+                                <p class="text-sm text-slate-500 mb-4">นี่คือลิงก์ที่ลูกค้าจะใช้เข้าชมร้านค้าของคุณ</p>
+                                
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <div class="flex-1 relative">
+                                        <input type="text" value="my-awesome-store" class="w-full pl-4 pr-36 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ci-blue/50">
+                                        <span class="absolute right-0 top-0 h-full px-4 flex items-center text-sm font-medium text-slate-500 bg-slate-50 border-l border-slate-200 rounded-r-xl">
+                                            .anajak.pod
+                                        </span>
+                                    </div>
+                                    <a href="#" target="_blank" class="flex items-center justify-center px-5 py-3 text-sm font-medium text-ci-blue bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all whitespace-nowrap">
+                                        <i data-lucide="external-link" class="w-4 h-4 mr-2"></i> ไปที่หน้าร้าน
+                                    </a>
+                                </div>
+                                
+                                <hr class="my-6 border-slate-100">
+
+                                <div>
+                                    <h3 class="font-bold text-slate-800 mb-2">เชื่อมต่อโดเมนของคุณเอง (Pro)</h3>
+                                    <p class="text-sm text-slate-500 mb-4">อัปเกรดเป็น Anajak Pro เพื่อใช้โดเมนส่วนตัว (เช่น mybrand.com)</p>
+                                    <div class="flex flex-col sm:flex-row gap-2">
+                                        <input type="text" placeholder="mybrand.com" class="flex-1 w-full px-4 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ci-blue/50" disabled>
+                                        <button class="flex items-center justify-center px-5 py-3 text-sm font-medium text-slate-400 bg-slate-100 border border-slate-200 rounded-xl transition-all whitespace-nowrap cursor-not-allowed" disabled>
+                                            <i data-lucide="lock" class="w-4 h-4 mr-2"></i> อัปเกรดเพื่อเชื่อมต่อ
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. Store Customization -->
+                            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 lg:p-8">
+                                <h2 class="text-lg font-bold text-slate-800 mb-6">ปรับแต่งหน้าร้าน</h2>
+                                <div class="space-y-6">
+                                    <!-- Store Title, Description, Logo, Banner, Theme Color... -->
+                                    <!-- (โค้ดเดิมจากไฟล์ของคุณ) -->
+                                    <!-- Store Title -->
+                                    <div>
+                                        <label for="store-title" class="block text-sm font-medium text-slate-700 mb-2">ชื่อร้านค้า (Store Title)</label>
+                                        <input type="text" id="store-title" value="My Awesome Store" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ci-blue/50">
+                                        <p class="text-xs text-slate-400 mt-1.5">ชื่อนี้จะแสดงบนแท็บเบราว์เซอร์และหัวเว็บ</p>
+                                    </div>
+                                    <!-- Store Description -->
+                                    <div>
+                                        <label for="store-desc" class="block text-sm font-medium text-slate-700 mb-2">คำอธิบายร้านค้า (Description)</label>
+                                        <textarea id="store-desc" rows="3" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ci-blue/50" placeholder="บอกเล่าเกี่ยวกับแบรนด์ของคุณ...">เสื้อยืดลายเท่ๆ สำหรับคนคูลๆ</textarea>
+                                    </div>
+                                    <!-- Logo Upload -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">โลโก้ร้านค้า</label>
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-20 h-20 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center">
+                                                <img src="https://placehold.co/100x100/e2e8f0/94a3b8?text=LOGO" alt="Current Logo" class="w-full h-full object-contain rounded-xl">
+                                            </div>
+                                            <label class="cursor-pointer">
+                                                <span class="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50">
+                                                    เปลี่ยนรูปภาพ
+                                                </span>
+                                                <input type="file" class="hidden">
+                                            </label>
+                                        </div>
+                                        <p class="text-xs text-slate-400 mt-1.5">แนะนำขนาด 400x400px, ไม่เกิน 2MB</p>
+                                    </div>
+                                    <!-- Banner Upload -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">แบนเนอร์หน้าร้าน (Hero Banner)</label>
+                                        <label class="file-upload-box flex flex-col items-center justify-center w-full h-48 rounded-2xl cursor-pointer">
+                                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <i data-lucide="upload-cloud" class="w-10 h-10 mb-3 text-slate-400"></i>
+                                                <p class="mb-2 text-sm text-slate-500"><span class="font-semibold">คลิกเพื่ออัปโหลด</span> หรือลากไฟล์มาวาง</p>
+                                                <p class="text-xs text-slate-400">PNG, JPG (แนะนำ 1600x400px)</p>
+                                            </div>
+                                            <input type="file" class="hidden">
+                                        </label>
+                                    </div>
+                                    <!-- Theme Color -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">สีธีม (Theme Color)</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" value="#3973b2" class="w-10 h-10 rounded-lg border border-slate-200 cursor-pointer p-0 m-0" style="padding: 0; border: none;">
+                                            <input type="text" value="#3973B2" class="w-32 px-4 py-2.5 text-sm border border-slate-200 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-ci-blue/50">
+                                        </div>
+                                        <p class="text-xs text-slate-400 mt-1.5">สีนี้จะถูกใช้กับปุ่มและลิงก์ต่างๆ ในหน้าร้าน</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 4. Payments -->
+                            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 lg:p-8">
+                                <h2 class="text-lg font-bold text-slate-800 mb-4">การชำระเงิน</h2>
+                                <div class="flex items-center p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                                    <div class="p-3 bg-emerald-100 rounded-xl mr-4 text-emerald-600">
+                                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-slate-800">จัดการโดย Anajak.POD</h3>
+                                        <p class="text-sm text-slate-600">เรารองรับการชำระเงินผ่าน QR PromptPay และบัตรเครดิตให้คุณโดยอัตโนมัติ คุณเพียงรอรับส่วนแบ่งกำไรในกระเป๋าเงินของคุณ</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ================= TAB 2: PRODUCTS (NEW) ================= -->
+                        <div id="tab-products" class="tab-content space-y-6">
+                            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm">
+                                <div class="p-6 lg:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100">
+                                    <div>
+                                        <h2 class="text-lg font-bold text-slate-800 mb-1">สินค้าในหน้าร้าน</h2>
+                                        <p class="text-sm text-slate-500">คุณมีสินค้า <span class="font-bold text-ci-blue">2</span> ชิ้น แสดงในหน้าร้าน</p>
+                                    </div>
+                                    <button class="mt-4 sm:mt-0 flex items-center justify-center px-5 py-3 text-sm font-bold text-white rounded-xl shadow-lg shadow-ci-blue/20 hover:shadow-ci-blue/40 hover:-translate-y-0.5 transition-all active:scale-95 whitespace-nowrap" style="background: linear-gradient(135deg, #3973b2, #4f86c6);">
+                                        <i data-lucide="plus" class="w-5 h-5 mr-2"></i> เพิ่มสินค้าใหม่
+                                    </button>
+                                </div>
+                                <!-- Products Table -->
+                                <div class="overflow-x-auto">
+                                    <table class="w-full min-w-[700px] text-sm text-left">
+                                        <thead class="bg-slate-50/80">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-4 font-bold text-slate-800" colspan="2">สินค้า</th>
+                                                <th scope="col" class="px-6 py-4 font-bold text-slate-800">ต้นทุน</th>
+                                                <th scope="col" class="px-6 py-4 font-bold text-slate-800">ราคาขาย</th>
+                                                <th scope="col" class="px-6 py-4 font-bold text-slate-800">กำไร</th>
+                                                <th scope="col" class="px-6 py-4 font-bold text-slate-800">สถานะ</th>
+                                                <th scope="col" class="px-6 py-4 font-bold text-slate-800"><span class="sr-only">Actions</span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100">
+                                            <!-- Product Row 1 -->
+                                            <tr>
+                                                <td class="p-4 w-16">
+                                                    <img src="https://placehold.co/100x100/e2e8f0/334155?text=Design+1" class="w-16 h-16 rounded-lg object-cover border border-slate-100">
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <div class="font-bold text-slate-800">ลาย "Bangkok Vibes"</div>
+                                                    <div class="text-xs text-slate-500">บนเสื้อ Gildan Premium (ดำ)</div>
+                                                </td>
+                                                <td class="px-6 py-4 text-slate-600 font-medium">฿180.00</td>
+                                                <td class="px-6 py-4">
+                                                    <input type="number" value="350" class="w-24 px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-ci-blue/50">
+                                                </td>
+                                                <td class="px-6 py-4 font-bold text-emerald-600">฿170.00</td>
+                                                <td class="px-6 py-4">
+                                                    <input type="checkbox" class="sr-only peer" checked>
+                                                    <div class="relative w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-ci-blue peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:border-slate-300 after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                                                </td>
+                                                <td class="px-6 py-4 text-right">
+                                                    <button class="p-2 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                                </td>
+                                            </tr>
+                                            <!-- Product Row 2 -->
+                                            <tr>
+                                                <td class="p-4 w-16">
+                                                    <img src="https://placehold.co/100x100/e2e8f0/334155?text=Design+2" class="w-16 h-16 rounded-lg object-cover border border-slate-100">
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <div class="font-bold text-slate-800">ลาย "Minimal Cat"</div>
+                                                    <div class="text-xs text-slate-500">บนกระเป๋าผ้า Canvas</div>
+                                                </td>
+                                                <td class="px-6 py-4 text-slate-600 font-medium">฿120.00</td>
+                                                <td class="px-6 py-4">
+                                                    <input type="number" value="250" class="w-24 px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-ci-blue/50">
+                                                </td>
+                                                <td class="px-6 py-4 font-bold text-emerald-600">฿130.00</td>
+                                                <td class="px-6 py-4">
+                                                    <input type="checkbox" class="sr-only peer" checked>
+                                                    <div class="relative w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-ci-blue peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:border-slate-300 after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                                                </td>
+                                                <td class="px-6 py-4 text-right">
+                                                    <button class="p-2 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ================= TAB 3: SHIPPING (NEW) ================= -->
+                        <div id="tab-shipping" class="tab-content space-y-6">
+                            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 lg:p-8">
+                                <h2 class="text-lg font-bold text-slate-800 mb-6">ตั้งค่าการจัดส่ง</h2>
+                                <p class="text-sm text-slate-500 mb-6">กำหนดวิธีคิดค่าจัดส่งสำหรับลูกค้าที่มาซื้อของที่หน้าร้านของคุณ (ยอดนี้จะไม่เกี่ยวกับค่าส่งที่ Anajak คิดกับคุณ)</p>
+                                
+                                <div class="space-y-4">
+                                    <label class="block p-5 bg-white rounded-2xl border border-ci-blue ring-2 ring-ci-blue/30 cursor-pointer">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-bold text-slate-800">ค่าส่งอัตราเดียว (Flat Rate)</span>
+                                            <input type="radio" name="shipping-option" class="h-4 w-4 text-ci-blue" checked>
+                                        </div>
+                                        <p class="text-sm text-slate-500 mt-2 mb-3">คิดค่าส่งเท่ากันทุกออเดอร์ ไม่ว่าลูกค้าจะสั่งกี่ชิ้น</p>
+                                        <div class="relative">
+                                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">฿</span>
+                                            <input type="number" value="40" class="w-32 pl-7 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-ci-blue/50">
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="block p-5 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:border-slate-300">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-bold text-slate-800">ส่งฟรี (Free Shipping)</span>
+                                            <input type="radio" name="shipping-option" class="h-4 w-4 text-ci-blue">
+                                        </div>
+                                        <p class="text-sm text-slate-500 mt-2">ลูกค้าไม่ต้องเสียค่าจัดส่ง (คุณเป็นผู้รับภาระค่าส่งแทน)</p>
+                                    </label>
+
+                                    <label class="block p-5 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:border-slate-300">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-bold text-slate-800">ส่งฟรีเมื่อยอดสั่งซื้อถึง...</span>
+                                            <input type="radio" name="shipping-option" class="h-4 w-4 text-ci-blue">
+                                        </div>
+                                        <p class="text-sm text-slate-500 mt-2 mb-3">เช่น ส่งฟรีเมื่อสั่งครบ 500 บาท</p>
+                                        <div class="flex items-center gap-3">
+                                            <div class="relative">
+                                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">฿</span>
+                                                <input type="number" placeholder="500" class="w-32 pl-7 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-ci-blue/50">
+                                            </div>
+                                            <span class="text-sm text-slate-600">มิฉะนั้น คิดค่าส่ง</span>
+                                            <div class="relative">
+                                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">฿</span>
+                                                <input type="number" placeholder="40" class="w-32 pl-7 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-ci-blue/50">
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ================= TAB 4: MARKETING (NEW) ================= -->
+                        <div id="tab-marketing" class="tab-content space-y-8">
+                            <!-- Tracking Pixels -->
+                            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 lg:p-8">
+                                <h2 class="text-lg font-bold text-slate-800 mb-6">Tracking & Pixels</h2>
+                                <p class="text-sm text-slate-500 mb-6">เชื่อมต่อเครื่องมือวิเคราะห์และการตลาดเพื่อยิงแอดและติดตามผลลัพธ์</p>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="fb-pixel" class="block text-sm font-medium text-slate-700 mb-2">Facebook Pixel ID</label>
+                                        <input type="text" id="fb-pixel" placeholder="1234567890123456" class="w-full sm:w-2/3 px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ci-blue/50 font-mono">
+                                    </div>
+                                    <div>
+                                        <label for="ga-pixel" class="block text-sm font-medium text-slate-700 mb-2">Google Analytics ID (GA4)</label>
+                                        <input type="text" id="ga-pixel" placeholder="G-XXXXXXXXXX" class="w-full sm:w-2/3 px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ci-blue/50 font-mono">
+                                    </div>
+                                    <div>
+                                        <label for="tt-pixel" class="block text-sm font-medium text-slate-700 mb-2">TikTok Pixel ID</label>
+                                        <input type="text" id="tt-pixel" placeholder="CXXXXXXXXXXXXX" class="w-full sm:w-2/3 px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ci-blue/50 font-mono">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Discount Codes -->
+                            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm">
+                                <div class="p-6 lg:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100">
+                                    <h2 class="text-lg font-bold text-slate-800">โค้ดส่วนลด</h2>
+                                    <button class="mt-4 sm:mt-0 flex items-center justify-center px-5 py-3 text-sm font-bold text-ci-blue bg-ci-blue/10 rounded-xl hover:bg-ci-blue/20 transition-all whitespace-nowrap">
+                                        <i data-lucide="plus" class="w-5 h-5 mr-2"></i> สร้างโค้ดใหม่
+                                    </button>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full min-w-[600px] text-sm text-left">
+                                        <thead class="bg-slate-50/80">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-4 font-bold text-slate-800">โค้ด</th>
+                                                <th scope="col" class="px-6 py-4 font-bold text-slate-800">ประเภท</th>
+                                                <th scope="col" class="px-6 py-4 font-bold text-slate-800">มูลค่า</th>
+                                                <th scope="col" class="px-6 py-4 font-bold text-slate-800">สถานะ</th>
+                                                <th scope="col" class="px-6 py-4 font-bold text-slate-800"><span class="sr-only">Actions</span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100">
+                                            <tr>
+                                                <td class="px-6 py-4 font-bold text-slate-800 font-mono">SALE10</td>
+                                                <td class="px-6 py-4 text-slate-600">เปอร์เซ็นต์ (%)</td>
+                                                <td class="px-6 py-4 text-slate-600">10%</td>
+                                                <td class="px-6 py-4 text-emerald-600 font-medium">Active</td>
+                                                <td class="px-6 py-4 text-right">
+                                                    <button class="p-2 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-6 py-4 font-bold text-slate-800 font-mono">FREESHIP</td>
+                                                <td class="px-6 py-4 text-slate-600">ส่งฟรี</td>
+                                                <td class="px-6 py-4 text-slate-600">-</td>
+                                                <td class="px-6 py-4 text-emerald-600 font-medium">Active</td>
+                                                <td class="px-6 py-4 text-right">
+                                                    <button class="p-2 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ================= TAB 5: PAGES (NEW) ================= -->
+                        <div id="tab-pages" class="tab-content space-y-6">
+                            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 lg:p-8">
+                                <h2 class="text-lg font-bold text-slate-800 mb-6">หน้าเพจ (Pages)</h2>
+                                <p class="text-sm text-slate-500 mb-6">จัดการเนื้อหาในหน้าเพจพื้นฐานของร้านคุณ เช่น 'เกี่ยวกับเรา' หรือ 'นโยบาย'</p>
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                                        <div class="flex items-center">
+                                            <i data-lucide="info" class="w-5 h-5 mr-3 text-slate-500"></i>
+                                            <span class="font-medium text-slate-800">เกี่ยวกับเรา (About Us)</span>
+                                        </div>
+                                        <button class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-100">
+                                            แก้ไขเนื้อหา
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                                        <div class="flex items-center">
+                                            <i data-lucide="phone" class="w-5 h-5 mr-3 text-slate-500"></i>
+                                            <span class="font-medium text-slate-800">ติดต่อเรา (Contact Us)</span>
+                                        </div>
+                                        <button class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-100">
+                                            แก้ไขเนื้อหา
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                                        <div class="flex items-center">
+                                            <i data-lucide="shield-half" class="w-5 h-5 mr-3 text-slate-500"></i>
+                                            <span class="font-medium text-slate-800">นโยบายการคืนเงิน (Refund Policy)</span>
+                                        </div>
+                                        <button class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-100">
+                                            แก้ไขเนื้อหา
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+            <!-- ================= END OF NEW MAIN CONTENT ================= -->
+
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // [NEW] Tab Switching Logic
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
+
+                // Update buttons
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+
+                // Update content
+                tabContents.forEach(content => {
+                    if (content.id === `tab-${tabId}`) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
