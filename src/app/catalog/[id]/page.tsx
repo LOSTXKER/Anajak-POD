@@ -3,7 +3,16 @@ import ProductDetailClient from './ProductDetailClient';
 import { notFound } from 'next/navigation';
 
 // Force dynamic rendering since we are fetching based on ID
-export const dynamic = 'force-dynamic';
+export const dynamic = 'auto';
+
+export async function generateStaticParams() {
+  const products = await prisma.product.findMany({
+    select: { id: true },
+  });
+  return products.map((product) => ({
+    id: product.id,
+  }));
+}
 
 interface PageProps {
   params: {

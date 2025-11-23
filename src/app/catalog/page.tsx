@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma';
 import Link from 'next/link';
 
 // Force dynamic rendering to ensure fresh data after seeding
-export const dynamic = 'force-dynamic';
+export const dynamic = 'auto';
 
 // Function to fetch products directly from DB (Server Side)
 async function getProducts() {
