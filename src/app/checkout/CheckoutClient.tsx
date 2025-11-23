@@ -59,7 +59,7 @@ export default function CheckoutClient() {
   if (step === 3) {
     return (
       <div className="min-h-screen bg-slate-50">
-        <Header />
+        <Header title="สั่งซื้อสินค้า" />
         <div className="max-w-md mx-auto mt-20 p-8 bg-white rounded-3xl shadow-sm border border-slate-100 text-center">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
             <Check className="w-10 h-10" />
@@ -81,7 +81,7 @@ export default function CheckoutClient() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header />
+      <Header title="สั่งซื้อสินค้า" />
       
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">

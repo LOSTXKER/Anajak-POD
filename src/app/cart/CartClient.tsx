@@ -73,7 +73,7 @@ export default function CartClient() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-        <Header />
+        <Header title="ตะกร้าสินค้า" />
         
         <main className="max-w-5xl mx-auto px-4 py-8">
             <div className="flex items-center gap-2 mb-8 text-slate-500 hover:text-ci-blue transition-colors w-fit">
