@@ -1,6 +1,8 @@
 'use client';
 
-import { Bell, Plus, Search, Wallet, Menu } from 'lucide-react';
+import { Bell, Plus, Search, Wallet, Menu, ShoppingCart } from 'lucide-react';
+import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 interface HeaderProps {
   title: string;
@@ -8,6 +10,7 @@ interface HeaderProps {
   showCreateButton?: boolean;
   onCreateClick?: () => void;
   createButtonText?: string;
+  centerContent?: React.ReactNode;
 }
 
 export default function Header({ 
@@ -15,13 +18,40 @@ export default function Header({
   subtitle, 
   showCreateButton = true,
   onCreateClick,
-  createButtonText = 'ออกแบบสินค้าใหม่'
+  createButtonText = 'ออกแบบสินค้าใหม่',
+  centerContent
 }: HeaderProps) {
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    const updateCount = () => {
+      const savedCart = localStorage.getItem('anajak_cart');
+      if (savedCart) {
+        try {
+          const items = JSON.parse(savedCart);
+          setCartCount(items.length);
+        } catch (e) {
+          setCartCount(0);
+        }
+      }
+    };
+
+    updateCount();
+    // Listen for storage events (cross-tab) and custom events (same-tab)
+    window.addEventListener('storage', updateCount);
+    window.addEventListener('cart-update', updateCount);
+    
+    return () => {
+      window.removeEventListener('storage', updateCount);
+      window.removeEventListener('cart-update', updateCount);
+    };
+  }, []);
+
   return (
     <header className="h-20 sticky top-0 z-30 px-6 lg:px-8 flex items-center justify-between bg-slate-50/80 backdrop-blur-xl border-b border-slate-200/50 transition-all">
       
       {/* Mobile Menu Toggle & Title */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 relative z-10">
         <button className="lg:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg">
           <Menu className="w-6 h-6" />
         </button>
@@ -31,8 +61,15 @@ export default function Header({
         </div>
       </div>
 
+      {/* Center Content */}
+      {centerContent && (
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:block z-0">
+          {centerContent}
+        </div>
+      )}
+
       {/* Actions Area */}
-      <div className="flex items-center gap-3 md:gap-4">
+      <div className="flex items-center gap-3 md:gap-4 relative z-10">
         
         {/* Search Bar (Hidden on mobile) */}
         <div className="hidden md:flex items-center relative">
@@ -54,6 +91,16 @@ export default function Header({
             <Plus className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Cart Shortcut */}
+        <Link href="/cart" className="relative p-2.5 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-ci-blue hover:border-ci-blue/30 hover:shadow-md hover:-translate-y-0.5 transition-all group">
+          <ShoppingCart className="w-5 h-5" />
+          {cartCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-ci-blue text-white text-[10px] font-bold flex items-center justify-center rounded-full shadow-sm border border-white">
+              {cartCount}
+            </span>
+          )}
+        </Link>
 
         {/* Notifications */}
         <button className="relative p-2.5 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-ci-blue hover:border-ci-blue/30 hover:shadow-md hover:-translate-y-0.5 transition-all group">

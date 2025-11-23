@@ -11,6 +11,7 @@ interface DashboardLayoutProps {
   showCreateButton?: boolean;
   onCreateClick?: () => void;
   createButtonText?: string;
+  headerCenter?: ReactNode;
 }
 
 export default function DashboardLayout({ 
@@ -19,7 +20,8 @@ export default function DashboardLayout({
   subtitle,
   showCreateButton,
   onCreateClick,
-  createButtonText
+  createButtonText,
+  headerCenter
 }: DashboardLayoutProps) {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
@@ -31,6 +33,7 @@ export default function DashboardLayout({
           showCreateButton={showCreateButton}
           onCreateClick={onCreateClick}
           createButtonText={createButtonText}
+          centerContent={headerCenter}
         />
         <main className="flex-1 overflow-y-auto p-6 lg:p-8">
           {children}

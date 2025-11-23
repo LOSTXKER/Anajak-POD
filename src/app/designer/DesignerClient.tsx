@@ -2194,6 +2194,25 @@ export default function DesignerClient() {
                     <p className="text-sm text-slate-500">ขั้นตอนสุดท้ายก่อนบันทึก</p>
                  </div>
               </div>
+
+              {/* Center: Process Stepper */}
+              <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-1 z-10 bg-slate-50/50 backdrop-blur px-4 py-1.5 rounded-full border border-slate-200/50 shadow-sm">
+                 {[
+                   { id: 1, label: 'เลือกสินค้า', status: 'completed' },
+                   { id: 2, label: 'ออกแบบ', status: 'completed' },
+                   { id: 3, label: 'ตรวจสอบ', status: 'current' },
+                 ].map((step, i) => (
+                   <div key={step.id} className="flex items-center gap-1">
+                     {i > 0 && <div className="w-4 h-px bg-slate-200" />}
+                     <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full transition-colors ${step.status === 'completed' ? 'text-green-600 bg-green-50' : step.status === 'current' ? 'text-ci-blue bg-blue-50' : 'text-slate-300'}`}>
+                       <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold border ${step.status === 'completed' ? 'bg-green-100 border-green-200' : step.status === 'current' ? 'bg-ci-blue text-white border-ci-blue' : 'bg-white border-slate-200'}`}>
+                         {step.status === 'completed' ? <Check className="w-2.5 h-2.5" /> : step.id}
+                       </div>
+                       <span className="text-[10px] font-bold uppercase tracking-wider">{step.label}</span>
+                     </div>
+                   </div>
+                 ))}
+              </div>
            </div>
 
            {/* Content */}
