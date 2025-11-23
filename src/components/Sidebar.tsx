@@ -22,6 +22,7 @@ const menuItems = [
     title: 'เมนูหลัก',
     items: [
       { href: '/dashboard', icon: LayoutDashboard, label: 'ภาพรวม' },
+      { href: '/dashboard/library', icon: Library, label: 'คลังของฉัน', badge: 'New' },
       { href: '/catalog', icon: Library, label: 'แคตตาล็อกสินค้า' },
       { href: '/orders', icon: ShoppingCart, label: 'รายการคำสั่งซื้อ', badge: 3 },
       { href: '/templates', icon: FolderHeart, label: 'เทมเพลตสินค้า' },

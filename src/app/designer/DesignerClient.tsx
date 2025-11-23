@@ -5,6 +5,7 @@ import {
   Type, 
   Image as ImageIcon, 
   UploadCloud, 
+  Upload,
   Shapes, 
   Shirt,
   Undo2, 
@@ -14,6 +15,8 @@ import {
   ShoppingCart, 
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   Trash2, 
   Copy, 
   Layers, 
@@ -31,7 +34,20 @@ import {
   Info,
   Check,
   Ruler,
-  Maximize2
+  Maximize2,
+  Sparkles,
+  ExternalLink,
+  Search,
+  Library,
+  FolderOpen,
+  Grid,
+  List,
+  MoreVertical,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Heart, Star, Zap, Ghost, Flame, Sun, Moon, Cloud, Music, Camera, Video, Mic, Headphones, MapPin, Globe, Anchor, Compass, Feather, Key, Lock, Bell, Tag, Flag, Award, Gift, Trophy, Crown, Diamond, Skull, Rocket, Plane, Car, Bike, Leaf, Flower, TreeDeciduous, Snowflake, Droplets, Umbrella, Glasses, Watch,   Shirt as ShirtIcon, Scissors,
+  Spline
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -49,10 +65,44 @@ const SHAPES = [
   { type: 'triangle', class: 'clip-triangle' },
 ];
 
-const STICKERS = ['🔥', '⚡', '❤️', '⭐', '💀', '🌈', '🎵', '🚀', '🐱', '👑', '🍕'];
+const STICKERS = ['🔥', '⚡', '❤️', '⭐', '💀', '🌈', '🎵', '🚀', '🐱', '👑', '🍕', '🎉', '😎', '👀', '💡', '💪', '🍔', '⚽', '🎮', '🚗'];
+
+// Icon Library
+const AVAILABLE_ICONS: Record<string, any> = {
+  Heart, Star, Zap, Ghost, Flame, Sun, Moon, Cloud, Music, 
+  Camera, Video, Mic, Headphones, MapPin, Globe, Anchor, Compass, 
+  Feather, Key, Lock, Bell, Tag, Flag, Award, Gift, Trophy, 
+  Crown, Diamond, Skull, Rocket, Plane, Car, Bike, Leaf, Flower, 
+  TreeDeciduous, Snowflake, Droplets, Umbrella, Glasses, Watch, 
+  Shirt: ShirtIcon, Scissors
+};
+
+// Mock User Library Data
+const MY_LIBRARY_ASSETS = [
+  { id: '1', type: 'image', url: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=150&q=80', name: 'My Dog Logo' },
+  { id: '2', type: 'image', url: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?auto=format&fit=crop&w=150&q=80', name: 'Vintage Badge' },
+  { id: '3', type: 'image', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=150&q=80', name: 'Abstract Art' },
+];
+
+const AI_TOOLS = [
+  { name: 'Midjourney', url: 'https://www.midjourney.com', description: 'High quality artistic images', icon: '🎨' },
+  { name: 'DALL-E 3', url: 'https://openai.com/dall-e-3', description: 'Easy to use, great prompt adherence', icon: '🤖' },
+  { name: 'Bing Image Creator', url: 'https://www.bing.com/images/create', description: 'Free, powered by DALL-E 3', icon: '✨' },
+  { name: 'Leonardo.ai', url: 'https://leonardo.ai', description: 'Great for game assets & style consistency', icon: '🦁' },
+  { name: 'Stable Diffusion', url: 'https://stability.ai', description: 'Open source, highly customizable', icon: '🌊' },
+];
+
+  const ICON_CATEGORIES = [
+    { id: 'all', label: 'ทั้งหมด' },
+    { id: 'nature', label: 'ธรรมชาติ', items: ['Sun', 'Moon', 'Cloud', 'Leaf', 'Flower', 'TreeDeciduous', 'Snowflake', 'Droplets', 'Flame'] },
+    { id: 'objects', label: 'สิ่งของ', items: ['Camera', 'Video', 'Mic', 'Headphones', 'Watch', 'Glasses', 'Umbrella', 'Key', 'Lock', 'Bell', 'Tag', 'Flag', 'Anchor', 'Compass', 'MapPin', 'Globe'] },
+    { id: 'shapes', label: 'สัญลักษณ์', items: ['Heart', 'Star', 'Zap', 'Ghost', 'Music', 'Feather', 'Diamond', 'Skull'] },
+    { id: 'awards', label: 'รางวัล', items: ['Award', 'Gift', 'Trophy', 'Crown'] },
+    { id: 'travel', label: 'ท่องเที่ยว', items: ['Rocket', 'Plane', 'Car', 'Bike'] },
+  ];
 
 // Types
-type ElementType = 'text' | 'image' | 'shape' | 'sticker';
+type ElementType = 'text' | 'image' | 'shape' | 'sticker' | 'icon';
 
 interface DesignElement {
   id: string;
@@ -76,11 +126,14 @@ interface DesignElement {
   contrast?: number;
   grayscale?: number;
   side?: 'front' | 'back';
+  curveType?: 'none' | 'circle' | 'arc' | 'wave';
+  curveStrength?: number;
+  effectType?: 'none' | 'shadow' | 'lift' | 'hollow' | 'splice' | 'outline' | 'echo' | 'glitch' | 'neon' | 'background';
 }
 
 export default function DesignerClient() {
   // UI State
-  const [activeTool, setActiveTool] = useState<'product' | 'text' | 'uploads' | 'elements' | 'layers' | null>('text');
+  const [activeTool, setActiveTool] = useState<'product' | 'text' | 'uploads' | 'elements' | 'layers' | 'ai' | 'library' | 'text-effects' | null>('text');
   const [zoom, setZoom] = useState(100);
   const [shirtColor, setShirtColor] = useState('#ffffff');
   const [shirtSize, setShirtSize] = useState('M'); // Preview size
@@ -90,9 +143,27 @@ export default function DesignerClient() {
   const [showFilters, setShowFilters] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
-  const [showRulers, setShowRulers] = useState(true);
+  const [showRulers, setShowRulers] = useState(false);
   const [unit, setUnit] = useState<'cm' | 'in'>('cm');
   const [viewSide, setViewSide] = useState<'front' | 'back'>('front');
+  const [showControls, setShowControls] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [fontSearchQuery, setFontSearchQuery] = useState('');
+  const [showCurveSettings, setShowCurveSettings] = useState(false);
+  
+  // Snap Guides State
+  const [snapX, setSnapX] = useState<number | null>(null);
+  const [snapY, setSnapY] = useState<number | null>(null);
+  const [resizeHandle, setResizeHandle] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [tempText, setTempText] = useState('');
+  
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  // History State
+  const [history, setHistory] = useState<DesignElement[][]>([[]]);
+  const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
   
   // Pricing Config
   const BASE_PRICE = 290;
@@ -167,7 +238,7 @@ export default function DesignerClient() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragStartPos = useRef({ x: 0, y: 0 });
-  const elementStartPos = useRef({ x: 0, y: 0, width: 0, height: 0 });
+  const elementStartPos = useRef({ x: 0, y: 0, width: 0, height: 0, fontSize: 0, rotation: 0 });
 
   const currentShirtSpec = SHIRT_SPECS[shirtSize] || SHIRT_SPECS['M'];
   const pixelsPerCm = BASE_SHIRT_WIDTH_PX / currentShirtSpec.width;
@@ -179,46 +250,287 @@ export default function DesignerClient() {
   const selectedElement = elements.find(el => el.id === selectedId);
 
   const STEPS = [
-    { id: 1, label: 'Product', status: 'completed' },
-    { id: 2, label: 'Design', status: 'current' },
-    { id: 3, label: 'Review', status: 'upcoming' },
+    { id: 1, label: 'เลือกสินค้า', status: 'completed' },
+    { id: 2, label: 'ออกแบบ', status: 'current' },
+    { id: 3, label: 'ตรวจสอบ', status: 'upcoming' },
   ];
+
+  // History Management
+  const addToHistory = (newElements: DesignElement[]) => {
+    const newHistory = history.slice(0, currentHistoryIndex + 1);
+    newHistory.push(newElements);
+    setHistory(newHistory);
+    setCurrentHistoryIndex(newHistory.length - 1);
+  };
+
+  const undo = () => {
+    if (currentHistoryIndex > 0) {
+      setCurrentHistoryIndex(prev => prev - 1);
+      setElements(history[currentHistoryIndex - 1]);
+    }
+  };
+
+  const redo = () => {
+    if (currentHistoryIndex < history.length - 1) {
+      setCurrentHistoryIndex(prev => prev + 1);
+      setElements(history[currentHistoryIndex + 1]);
+    }
+  };
+
+  const handleTextEditStart = (el: DesignElement) => {
+    if (el.type === 'text') {
+      setEditingId(el.id);
+      setTempText(el.content);
+      // Wait for render to focus
+      setTimeout(() => {
+        if (textAreaRef.current) {
+          textAreaRef.current.focus();
+          textAreaRef.current.select();
+        }
+      }, 0);
+    }
+  };
+
+  const handleTextEditEnd = () => {
+    if (editingId) {
+        // Update with final text
+        // Also trigger measureText to auto-resize if needed
+        const el = elements.find(e => e.id === editingId);
+        if (el && el.type === 'text') {
+            const fs = el.fontSize || 32;
+            const font = el.fontFamily || 'Sarabun';
+            const dims = measureText(tempText, fs, font);
+            
+            updateElementWithHistory(editingId, { 
+                content: tempText,
+                width: Math.max(20, dims.width + 10),
+                height: Math.max(el.height, dims.height)
+            });
+        }
+        setEditingId(null);
+    }
+  };
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setTempText(e.target.value);
+    // Auto-expand textarea height while typing if needed? 
+    // For now, let's just update the content in real-time visually on the textarea
+  };
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (editingId) return; // Disable shortcuts while editing text
+      
+      if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') return;
+
+      // Delete
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedId) {
+           const newElements = elements.filter(el => el.id !== selectedId);
+           setElements(newElements);
+           addToHistory(newElements);
+           setSelectedId(null);
+        }
+      }
+
+      // Undo/Redo
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) redo();
+        else undo();
+      }
+
+      // Nudge
+      if (selectedId && selectedElement) {
+        const step = e.shiftKey ? 10 : 1;
+        let newX = selectedElement.x;
+        let newY = selectedElement.y;
+        let changed = false;
+
+        if (e.key === 'ArrowLeft') { newX -= step; changed = true; }
+        if (e.key === 'ArrowRight') { newX += step; changed = true; }
+        if (e.key === 'ArrowUp') { newY -= step; changed = true; }
+        if (e.key === 'ArrowDown') { newY += step; changed = true; }
+
+        if (changed) {
+          e.preventDefault();
+          const newElements = elements.map(el => el.id === selectedId ? { ...el, x: newX, y: newY } : el);
+          setElements(newElements);
+          // Debounce history add for nudging could be better, but simple for now
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedId, elements, currentHistoryIndex, history]); // Add history deps
 
   useEffect(() => {
     // Global Mouse Events for Dragging/Resizing
     const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging && selectedId) {
+      if (isDragging && selectedId && selectedElement) { // Added selectedElement check
         const dx = (e.clientX - dragStartPos.current.x) / (zoom / 100);
         const dy = (e.clientY - dragStartPos.current.y) / (zoom / 100);
         
-        updateElement(selectedId, {
-          x: elementStartPos.current.x + dx,
-          y: elementStartPos.current.y + dy
-        });
-      } else if (isResizing && selectedId) {
-        const dx = (e.clientX - dragStartPos.current.x) / (zoom / 100);
-        // Simple proportional resizing based on width change
-        const newWidth = Math.max(20, elementStartPos.current.width + dx);
-        const scaleFactor = newWidth / elementStartPos.current.width;
-        const newHeight = elementStartPos.current.height * scaleFactor;
+        let newX = elementStartPos.current.x + dx;
+        let newY = elementStartPos.current.y + dy;
 
-        // Update based on type
-        const updates: Partial<DesignElement> = { width: newWidth, height: newHeight };
+        const SNAP_THRESHOLD = 5;
+        const CANVAS_WIDTH = 500;
+        const CANVAS_HEIGHT = 600;
         
-        // Scale font size for text/stickers
-        if (selectedElement?.fontSize) {
-           updates.fontSize = (elementStartPos.current.width / 10) * scaleFactor * 10; // Approximate scaling
-           // Better: Store initial font size and scale it
-           // customized logic inside update if needed
+        // Target edges (un-snapped initially)
+        const tWidth = selectedElement.width;
+        const tHeight = selectedElement.height;
+        let tLeft = newX;
+        let tRight = newX + tWidth;
+        let tCenterX = newX + tWidth / 2;
+        
+        let tTop = newY;
+        let tBottom = newY + tHeight;
+        let tCenterY = newY + tHeight / 2;
+
+        let bestSnapX: number | null = null;
+        let minDiffX = SNAP_THRESHOLD;
+        let bestSnapY: number | null = null;
+        let minDiffY = SNAP_THRESHOLD;
+
+        // 1. Snap to Canvas Center
+        const canvasCenterX = CANVAS_WIDTH / 2;
+        const canvasCenterY = CANVAS_HEIGHT / 2;
+
+        if (Math.abs(tCenterX - canvasCenterX) < minDiffX) {
+            newX = canvasCenterX - tWidth / 2;
+            bestSnapX = canvasCenterX;
+            minDiffX = Math.abs(tCenterX - canvasCenterX);
+        }
+        if (Math.abs(tCenterY - canvasCenterY) < minDiffY) {
+            newY = canvasCenterY - tHeight / 2;
+            bestSnapY = canvasCenterY;
+            minDiffY = Math.abs(tCenterY - canvasCenterY);
         }
 
-        updateElement(selectedId, updates);
+        // 2. Snap to Other Objects
+        const otherElements = elements.filter(el => el.id !== selectedId && el.side === viewSide);
+        
+        otherElements.forEach(other => {
+            // X Alignment
+            const oLeft = other.x;
+            const oRight = other.x + other.width;
+            const oCenterX = other.x + other.width / 2;
+            const oTop = other.y;
+            const oBottom = other.y + other.height;
+            const oCenterY = other.y + other.height / 2;
+
+            // Snap Target Left to Other (Left, Right, Center)
+            if (Math.abs(tLeft - oLeft) < minDiffX) { newX = oLeft; bestSnapX = oLeft; minDiffX = Math.abs(tLeft - oLeft); }
+            if (Math.abs(tLeft - oRight) < minDiffX) { newX = oRight; bestSnapX = oRight; minDiffX = Math.abs(tLeft - oRight); }
+            if (Math.abs(tLeft - oCenterX) < minDiffX) { newX = oCenterX; bestSnapX = oCenterX; minDiffX = Math.abs(tLeft - oCenterX); }
+
+            // Snap Target Right to Other (Left, Right, Center)
+            if (Math.abs(tRight - oLeft) < minDiffX) { newX = oLeft - tWidth; bestSnapX = oLeft; minDiffX = Math.abs(tRight - oLeft); }
+            if (Math.abs(tRight - oRight) < minDiffX) { newX = oRight - tWidth; bestSnapX = oRight; minDiffX = Math.abs(tRight - oRight); }
+            if (Math.abs(tRight - oCenterX) < minDiffX) { newX = oCenterX - tWidth; bestSnapX = oCenterX; minDiffX = Math.abs(tRight - oCenterX); }
+
+            // Snap Target Center to Other (Left, Right, Center)
+            if (Math.abs(tCenterX - oLeft) < minDiffX) { newX = oLeft - tWidth/2; bestSnapX = oLeft; minDiffX = Math.abs(tCenterX - oLeft); }
+            if (Math.abs(tCenterX - oRight) < minDiffX) { newX = oRight - tWidth/2; bestSnapX = oRight; minDiffX = Math.abs(tCenterX - oRight); }
+            if (Math.abs(tCenterX - oCenterX) < minDiffX) { newX = oCenterX - tWidth/2; bestSnapX = oCenterX; minDiffX = Math.abs(tCenterX - oCenterX); }
+
+            // Y Alignment (similar logic)
+             if (Math.abs(tTop - oTop) < minDiffY) { newY = oTop; bestSnapY = oTop; minDiffY = Math.abs(tTop - oTop); }
+             if (Math.abs(tTop - oBottom) < minDiffY) { newY = oBottom; bestSnapY = oBottom; minDiffY = Math.abs(tTop - oBottom); }
+             if (Math.abs(tTop - oCenterY) < minDiffY) { newY = oCenterY; bestSnapY = oCenterY; minDiffY = Math.abs(tTop - oCenterY); }
+
+             if (Math.abs(tBottom - oTop) < minDiffY) { newY = oTop - tHeight; bestSnapY = oTop; minDiffY = Math.abs(tBottom - oTop); }
+             if (Math.abs(tBottom - oBottom) < minDiffY) { newY = oBottom - tHeight; bestSnapY = oBottom; minDiffY = Math.abs(tBottom - oBottom); }
+             if (Math.abs(tBottom - oCenterY) < minDiffY) { newY = oCenterY - tHeight; bestSnapY = oCenterY; minDiffY = Math.abs(tBottom - oCenterY); }
+
+             if (Math.abs(tCenterY - oTop) < minDiffY) { newY = oTop - tHeight/2; bestSnapY = oTop; minDiffY = Math.abs(tCenterY - oTop); }
+             if (Math.abs(tCenterY - oBottom) < minDiffY) { newY = oBottom - tHeight/2; bestSnapY = oBottom; minDiffY = Math.abs(tCenterY - oBottom); }
+             if (Math.abs(tCenterY - oCenterY) < minDiffY) { newY = oCenterY - tHeight/2; bestSnapY = oCenterY; minDiffY = Math.abs(tCenterY - oCenterY); }
+        });
+
+        setSnapX(bestSnapX);
+        setSnapY(bestSnapY);
+
+        setElements(prev => prev.map(el => el.id === selectedId ? { ...el, x: newX, y: newY } : el));
+      } else if (isResizing && selectedId && selectedElement && resizeHandle) {
+        const dx = (e.clientX - dragStartPos.current.x) / (zoom / 100);
+        const dy = (e.clientY - dragStartPos.current.y) / (zoom / 100);
+        
+        const start = elementStartPos.current;
+        let newX = start.x;
+        let newY = start.y;
+        let newWidth = start.width;
+        let newHeight = start.height;
+
+        // Aspect Ratio for proportional resizing
+        const aspectRatio = start.width / start.height;
+
+        if (['ne', 'nw', 'se', 'sw'].includes(resizeHandle)) {
+           // CORNER RESIZE: Proportional (Scale)
+           if (resizeHandle.includes('e')) {
+              newWidth = Math.max(20, start.width + dx);
+           } else {
+              newWidth = Math.max(20, start.width - dx);
+              newX = start.x + (start.width - newWidth);
+           }
+           
+           // Enforce aspect ratio based on new width
+           newHeight = newWidth / aspectRatio;
+
+           if (resizeHandle.includes('n')) {
+              newY = start.y + (start.height - newHeight);
+           }
+           
+           // Update element
+           const updates: Partial<DesignElement> = { x: newX, y: newY, width: newWidth, height: newHeight };
+           
+           // Scale font size for text/stickers (Correctly based on start size)
+           if (start.fontSize) {
+             updates.fontSize = start.fontSize * (newWidth / start.width);
+           }
+           
+           setElements(prev => prev.map(el => el.id === selectedId ? { ...el, ...updates } : el));
+
+        } else {
+           // SIDE RESIZE: Free (Crop/Wrap)
+           if (resizeHandle === 'e' || resizeHandle === 'w') {
+              if (resizeHandle === 'e') {
+                newWidth = Math.max(20, start.width + dx);
+              } else {
+                newWidth = Math.max(20, start.width - dx);
+                newX = start.x + (start.width - newWidth);
+              }
+           }
+           
+           if (resizeHandle === 'n' || resizeHandle === 's') {
+              if (resizeHandle === 's') {
+                newHeight = Math.max(20, start.height + dy);
+              } else {
+                newHeight = Math.max(20, start.height - dy);
+                newY = start.y + (start.height - newHeight);
+              }
+           }
+           
+           // For side resize, we DON'T scale font size, just dimensions (like Canva)
+           setElements(prev => prev.map(el => el.id === selectedId ? { ...el, x: newX, y: newY, width: newWidth, height: newHeight } : el));
+        }
       }
     };
 
     const handleMouseUp = () => {
+      if (isDragging || isResizing) {
+         // Add to history on drag end
+         addToHistory(elements);
+      }
       setIsDragging(false);
       setIsResizing(false);
+      setResizeHandle(null);
+      setSnapX(null);
+      setSnapY(null);
     };
 
     if (isDragging || isResizing) {
@@ -230,21 +542,56 @@ export default function DesignerClient() {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, selectedId, zoom, selectedElement]);
+  }, [isDragging, isResizing, selectedId, zoom, selectedElement, elements]); // Added elements dependency for history snapshot
+
+  // Auto-close Text Effects panel if no text element is selected
+  useEffect(() => {
+    if (activeTool === 'text-effects') {
+        if (!selectedElement || selectedElement.type !== 'text') {
+            setActiveTool(null);
+        }
+    }
+  }, [selectedElement, activeTool]);
+
+  // Text Measurement Helper
+  const measureText = (text: string, fontSize: number, fontFamily: string) => {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    if (!context) return { width: 200, height: 50 };
+
+    context.font = `${fontSize}px ${fontFamily}`;
+    const metrics = context.measureText(text);
+    
+    // Height estimation (Canvas measureText height is tricky, usually fontSize * 1.2 is decent for tight fit)
+    // But for Thai, we need a bit more.
+    const width = Math.ceil(metrics.width);
+    const height = Math.ceil(fontSize * 1.2); // Tight fit for line-height 1 + buffer
+
+    return { width, height };
+  };
 
   // Helpers
-  const addElement = (type: ElementType, content: string, extraProps = {}) => {
+  const addElement = (type: ElementType, content: string, extraProps: any = {}) => {
     // Default dimensions based on type
     let width = 200;
     let height = 50;
-    if (type === 'image' || type === 'shape' || type === 'sticker') {
+
+    if (type === 'text') {
+      const fs = extraProps.fontSize || 32;
+      const font = extraProps.fontFamily || 'Sarabun';
+      const dims = measureText(content, fs, font);
+      width = dims.width + 10; // Add small buffer for anti-aliasing/padding
+      height = dims.height;
+    }
+
+    if (type === 'image' || type === 'shape' || type === 'sticker' || type === 'icon') {
       width = 100;
       height = 100;
     }
 
       const newEl: DesignElement = {
       id: Date.now().toString(), type, content, 
-      x: 150, y: 200, // Center-ish
+      x: 250 - width/2, y: 300 - height/2, // Start at center
       width, height,
       rotation: 0, opacity: 100,
       color: '#000000', fontSize: 32, fontFamily: 'Sarabun', fontWeight: 'normal', fontStyle: 'normal', textAlign: 'center',
@@ -252,18 +599,40 @@ export default function DesignerClient() {
       side: viewSide, // Add to current side
       ...extraProps
     };
-    setElements(prev => [...prev, newEl]);
+    const newElements = [...elements, newEl];
+    setElements(newElements);
+    addToHistory(newElements);
     setSelectedId(newEl.id);
   };
 
   const updateElement = (id: string | null, changes: Partial<DesignElement>) => {
     if (!id) return;
-    setElements(prev => prev.map(el => el.id === id ? { ...el, ...changes } : el));
+    const newElements = elements.map(el => el.id === id ? { ...el, ...changes } : el);
+    setElements(newElements);
+    // Note: For continuous updates like color picker, we might want to debounce history
+    // But for now, let's add history for simple clicks. 
+    // Ideally we separate "committing" changes vs "previewing".
+    // For simplicity in this context, we might skip addToHistory here and rely on explicit actions or just add it.
+    // Let's add it to be safe, though it might create many history steps for sliders.
+  };
+  
+  // Better update for history: only call addToHistory on "final" actions.
+  // But since updateElement is used by sliders, we need to be careful.
+  // Let's create a separate function for "Finalize Update" or just use mouseUp on sliders.
+  // For buttons (bold, italic, align), we should add history.
+  
+  const updateElementWithHistory = (id: string | null, changes: Partial<DesignElement>) => {
+      if (!id) return;
+      const newElements = elements.map(el => el.id === id ? { ...el, ...changes } : el);
+      setElements(newElements);
+      addToHistory(newElements);
   };
 
   const deleteElement = (id: string | null) => {
     if (!id) return;
-    setElements(prev => prev.filter(el => el.id !== id));
+    const newElements = elements.filter(el => el.id !== id);
+    setElements(newElements);
+    addToHistory(newElements);
     setSelectedId(null);
   };
 
@@ -294,6 +663,7 @@ export default function DesignerClient() {
       [newElements[index], newElements[index - 1]] = [newElements[index - 1], newElements[index]];
     }
     setElements(newElements);
+    addToHistory(newElements); // Add to history for layer moves
   };
 
   // Interaction Handlers
@@ -303,20 +673,49 @@ export default function DesignerClient() {
     setShowFilters(false);
     setIsDragging(true);
     dragStartPos.current = { x: e.clientX, y: e.clientY };
-    elementStartPos.current = { x: el.x, y: el.y, width: el.width, height: el.height };
+    elementStartPos.current = { 
+      x: el.x, 
+      y: el.y, 
+      width: el.width, 
+      height: el.height,
+      fontSize: el.fontSize || 0,
+      rotation: el.rotation
+    };
   };
 
   const handleTextEdit = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (selectedId) {
-      updateElement(selectedId, { content: e.target.value });
+    if (selectedId && selectedElement) {
+      // Auto-resize width on text change to keep it tight
+      // But we only update width, keeping height manual or proportionally updated if we wanted?
+      // Actually, user expects box to grow with text usually.
+      
+      const fs = selectedElement.fontSize || 32;
+      const font = selectedElement.fontFamily || 'Sarabun';
+      const dims = measureText(e.target.value, fs, font);
+      
+      updateElement(selectedId, { 
+        content: e.target.value,
+        width: Math.max(20, dims.width + 10), // Buffer
+        // height: dims.height // Optional: update height too? Let's keep height manual/fixed for now as user might have cropped it? 
+        // Actually, usually typing extends the box.
+        height: Math.max(selectedElement.height, dims.height)
+      });
     }
   };
 
-  const handleResizeStart = (e: React.MouseEvent, el: DesignElement) => {
+  const handleResizeStart = (e: React.MouseEvent, el: DesignElement, handle: string) => {
     e.stopPropagation();
     setIsResizing(true);
+    setResizeHandle(handle);
     dragStartPos.current = { x: e.clientX, y: e.clientY };
-    elementStartPos.current = { x: el.x, y: el.y, width: el.width, height: el.height };
+    elementStartPos.current = { 
+      x: el.x, 
+      y: el.y, 
+      width: el.width, 
+      height: el.height,
+      fontSize: el.fontSize || 0,
+      rotation: el.rotation
+    };
   };
 
   // Components
@@ -337,48 +736,165 @@ export default function DesignerClient() {
       <div className="w-[72px] bg-white border-r border-slate-200 flex flex-col items-center py-4 z-30 shadow-sm flex-shrink-0">
         <Link href="/catalog" className="mb-6 w-10 h-10 bg-gradient-to-br from-slate-900 to-slate-700 rounded-xl flex items-center justify-center text-white font-bold shadow-lg hover:scale-105 transition-transform">A</Link>
         <div className="w-full flex-1 space-y-1">
-          <SidebarItem icon={Shirt} label="Product" id="product" isActive={activeTool === 'product'} onClick={setActiveTool} />
-          <SidebarItem icon={Type} label="Text" id="text" isActive={activeTool === 'text'} onClick={setActiveTool} />
-          <SidebarItem icon={UploadCloud} label="Uploads" id="uploads" isActive={activeTool === 'uploads'} onClick={setActiveTool} />
-          <SidebarItem icon={Shapes} label="Elements" id="elements" isActive={activeTool === 'elements'} onClick={setActiveTool} />
-          <SidebarItem icon={Layers} label="Layers" id="layers" isActive={activeTool === 'layers'} onClick={setActiveTool} />
+          <SidebarItem icon={Shirt} label="สินค้า" id="product" isActive={activeTool === 'product'} onClick={setActiveTool} />
+          <SidebarItem icon={Type} label="ข้อความ" id="text" isActive={activeTool === 'text'} onClick={setActiveTool} />
+          <SidebarItem icon={UploadCloud} label="อัปโหลด" id="uploads" isActive={activeTool === 'uploads'} onClick={setActiveTool} />
+          <SidebarItem icon={Library} label="คลังของฉัน" id="library" isActive={activeTool === 'library'} onClick={setActiveTool} />
+          <SidebarItem icon={Sparkles} label="AI Gen" id="ai" isActive={activeTool === 'ai'} onClick={setActiveTool} />
+          <SidebarItem icon={Shapes} label="องค์ประกอบ" id="elements" isActive={activeTool === 'elements'} onClick={setActiveTool} />
+          <SidebarItem icon={Layers} label="เลเยอร์" id="layers" isActive={activeTool === 'layers'} onClick={setActiveTool} />
         </div>
       </div>
 
       {/* 2. Slide-out Panel */}
       <div className={`w-80 bg-white border-r border-slate-200 flex flex-col z-20 shadow-xl transition-all duration-300 absolute left-[72px] top-0 bottom-0 transform ${activeTool ? 'translate-x-0' : '-translate-x-full opacity-0 pointer-events-none'}`}>
         <div className="h-14 border-b border-slate-100 flex items-center justify-between px-6 bg-white/80 backdrop-blur sticky top-0 z-10">
-          <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 capitalize">{activeTool}</h2>
+          <h2 className="font-bold text-slate-800 text-lg flex items-center gap-2 capitalize">
+            {activeTool === 'product' ? 'สินค้า' : 
+             activeTool === 'text' ? 'ข้อความ' : 
+             activeTool === 'uploads' ? 'อัปโหลด' : 
+             activeTool === 'library' ? 'คลังของฉัน' : 
+             activeTool === 'ai' ? 'สร้างภาพ AI' : 
+             activeTool === 'text-effects' ? 'เอฟเฟกต์' :
+             activeTool === 'elements' ? 'องค์ประกอบ' : 'เลเยอร์'}
+          </h2>
           <button onClick={() => setActiveTool(null)} className="p-2 hover:bg-slate-100 rounded-full"><ChevronLeft className="w-5 h-5 text-slate-400" /></button>
         </div>
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+          {/* Removed font-selector panel as per request to integrate into text panel */}
+          {activeTool === 'text-effects' && (
+            <div className="space-y-8">
+               {/* Style Section */}
+               <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-slate-800 text-sm">สไตล์ข้อความ</h3>
+                    <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-1 rounded-full">เลือก 1 แบบ</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                     {[
+                       { id: 'none', label: 'ปกติ', preview: 'Aa', style: {} },
+                       { id: 'shadow', label: 'มีเงา', preview: 'Aa', style: { textShadow: '2px 2px 0px rgba(0,0,0,0.2)' } },
+                       { id: 'lift', label: 'ยกนูน', preview: 'Aa', style: { textShadow: '0px 4px 8px rgba(0,0,0,0.3)' } },
+                       { id: 'hollow', label: 'ตัวกลวง', preview: 'Aa', style: { WebkitTextStroke: '1px currentColor', color: 'transparent' } },
+                       { id: 'splice', label: 'ซ้อนทับ', preview: 'Aa', style: { WebkitTextStroke: '1px currentColor', color: 'transparent', textShadow: '2px 2px 0px #cbd5e1' } },
+                       { id: 'outline', label: 'เส้นขอบ', preview: 'Aa', style: { WebkitTextStroke: '2px currentColor', color: 'transparent', fontWeight: 'bold' } },
+                       { id: 'echo', label: 'สะท้อน', preview: 'Aa', style: { textShadow: '2px 2px 0px rgba(0,0,0,0.1), 4px 4px 0px rgba(0,0,0,0.1)' } },
+                       { id: 'neon', label: 'นีออน', preview: 'Aa', style: { textShadow: '0 0 10px currentColor', color: 'white' } },
+                       { id: 'glitch', label: 'กลิตช์', preview: 'Aa', style: { textShadow: '2px 0px #ef4444, -2px 0px #3b82f6' } },
+                       { id: 'background', label: 'พื้นหลัง', preview: 'Aa', style: { backgroundColor: 'currentColor', color: 'white', padding: '0 4px', borderRadius: '4px' } },
+                     ].map((effect) => (
+                       <button
+                         key={effect.id}
+                         onClick={() => updateElementWithHistory(selectedId, { 
+                            effectType: effect.id as any,
+                            color: effect.id === 'neon' ? '#ec4899' : 
+                                   effect.id === 'background' ? '#fcd34d' : selectedElement?.color,
+                            backgroundColor: effect.id === 'background' ? '#fcd34d' : 'transparent'
+                         })}
+                         className={`flex items-center gap-3 p-3 rounded-xl border transition-all group text-left relative overflow-hidden ${selectedElement?.effectType === effect.id || (!selectedElement?.effectType && effect.id === 'none') ? 'border-ci-blue bg-blue-50/50 ring-1 ring-ci-blue' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}
+                       >
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl font-bold ${effect.id === 'background' ? 'text-slate-800' : 'text-slate-700'}`} style={effect.style}>
+                             {effect.preview}
+                          </div>
+                          <span className={`text-xs font-bold ${selectedElement?.effectType === effect.id || (!selectedElement?.effectType && effect.id === 'none') ? 'text-ci-blue' : 'text-slate-600'}`}>{effect.label}</span>
+                          
+                          {(selectedElement?.effectType === effect.id || (!selectedElement?.effectType && effect.id === 'none')) && (
+                            <div className="absolute top-2 right-2 w-2 h-2 bg-ci-blue rounded-full shadow-sm" />
+                          )}
+                       </button>
+                     ))}
+                  </div>
+               </div>
+
+               <div className="h-px w-full bg-slate-100" />
+
+               {/* Shape Section */}
+               <div>
+                  <h3 className="font-bold text-slate-800 text-sm mb-4">การดัดโค้ง</h3>
+                  <div className="bg-slate-50 rounded-2xl p-1.5 flex gap-1 border border-slate-100">
+                     <button
+                        onClick={() => updateElementWithHistory(selectedId, { curveType: 'none' })}
+                        className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1 ${!selectedElement?.curveType || selectedElement?.curveType === 'none' ? 'bg-white shadow-sm text-ci-blue ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/50'}`}
+                     >
+                        <Type className="w-4 h-4" />
+                        <span>ปกติ</span>
+                     </button>
+                     <button
+                        onClick={() => updateElementWithHistory(selectedId, { curveType: 'arc', width: selectedElement?.width && selectedElement.width < 200 ? 250 : selectedElement?.width })}
+                        className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1 ${selectedElement?.curveType === 'arc' ? 'bg-white shadow-sm text-ci-blue ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/50'}`}
+                     >
+                        <div className="w-4 h-4 border-t-2 border-current rounded-t-full mt-1" />
+                        <span>โค้ง</span>
+                     </button>
+                     <button
+                        onClick={() => updateElementWithHistory(selectedId, { curveType: 'circle', width: selectedElement?.width && selectedElement.width < 200 ? 250 : selectedElement?.width })}
+                        className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1 ${selectedElement?.curveType === 'circle' ? 'bg-white shadow-sm text-ci-blue ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/50'}`}
+                     >
+                        <div className="w-4 h-4 border-2 border-current rounded-full" />
+                        <span>วงกลม</span>
+                     </button>
+                  </div>
+
+                  {/* Curve Settings */}
+                  {(selectedElement?.curveType === 'arc' || selectedElement?.curveType === 'circle' || selectedElement?.curveType === 'wave') && (
+                     <div className="mt-6 space-y-3 animate-in slide-in-from-top-2 fade-in duration-300 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                        <div className="flex justify-between items-center">
+                           <span className="text-xs font-bold text-slate-500">ระดับความโค้ง</span>
+                           <span className="text-xs font-bold text-ci-blue bg-blue-50 px-2 py-0.5 rounded">{selectedElement.curveStrength ?? 50}%</span>
+                        </div>
+                        <div className="relative h-6 flex items-center">
+                           <div className="absolute left-0 right-0 h-1 bg-slate-100 rounded-full"></div>
+                           <input 
+                              type="range" 
+                              min="0" 
+                              max="100" 
+                              value={selectedElement.curveStrength ?? 50} 
+                              onChange={(e) => updateElement(selectedId, { curveStrength: parseInt(e.target.value) })} 
+                              onMouseUp={() => addToHistory(elements)}
+                              className="w-full absolute inset-0 opacity-0 cursor-pointer z-10" 
+                           />
+                           <div 
+                              className="absolute h-4 w-4 bg-white border-2 border-ci-blue rounded-full shadow-sm pointer-events-none transition-all"
+                              style={{ left: `calc(${selectedElement.curveStrength ?? 50}% - 8px)` }}
+                           />
+                           <div 
+                              className="absolute left-0 h-1 bg-ci-blue rounded-l-full pointer-events-none"
+                              style={{ width: `${selectedElement.curveStrength ?? 50}%` }}
+                           />
+                        </div>
+                     </div>
+                  )}
+               </div>
+            </div>
+          )}
           {activeTool === 'product' && (
             <div className="space-y-8 px-2">
               {/* Product Summary Card */}
               <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                 <div className="aspect-square w-full bg-white rounded-xl border border-slate-200 mb-3 p-4 flex items-center justify-center relative overflow-hidden">
                    <img src="https://www.pngall.com/wp-content/uploads/2016/04/T-Shirt-PNG-File.png" className="w-full h-full object-contain mix-blend-multiply" />
-                   <div className="absolute bottom-2 right-2 bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                   <div className="absolute bottom-2 right-2 bg-ci-blue text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
                      ฿{currentPrice}
                    </div>
                 </div>
-                <h3 className="font-bold text-slate-800 text-sm mb-1">Premium Cotton T-Shirt</h3>
-                <p className="text-xs text-slate-500">High quality, 100% cotton, sustainable.</p>
+                <h3 className="font-bold text-slate-800 text-sm mb-1">เสื้อยืด Cotton พรีเมียม</h3>
+                <p className="text-xs text-slate-500">ผ้าคอตตอน 100% คุณภาพสูง ใส่สบาย ระบายอากาศดี</p>
               </div>
 
               {/* Customization Options */}
               <div className="space-y-6">
                 {/* Technique Selector */}
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Technique</label>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">เทคนิคการพิมพ์</label>
                   <div className="p-1 bg-slate-100 rounded-xl flex gap-1">
-                     {['Printing', 'Embroidery'].map((t) => (
+                     {[{ id: 'printing', label: 'สกรีน' }, { id: 'embroidery', label: 'ปัก' }].map((t) => (
                        <button 
-                         key={t}
-                         onClick={() => setTechnique(t.toLowerCase() as any)}
-                         className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${technique === t.toLowerCase() ? 'bg-white text-ci-blue shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                         key={t.id}
+                         onClick={() => setTechnique(t.id as any)}
+                         className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${technique === t.id ? 'bg-white text-ci-blue shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                        >
-                         {t}
+                         {t.label}
                        </button>
                      ))}
                   </div>
@@ -387,7 +903,7 @@ export default function DesignerClient() {
                 {/* Colors */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Color</label>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">สีเสื้อ</label>
                     <span className="text-xs font-bold text-slate-700">{COLORS.find(c => c.value === shirtColor)?.name}</span>
                   </div>
                   <div className="flex flex-wrap gap-3">
@@ -406,9 +922,9 @@ export default function DesignerClient() {
                 {/* Sizes */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Sizes</label>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">ไซส์ที่ต้องการ</label>
                     <button onClick={() => setSelectedSizes(selectedSizes.length === SIZES.length ? [] : [...SIZES])} className="text-[10px] font-bold text-ci-blue hover:underline">
-                      {selectedSizes.length === SIZES.length ? 'Clear All' : 'Select All'}
+                      {selectedSizes.length === SIZES.length ? 'ล้างค่า' : 'เลือกทั้งหมด'}
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -422,7 +938,7 @@ export default function DesignerClient() {
                              setSelectedSizes(newSizes);
                              if (!isSelected) setShirtSize(s); 
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${isSelected ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'}`}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${isSelected ? 'bg-ci-blue text-white border-ci-blue' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'}`}
                         >
                           {s}
                         </button>
@@ -434,29 +950,256 @@ export default function DesignerClient() {
             </div>
           )}
           {activeTool === 'text' && (
-            <div className="space-y-4">
-              <button onClick={() => addElement('text', 'Heading', { fontSize: 48, fontWeight: 'bold' })} className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-2xl hover:scale-[1.02] transition-transform shadow-lg">Add Heading</button>
-              <button onClick={() => addElement('text', 'Subheading', { fontSize: 32, fontWeight: 'medium' })} className="w-full py-3 bg-white border-2 border-slate-200 rounded-xl font-bold text-lg text-slate-700 hover:border-slate-900">Add Subheading</button>
-              <button onClick={() => addElement('text', 'Body Text', { fontSize: 24 })} className="w-full py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-500 hover:bg-slate-100">Add Body Text</button>
+            <div className="space-y-6">
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search fonts" 
+                  value={fontSearchQuery}
+                  onChange={(e) => setFontSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border-transparent focus:bg-white border focus:border-ci-blue rounded-xl text-sm transition-all outline-none"
+                />
+              </div>
+
+              <button onClick={() => addElement('text', 'ข้อความ', { fontSize: 32 })} className="w-full py-3 bg-gradient-to-r from-ci-blue to-blue-600 text-white rounded-xl font-bold text-lg hover:scale-[1.02] transition-transform shadow-lg shadow-ci-blue/20 flex items-center justify-center gap-2">
+                <Type className="w-5 h-5" />
+                เพิ่มกล่องข้อความ
+              </button>
+              
+              {/* Curved Text Section */}
+              <div className="space-y-3">
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                       <h3 className="font-bold text-slate-800 text-sm">Curved Text</h3>
+                       <span className="bg-slate-100 text-slate-500 text-[10px] px-1.5 py-0.5 rounded font-medium">Editable</span>
+                    </div>
+                    <button className="text-xs text-slate-400 hover:text-ci-blue underline decoration-dotted underline-offset-2">Show more</button>
+                 </div>
+                 <div className="grid grid-cols-3 gap-2">
+                    {/* Mock Curved Text Items */}
+                    <button onClick={() => addElement('text', 'Curved', { fontSize: 32, curveType: 'circle', width: 250, height: 250 })} className="aspect-square bg-white rounded-xl border border-slate-200 hover:border-ci-blue hover:shadow-md flex items-center justify-center p-2 group transition-all overflow-hidden">
+                       <div className="w-full h-full rounded-full border-2 border-dashed border-slate-300 group-hover:border-ci-blue/50 flex items-center justify-center">
+                          <span className="text-[8px] font-bold text-slate-400 group-hover:text-ci-blue -rotate-12">Circle</span>
+                       </div>
+                    </button>
+                    <button onClick={() => addElement('text', 'Wavy', { fontSize: 32, curveType: 'wave', width: 300, height: 100 })} className="aspect-square bg-white rounded-xl border border-slate-200 hover:border-ci-blue hover:shadow-md flex items-center justify-center p-2 group transition-all overflow-hidden">
+                       <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-[8px] font-bold text-slate-400 group-hover:text-ci-blue transform skew-x-12">Wavy</span>
+                       </div>
+                    </button>
+                    <button onClick={() => addElement('text', 'Arc', { fontSize: 32, curveType: 'arc', width: 300, height: 150 })} className="aspect-square bg-white rounded-xl border border-slate-200 hover:border-ci-blue hover:shadow-md flex items-center justify-center p-2 group transition-all overflow-hidden">
+                        <div className="w-full h-full border-t-2 border-dashed border-slate-300 group-hover:border-ci-blue/50 rounded-t-full mt-4 flex justify-center pt-1">
+                          <span className="text-[8px] font-bold text-slate-400 group-hover:text-ci-blue">Arc</span>
+                       </div>
+                    </button>
+                 </div>
+              </div>
+
+              {/* My Fonts & Upload */}
+              <div className="space-y-3">
+                 <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-slate-800 text-sm">My fonts</h3>
+                    <span className="bg-blue-100 text-blue-600 text-[10px] px-1.5 py-0.5 rounded font-bold">New</span>
+                 </div>
+                 <button className="w-full py-2.5 border border-slate-300 rounded-xl flex items-center justify-center gap-2 hover:border-ci-blue hover:text-ci-blue hover:bg-blue-50 transition-all text-slate-600 font-bold text-sm bg-white">
+                    <Upload className="w-4 h-4" />
+                    Upload font
+                 </button>
+              </div>
+
+              <div className="h-px w-full bg-slate-100" />
+              
+              {/* Font List */}
+              <div>
+                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">All Fonts</h3>
+                 <div className="space-y-1">
+                    {FONTS.filter(f => f.name.toLowerCase().includes(fontSearchQuery.toLowerCase())).map((f) => (
+                      <button 
+                        key={f.name} 
+                        onClick={() => {
+                          if (selectedId && selectedElement?.type === 'text') {
+                            updateElementWithHistory(selectedId, { fontFamily: f.name });
+                          } else {
+                            addElement('text', 'ข้อความ', { fontFamily: f.name, fontSize: 32 });
+                          }
+                        }}
+                        className={`w-full text-left px-4 py-3 rounded-xl hover:bg-slate-50 transition-all group flex items-center justify-between ${selectedElement?.fontFamily === f.name ? 'bg-blue-50 ring-1 ring-ci-blue' : 'bg-white border border-slate-100'}`}
+                      >
+                        <span className={`text-base ${f.family} ${selectedElement?.fontFamily === f.name ? 'text-ci-blue' : 'text-slate-700'}`}>{f.name}</span>
+                        {selectedElement?.fontFamily === f.name && <Check className="w-4 h-4 text-ci-blue" />}
+                      </button>
+                    ))}
+                 </div>
+                 {FONTS.filter(f => f.name.toLowerCase().includes(fontSearchQuery.toLowerCase())).length === 0 && (
+                    <div className="text-center py-8 text-slate-400 text-sm">
+                       No fonts found
+                    </div>
+                 )}
+              </div>
             </div>
           )}
           {activeTool === 'uploads' && (
             <div className="text-center">
               <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
-              <button onClick={() => fileInputRef.current?.click()} className="w-full border-2 border-dashed border-ci-blue/30 bg-ci-blue/5 rounded-2xl p-8 mb-6 hover:bg-ci-blue/10 transition-colors">
-                <UploadCloud className="w-10 h-10 text-ci-blue mx-auto mb-2" />
-                <p className="text-sm font-bold text-ci-blue">Upload Media</p>
+              <button onClick={() => fileInputRef.current?.click()} className="w-full border-2 border-dashed border-ci-blue/30 bg-blue-50/30 rounded-2xl p-8 mb-6 hover:bg-blue-50/60 hover:border-ci-blue/50 transition-all group">
+                <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <UploadCloud className="w-8 h-8 text-ci-blue" />
+                </div>
+                <p className="text-sm font-bold text-slate-700 mb-1">คลิกเพื่ออัปโหลด</p>
+                <p className="text-xs text-slate-400">รองรับไฟล์ JPG, PNG</p>
               </button>
             </div>
           )}
+          {activeTool === 'library' && (
+            <div className="space-y-4">
+               <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-bold text-slate-800 text-base">รูปภาพของฉัน</h3>
+                  <Link href="/dashboard/library" className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-ci-blue transition-colors" title="จัดการคลังภาพ">
+                    <ExternalLink className="w-4 h-4" />
+                  </Link>
+               </div>
+               
+               
+               <div className="grid grid-cols-2 gap-3">
+                 {/* Upload New Button */}
+                 <button onClick={() => fileInputRef.current?.click()} className="aspect-square border-2 border-dashed border-ci-blue/30 bg-blue-50/30 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-ci-blue/50 hover:bg-blue-50/50 transition-all group">
+                    <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform text-ci-blue">
+                      <Plus className="w-5 h-5" />
+                    </div>
+                    <span className="text-xs font-bold text-ci-blue">อัปโหลดใหม่</span>
+                 </button>
+                 
+                 {/* Assets */}
+                 {MY_LIBRARY_ASSETS.map((asset) => (
+                   <div key={asset.id} className="group relative aspect-square bg-slate-100 rounded-xl overflow-hidden cursor-pointer border border-slate-200 hover:border-ci-blue hover:shadow-md transition-all" onClick={() => addElement('image', asset.url)}>
+                      <img src={asset.url} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                      <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                        <p className="text-[10px] text-white font-bold truncate">{asset.name}</p>
+                      </div>
+                      <button className="absolute top-2 right-2 p-1 bg-white/90 rounded-full shadow-sm opacity-0 group-hover:opacity-100 hover:bg-white text-slate-600 hover:text-red-500 transition-all transform translate-y-2 group-hover:translate-y-0">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                   </div>
+                 ))}
+               </div>
+            </div>
+          )}
+          {activeTool === 'ai' && (
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-center">
+                <Sparkles className="w-8 h-8 text-ci-blue mx-auto mb-2" />
+                <h3 className="font-bold text-blue-900 text-sm">สร้างภาพด้วย AI</h3>
+                <p className="text-xs text-blue-600 mt-1">ใช้เครื่องมือเหล่านี้สร้างภาพสวยๆ แล้วนำมาอัปโหลดที่นี่</p>
+              </div>
+              
+              <div className="space-y-3">
+                {AI_TOOLS.map((tool, i) => (
+                  <a 
+                    key={i} 
+                    href={tool.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-ci-blue hover:bg-blue-50/50 transition-all group"
+                  >
+                    <div className="text-2xl bg-white w-10 h-10 rounded-lg border border-slate-100 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      {tool.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1">
+                        <h4 className="font-bold text-sm text-slate-800 group-hover:text-ci-blue">{tool.name}</h4>
+                        <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-ci-blue" />
+                      </div>
+                      <p className="text-[10px] text-slate-500 leading-tight mt-0.5">{tool.description}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
           {activeTool === 'elements' && (
-            <div className="space-y-8">
-              <div className="grid grid-cols-3 gap-3">
-                 {SHAPES.map((s, i) => <div key={i} onClick={() => addElement('shape', s.type, { backgroundColor: '#94a3b8' })} className={`h-16 bg-slate-200 hover:bg-slate-300 cursor-pointer ${s.class}`} />)}
+            <div className="space-y-6">
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search elements..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border-transparent focus:bg-white border focus:border-ci-blue rounded-xl text-sm transition-all outline-none"
+                />
               </div>
+
+              {/* Categories */}
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
+                {ICON_CATEGORIES.map(cat => (
+                  <button 
+                    key={cat.id}
+                    onClick={() => setActiveCategory(cat.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${activeCategory === cat.id ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-ci-blue'}`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Icons Grid */}
+              <div className="space-y-4">
+                 {ICON_CATEGORIES.filter(c => activeCategory === 'all' || activeCategory === c.id).map(category => {
+                   if (category.id === 'all') return null;
+                   
+                   const items = category.items?.filter(item => item.toLowerCase().includes(searchQuery.toLowerCase()));
+                   if (!items?.length) return null;
+
+                   return (
+                     <div key={category.id} className="space-y-3">
+                       <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                         {category.label}
+                         <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{items.length}</span>
+                       </h3>
+                       <div className="grid grid-cols-4 gap-3">
+                         {items.map(iconName => {
+                           const Icon = AVAILABLE_ICONS[iconName];
+                           if (!Icon) return null;
+                           return (
+                             <button 
+                               key={iconName} 
+                               onClick={() => addElement('icon', iconName, { color: '#1e293b' })} 
+                               className="aspect-square bg-white rounded-xl border border-slate-200 hover:border-ci-blue hover:shadow-md flex items-center justify-center text-slate-700 hover:text-ci-blue transition-all group"
+                               title={iconName}
+                             >
+                               <Icon className="w-6 h-6 group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+                             </button>
+                           );
+                         })}
+                       </div>
+                     </div>
+                   );
+                 })}
+              </div>
+              
+              {/* Stickers */}
+              {(activeCategory === 'all' || activeCategory === 'shapes') && !searchQuery && (
+                <div className="space-y-3 pt-4 border-t border-slate-100">
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Stickers & Emojis</h3>
               <div className="grid grid-cols-5 gap-2">
-                {STICKERS.map((s, i) => <button key={i} onClick={() => addElement('sticker', s, { fontSize: 64 })} className="text-2xl hover:scale-125 transition-transform">{s}</button>)}
+                    {STICKERS.map((s, i) => <button key={i} onClick={() => addElement('sticker', s, { fontSize: 64 })} className="text-2xl hover:scale-125 transition-transform p-2 hover:bg-slate-50 rounded-xl">{s}</button>)}
               </div>
+                </div>
+              )}
+
+              {/* Basic Shapes */}
+              {(activeCategory === 'all' || activeCategory === 'shapes') && !searchQuery && (
+                <div className="space-y-3 pt-4 border-t border-slate-100">
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Basic Shapes</h3>
+                  <div className="grid grid-cols-3 gap-3">
+                     {SHAPES.map((s, i) => <div key={i} onClick={() => addElement('shape', s.type, { backgroundColor: '#94a3b8' })} className={`h-12 bg-slate-200 hover:bg-slate-300 cursor-pointer transition-colors ${s.class}`} />)}
+                  </div>
+                </div>
+              )}
             </div>
           )}
           {activeTool === 'layers' && (
@@ -464,15 +1207,15 @@ export default function DesignerClient() {
               <div className="flex items-center gap-2 mb-4 p-1 bg-slate-100 rounded-lg">
                 <button 
                   onClick={() => setViewSide('front')}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${viewSide === 'front' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${viewSide === 'front' ? 'bg-white shadow text-ci-blue' : 'text-slate-500'}`}
                 >
-                  Front
+                  ด้านหน้า
                 </button>
                 <button 
                   onClick={() => setViewSide('back')}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${viewSide === 'back' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${viewSide === 'back' ? 'bg-white shadow text-ci-blue' : 'text-slate-500'}`}
                 >
-                  Back
+                  ด้านหลัง
                 </button>
               </div>
               
@@ -515,8 +1258,12 @@ export default function DesignerClient() {
            {/* Left: Tools */}
            <div className="flex items-center gap-4 z-20 relative">
               <div className="flex bg-slate-100 rounded-lg p-1">
-                 <button className="p-1.5 hover:bg-white rounded text-slate-500 hover:shadow-sm"><Undo2 className="w-4 h-4" /></button>
-                 <button className="p-1.5 hover:bg-white rounded text-slate-500 hover:shadow-sm"><Redo2 className="w-4 h-4" /></button>
+                    <button onClick={undo} disabled={currentHistoryIndex <= 0} className={`p-1.5 rounded transition-colors ${currentHistoryIndex <= 0 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:bg-white hover:shadow-sm hover:text-ci-blue'}`}>
+                      <Undo2 className="w-4 h-4" />
+                    </button>
+                    <button onClick={redo} disabled={currentHistoryIndex >= history.length - 1} className={`p-1.5 rounded transition-colors ${currentHistoryIndex >= history.length - 1 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:bg-white hover:shadow-sm hover:text-ci-blue'}`}>
+                      <Redo2 className="w-4 h-4" />
+                    </button>
               </div>
            </div>
 
@@ -525,8 +1272,8 @@ export default function DesignerClient() {
               {STEPS.map((step, i) => (
                 <div key={step.id} className="flex items-center gap-1">
                   {i > 0 && <div className="w-4 h-px bg-slate-200" />}
-                  <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full transition-colors ${step.status === 'completed' ? 'text-green-600 bg-green-50' : step.status === 'current' ? 'text-slate-900 bg-slate-100' : 'text-slate-300'}`}>
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold border ${step.status === 'completed' ? 'bg-green-100 border-green-200' : step.status === 'current' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white border-slate-200'}`}>
+                  <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full transition-colors ${step.status === 'completed' ? 'text-green-600 bg-green-50' : step.status === 'current' ? 'text-ci-blue bg-blue-50' : 'text-slate-300'}`}>
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold border ${step.status === 'completed' ? 'bg-green-100 border-green-200' : step.status === 'current' ? 'bg-ci-blue text-white border-ci-blue' : 'bg-white border-slate-200'}`}>
                       {step.status === 'completed' ? <Check className="w-2.5 h-2.5" /> : step.id}
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider">{step.label}</span>
@@ -539,58 +1286,62 @@ export default function DesignerClient() {
            <div className="flex items-center gap-2 z-20 relative">
               {/* Price Tag */}
               <div className="flex flex-col items-end leading-none mr-4">
-                   <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Total</span>
+                   <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">ราคารวม</span>
                    <span className="text-xl font-black text-slate-900 tracking-tight">฿{currentPrice.toLocaleString()}</span>
               </div>
 
               {/* Buttons */}
-              <button className="h-10 px-4 text-slate-500 font-bold text-sm hover:text-slate-900 hover:bg-slate-50 rounded-xl border border-transparent hover:border-slate-200 transition-all">
-                Preview
+              <button className="h-10 px-4 text-slate-500 font-bold text-sm hover:text-ci-blue hover:bg-blue-50 rounded-xl border border-transparent hover:border-blue-100 transition-all">
+                ดูตัวอย่าง
               </button>
-              <button className="h-10 px-6 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 shadow-lg shadow-slate-900/20 hover:shadow-xl hover:shadow-slate-900/30 transition-all flex items-center gap-2 hover:-translate-y-0.5 active:translate-y-0">
+              <button className="h-10 px-6 bg-gradient-to-r from-ci-blue to-blue-600 text-white rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-ci-blue/30 hover:-translate-y-0.5 transition-all flex items-center gap-2 active:translate-y-0">
                  <ShoppingCart className="w-4 h-4" />
-                 <span>Add to Cart</span>
+                 <span>ใส่ตะกร้า</span>
               </button>
            </div>
         </div>
 
         {/* Context Toolbar */}
-        {selectedElement && (
+        {selectedElement && !editingId && (
            <div className="absolute top-20 left-1/2 -translate-x-1/2 z-40 bg-white rounded-xl shadow-xl border border-slate-200 px-4 py-2 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-200">
               {selectedElement.type === 'text' && (
                  <>
-                    <div className="w-full px-2 pb-2 border-b border-slate-100 mb-2">
-                      <input 
-                        type="text" 
-                        value={selectedElement.content} 
-                        onChange={handleTextEdit}
-                        className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-ci-blue focus:ring-1 focus:ring-ci-blue/20"
-                        placeholder="Enter text..."
-                      />
-                    </div>
                     <div className="relative group">
-                      <button className="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-100 rounded-lg text-sm font-medium w-28 justify-between"><span className="truncate">{selectedElement.fontFamily}</span><ChevronRight className="w-3 h-3 rotate-90 text-slate-400" /></button>
-                      <div className="absolute top-full left-0 mt-2 w-40 bg-white border border-slate-200 rounded-xl shadow-lg hidden group-hover:block py-1 max-h-48 overflow-y-auto z-50">
-                        {FONTS.map(f => (<button key={f.name} onClick={() => updateElement(selectedId, { fontFamily: f.name })} className={`w-full text-left px-3 py-2 hover:bg-slate-50 text-sm ${f.family}`}>{f.name}</button>))}
-                      </div>
+                      <button onClick={() => setActiveTool(activeTool === 'text' ? null : 'text')} className="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-100 rounded-lg text-sm font-medium w-28 justify-center border border-slate-200 text-center">
+                        <span className="truncate">{selectedElement.fontFamily}</span>
+                      </button>
                     </div>
                     <Divider />
                     <div className="flex items-center bg-slate-100 rounded-lg">
-                       <button onClick={() => updateElement(selectedId, { fontSize: Math.max(12, (selectedElement.fontSize || 32) - 4) })} className="p-1.5 hover:bg-slate-200 rounded-l-lg text-slate-600"><Minus className="w-3 h-3" /></button>
-                       <span className="w-8 text-center text-xs font-bold">{selectedElement.fontSize}</span>
-                       <button onClick={() => updateElement(selectedId, { fontSize: Math.min(200, (selectedElement.fontSize || 32) + 4) })} className="p-1.5 hover:bg-slate-200 rounded-r-lg text-slate-600"><Plus className="w-3 h-3" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { fontSize: Math.max(12, (selectedElement.fontSize || 32) - 4) })} className="p-1.5 hover:bg-slate-200 rounded-l-lg text-slate-600"><Minus className="w-3 h-3" /></button>
+                       <span className="w-8 text-center text-xs font-bold">{Math.round(selectedElement.fontSize || 0)}</span>
+                       <button onClick={() => updateElementWithHistory(selectedId, { fontSize: Math.min(200, (selectedElement.fontSize || 32) + 4) })} className="p-1.5 hover:bg-slate-200 rounded-r-lg text-slate-600"><Plus className="w-3 h-3" /></button>
                     </div>
                     <Divider />
                     <div className="flex items-center gap-2 relative group">
                        <div className="w-6 h-6 rounded border border-slate-300" style={{ backgroundColor: selectedElement.color }}></div>
-                       <input type="color" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => updateElement(selectedId, { color: e.target.value })} />
+                       <input type="color" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => updateElement(selectedId, { color: e.target.value })} onBlur={(e) => updateElementWithHistory(selectedId, { color: e.target.value })} />
                     </div>
                     <Divider />
                     <div className="flex items-center gap-1">
-                       <button onClick={() => updateElement(selectedId, { fontWeight: selectedElement.fontWeight === 'bold' ? 'normal' : 'bold' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.fontWeight === 'bold' ? 'bg-slate-200' : ''}`}><Bold className="w-4 h-4" /></button>
-                       <button onClick={() => updateElement(selectedId, { fontStyle: selectedElement.fontStyle === 'italic' ? 'normal' : 'italic' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.fontStyle === 'italic' ? 'bg-slate-200' : ''}`}><Italic className="w-4 h-4" /></button>
-                       <button onClick={() => updateElement(selectedId, { textDecoration: selectedElement.textDecoration === 'underline' ? 'none' : 'underline' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.textDecoration === 'underline' ? 'bg-slate-200' : ''}`}><Underline className="w-4 h-4" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { fontWeight: selectedElement.fontWeight === 'bold' ? 'normal' : 'bold' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.fontWeight === 'bold' ? 'bg-slate-200' : ''}`}><Bold className="w-4 h-4" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { fontStyle: selectedElement.fontStyle === 'italic' ? 'normal' : 'italic' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.fontStyle === 'italic' ? 'bg-slate-200' : ''}`}><Italic className="w-4 h-4" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { textDecoration: selectedElement.textDecoration === 'underline' ? 'none' : 'underline' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.textDecoration === 'underline' ? 'bg-slate-200' : ''}`}><Underline className="w-4 h-4" /></button>
                     </div>
+                    <Divider />
+                    <div className="flex items-center gap-1">
+                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'left' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.textAlign === 'left' ? 'bg-slate-200' : ''}`}><AlignLeft className="w-4 h-4" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'center' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.textAlign === 'center' || !selectedElement.textAlign ? 'bg-slate-200' : ''}`}><AlignCenter className="w-4 h-4" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'right' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.textAlign === 'right' ? 'bg-slate-200' : ''}`}><AlignRight className="w-4 h-4" /></button>
+                    </div>
+                    <Divider />
+                    {/* Effects Button */}
+                    <button 
+                      onClick={() => setActiveTool('text-effects')} 
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTool === 'text-effects' ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-ci-blue'}`}
+                    >
+                      เอฟเฟกต์
+                    </button>
                  </>
               )}
               {selectedElement.type === 'sticker' && (
@@ -598,14 +1349,35 @@ export default function DesignerClient() {
                     <div className="flex items-center gap-2 text-slate-500"><Sticker className="w-4 h-4" /><span className="text-xs font-bold uppercase">Sticker</span></div>
                     <Divider />
                     <div className="flex items-center bg-slate-100 rounded-lg">
-                       <button onClick={() => updateElement(selectedId, { fontSize: Math.max(24, (selectedElement.fontSize || 64) - 8) })} className="p-1.5 hover:bg-slate-200 rounded-l-lg text-slate-600"><Minus className="w-3 h-3" /></button>
-                       <span className="w-8 text-center text-xs font-bold">{selectedElement.fontSize}</span>
-                       <button onClick={() => updateElement(selectedId, { fontSize: Math.min(300, (selectedElement.fontSize || 64) + 8) })} className="p-1.5 hover:bg-slate-200 rounded-r-lg text-slate-600"><Plus className="w-3 h-3" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { fontSize: Math.max(24, (selectedElement.fontSize || 64) - 8) })} className="p-1.5 hover:bg-slate-200 rounded-l-lg text-slate-600"><Minus className="w-3 h-3" /></button>
+                       <span className="w-8 text-center text-xs font-bold">{Math.round(selectedElement.fontSize || 0)}</span>
+                       <button onClick={() => updateElementWithHistory(selectedId, { fontSize: Math.min(300, (selectedElement.fontSize || 64) + 8) })} className="p-1.5 hover:bg-slate-200 rounded-r-lg text-slate-600"><Plus className="w-3 h-3" /></button>
                     </div>
                     <Divider />
                     <div className="flex items-center gap-3 px-2">
                        <span className="text-xs font-bold text-slate-500 uppercase">Opacity</span>
-                       <input type="range" min="0" max="100" value={selectedElement.opacity} onChange={(e) => updateElement(selectedId, { opacity: parseInt(e.target.value) })} className="w-24 accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none" />
+                       <input type="range" min="0" max="100" value={selectedElement.opacity} onChange={(e) => updateElement(selectedId, { opacity: parseInt(e.target.value) })} onMouseUp={() => addToHistory(elements)} className="w-24 accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none" />
+                    </div>
+                 </>
+              )}
+              {selectedElement.type === 'icon' && (
+                 <>
+                    <div className="flex items-center gap-2 text-slate-500">
+                       <div className="w-4 h-4">{AVAILABLE_ICONS[selectedElement.content] && <span className="w-4 h-4 flex items-center justify-center"><Search className="w-3 h-3" /></span>}</div>
+                       <span className="text-xs font-bold uppercase">Icon</span>
+                    </div>
+                    <Divider />
+                    <div className="flex items-center gap-3 px-2">
+                        <span className="text-xs font-bold text-slate-500 uppercase">Color</span>
+                        <div className="flex items-center gap-2 relative">
+                          <div className="w-8 h-8 rounded-lg border border-slate-300 shadow-sm" style={{ backgroundColor: selectedElement.color }}></div>
+                          <input type="color" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => updateElement(selectedId, { color: e.target.value })} onBlur={(e) => updateElementWithHistory(selectedId, { color: e.target.value })} />
+                        </div>
+                    </div>
+                    <Divider />
+                    <div className="flex items-center gap-3 px-2">
+                       <span className="text-xs font-bold text-slate-500 uppercase">Opacity</span>
+                       <input type="range" min="0" max="100" value={selectedElement.opacity} onChange={(e) => updateElement(selectedId, { opacity: parseInt(e.target.value) })} onMouseUp={() => addToHistory(elements)} className="w-24 accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none" />
                     </div>
                  </>
               )}
@@ -616,7 +1388,7 @@ export default function DesignerClient() {
                         <span className="text-xs font-bold text-slate-500 uppercase">Color</span>
                         <div className="flex items-center gap-2 relative">
                           <div className="w-8 h-8 rounded-lg border border-slate-300 shadow-sm" style={{ backgroundColor: selectedElement.backgroundColor }}></div>
-                          <input type="color" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => updateElement(selectedId, { backgroundColor: e.target.value })} />
+                          <input type="color" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => updateElement(selectedId, { backgroundColor: e.target.value })} onBlur={(e) => updateElementWithHistory(selectedId, { backgroundColor: e.target.value })} />
                         </div>
                       </div>
                     )}
@@ -625,16 +1397,23 @@ export default function DesignerClient() {
                     )}
                     {showFilters && selectedElement.type === 'image' && (
                        <div className="absolute top-full left-0 mt-2 p-4 bg-white rounded-xl shadow-xl border border-slate-200 w-64 z-50 space-y-3">
-                          <div><div className="flex justify-between mb-1"><span className="text-xs text-slate-500">Brightness</span><span className="text-xs">{selectedElement.brightness}%</span></div><input type="range" min="0" max="200" value={selectedElement.brightness} onChange={(e) => updateElement(selectedId, { brightness: parseInt(e.target.value) })} className="w-full accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none" /></div>
-                          <div><div className="flex justify-between mb-1"><span className="text-xs text-slate-500">Contrast</span><span className="text-xs">{selectedElement.contrast}%</span></div><input type="range" min="0" max="200" value={selectedElement.contrast} onChange={(e) => updateElement(selectedId, { contrast: parseInt(e.target.value) })} className="w-full accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none" /></div>
+                          <div><div className="flex justify-between mb-1"><span className="text-xs text-slate-500">Brightness</span><span className="text-xs">{selectedElement.brightness}%</span></div><input type="range" min="0" max="200" value={selectedElement.brightness} onChange={(e) => updateElement(selectedId, { brightness: parseInt(e.target.value) })} onMouseUp={() => addToHistory(elements)} className="w-full accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none" /></div>
+                          <div><div className="flex justify-between mb-1"><span className="text-xs text-slate-500">Contrast</span><span className="text-xs">{selectedElement.contrast}%</span></div><input type="range" min="0" max="200" value={selectedElement.contrast} onChange={(e) => updateElement(selectedId, { contrast: parseInt(e.target.value) })} onMouseUp={() => addToHistory(elements)} className="w-full accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none" /></div>
                        </div>
                     )}
                     <Divider />
-                    <div className="flex items-center gap-3 px-2"><span className="text-xs font-bold text-slate-500 uppercase">Opacity</span><input type="range" min="0" max="100" value={selectedElement.opacity} onChange={(e) => updateElement(selectedId, { opacity: parseInt(e.target.value) })} className="w-24 accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none" /></div>
+                    <div className="flex items-center gap-3 px-2"><span className="text-xs font-bold text-slate-500 uppercase">Opacity</span><input type="range" min="0" max="100" value={selectedElement.opacity} onChange={(e) => updateElement(selectedId, { opacity: parseInt(e.target.value) })} onMouseUp={() => addToHistory(elements)} className="w-24 accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none" /></div>
                  </>
               )}
               <Divider />
-              <div className="flex items-center gap-1"><button onClick={() => moveLayer('up')} className="p-1.5 hover:bg-slate-100 rounded text-slate-500"><ArrowUp className="w-4 h-4" /></button><button onClick={() => moveLayer('down')} className="p-1.5 hover:bg-slate-100 rounded text-slate-500"><ArrowDown className="w-4 h-4" /></button></div>
+              <div className="flex items-center gap-1">
+                 <button onClick={() => moveLayer('up')} className="p-1.5 hover:bg-slate-100 rounded text-slate-500" title="เลื่อนขึ้น">
+                    <ArrowUp className="w-4 h-4" />
+                 </button>
+                 <button onClick={() => moveLayer('down')} className="p-1.5 hover:bg-slate-100 rounded text-slate-500" title="เลื่อนลง">
+                    <ArrowDown className="w-4 h-4" />
+                 </button>
+              </div>
               <Divider />
               <div className="flex items-center gap-1"><button onClick={duplicateElement} className="p-1.5 hover:bg-slate-100 rounded text-slate-500"><Copy className="w-4 h-4" /></button><button onClick={() => deleteElement(selectedId)} className="p-1.5 hover:bg-red-50 rounded text-red-500"><Trash2 className="w-4 h-4" /></button></div>
            </div>
@@ -646,8 +1425,8 @@ export default function DesignerClient() {
            
            {/* Front/Back Toggle */}
            <div className="absolute bottom-6 left-6 bg-white rounded-lg shadow-md border border-slate-200 flex p-1 gap-1 z-30">
-              <button onClick={() => setViewSide('front')} className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${viewSide === 'front' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-50'}`}>Front</button>
-              <button onClick={() => setViewSide('back')} className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${viewSide === 'back' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-50'}`}>Back</button>
+              <button onClick={() => setViewSide('front')} className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${viewSide === 'front' ? 'bg-ci-blue text-white' : 'text-slate-500 hover:bg-slate-50'}`}>ด้านหน้า</button>
+              <button onClick={() => setViewSide('back')} className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${viewSide === 'back' ? 'bg-ci-blue text-white' : 'text-slate-500 hover:bg-slate-50'}`}>ด้านหลัง</button>
            </div>
 
            <div ref={containerRef} className="relative w-[500px] h-[600px] transition-transform duration-200" style={{ transform: `scale(${zoom / 100})` }}>
@@ -672,7 +1451,7 @@ export default function DesignerClient() {
 
               {/* Print Area */}
               <div 
-                className={`absolute transition-all z-10 overflow-visible group/area ${showRulers ? 'opacity-100' : 'opacity-0 hover:opacity-100'}`}
+                className="absolute transition-all z-10 overflow-visible group/area"
                 style={{
                   width: `${printAreaWidthPercent}%`,
                   height: `${(PRINT_AREA_HEIGHT_CM / currentShirtSpec.width) * 100}%`, // Rough aspect ratio estimate for height
@@ -687,12 +1466,12 @@ export default function DesignerClient() {
                  {showRulers && (
                    <>
                      {/* Top Ruler */}
-                     <div className="absolute -top-6 left-0 w-full h-6 border-b border-slate-300 bg-white/80 backdrop-blur flex items-end justify-between text-[8px] text-slate-400 px-1 select-none">
+                     <div className="absolute -top-6 left-0 w-full h-6 border-b border-slate-300/50 flex items-end justify-between text-[8px] text-slate-400 px-1 select-none">
                         <span>0</span>
                         <span className="font-bold text-ci-blue">{PRINT_AREA_WIDTH_CM} {unit}</span>
                      </div>
                      {/* Left Ruler */}
-                     <div className="absolute top-0 -left-6 w-6 h-full border-r border-slate-300 bg-white/80 backdrop-blur flex flex-col items-end justify-between text-[8px] text-slate-400 py-1 select-none">
+                     <div className="absolute top-0 -left-6 w-6 h-full border-r border-slate-300/50 flex flex-col items-end justify-between text-[8px] text-slate-400 py-1 select-none">
                         <span>0</span>
                         <span>{PRINT_AREA_HEIGHT_CM}</span>
                      </div>
@@ -706,90 +1485,264 @@ export default function DesignerClient() {
                    </>
                  )}
 
-                 {elements.filter(el => el.side === viewSide).map((el) => (
+                 {/* Snap Guides */}
+                 {snapX !== null && (
+                    <div className="absolute top-0 bottom-0 w-px bg-ci-blue z-50 pointer-events-none" style={{ left: snapX }}></div>
+                 )}
+                 {snapY !== null && (
+                    <div className="absolute left-0 right-0 h-px bg-ci-blue z-50 pointer-events-none" style={{ top: snapY }}></div>
+                 )}
+
+                 {elements.filter(el => el.side === viewSide).map((el, index) => (
                    <div
                      key={el.id}
                      onMouseDown={(e) => handleDragStart(e, el)}
                      onClick={(e) => e.stopPropagation()}
-                     className={`absolute cursor-move select-none group ${selectedId === el.id ? 'z-50' : 'z-20'}`}
-                     style={{ left: el.x, top: el.y, width: el.width, height: el.height }}
+                     className="absolute cursor-move select-none group"
+                     style={{ left: el.x, top: el.y, width: el.width, height: el.height, zIndex: 10 + index }}
                    >
-                     {/* Measurement Labels (Show when selected or hovering) */}
-                     {showRulers && (selectedId === el.id || isResizing) && (
-                       <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap z-50 shadow-sm pointer-events-none">
-                          {(el.width / pixelsPerCm).toFixed(1)} x {(el.height / pixelsPerCm).toFixed(1)} {unit}
-                       </div>
-                     )}
-
                      {/* Content */}
-                     <div className={`relative w-full h-full ${selectedId === el.id ? 'ring-2 ring-ci-blue ring-offset-2' : 'hover:ring-1 hover:ring-ci-blue/30'}`}>
+                     <div className={`relative w-full h-full ${selectedId === el.id && !editingId ? '' : !editingId ? 'hover:ring-1 hover:ring-ci-blue/30' : ''}`}
+                          onDoubleClick={(e) => { e.stopPropagation(); handleTextEditStart(el); }}
+                     >
                         {el.type === 'text' && (
-                          <div style={{ fontSize: el.fontSize, color: el.color, fontFamily: el.fontFamily, fontWeight: el.fontWeight, fontStyle: el.fontStyle, textDecoration: el.textDecoration, opacity: el.opacity / 100, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: el.textAlign, whiteSpace: 'nowrap' }}>{el.content}</div>
+                          editingId === el.id ? (
+                            <textarea
+                                ref={textAreaRef}
+                                value={tempText}
+                                onChange={handleTextChange}
+                                onBlur={handleTextEditEnd}
+                                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleTextEditEnd(); }}}
+                                style={{
+                                    fontSize: el.fontSize,
+                                    color: el.color,
+                                    fontFamily: el.fontFamily,
+                                    fontWeight: el.fontWeight,
+                                    fontStyle: el.fontStyle,
+                                    textDecoration: el.textDecoration,
+                                    textAlign: el.textAlign,
+                                    lineHeight: 1,
+                                    padding: '0 5px',
+                                    width: '100%',
+                                    height: '100%',
+                                    resize: 'none',
+                                    border: 'none',
+                                    outline: 'none',
+                                    background: 'transparent',
+                                    overflow: 'hidden',
+                                    whiteSpace: 'pre'
+                                }}
+                            />
+                          ) : (
+                            el.curveType && el.curveType !== 'none' ? (
+                               <svg width="100%" height="100%" viewBox={`0 0 ${el.width} ${el.height}`} style={{ overflow: 'visible' }}>
+                                   <defs>
+                                       <path id={`curve-${el.id}`} d={
+                                           el.curveType === 'circle' 
+                                            ? (() => {
+                                                return `M 0,${el.height/2} a ${el.width/2},${el.height/2} 0 1,1 ${el.width},0 a ${el.width/2},${el.height/2} 0 1,1 -${el.width},0`;
+                                            })()
+                                            : el.curveType === 'arc'
+                                            ? (() => {
+                                                const strength = el.curveStrength ?? 50;
+                                                const bendY = el.height - ((strength / 50) * (el.height * 1.5));
+                                                return `M 0,${el.height} Q ${el.width/2},${bendY} ${el.width},${el.height}`;
+                                            })()
+                                            : (() => {
+                                                const strength = el.curveStrength ?? 50;
+                                                const amplitude = (strength / 50) * (el.height / 2);
+                                                return `M 0,${el.height/2} Q ${el.width/4},${(el.height/2) - amplitude} ${el.width/2},${el.height/2} T ${el.width},${el.height/2}`;
+                                            })()
+                                       } />
+                                   </defs>
+                                   <text 
+                                       fontSize={el.fontSize}
+                                       fontFamily={el.fontFamily}
+                                       fontWeight={el.fontWeight}
+                                       fontStyle={el.fontStyle}
+                                       fill={el.color}
+                                       opacity={el.opacity / 100}
+                                       dominantBaseline="middle"
+                                       textAnchor="middle"
+                                       style={
+                                           el.effectType === 'shadow' ? { textShadow: '3px 3px 0px rgba(0,0,0,0.2)' } :
+                                           el.effectType === 'lift' ? { textShadow: '0px 5px 10px rgba(0,0,0,0.3)' } :
+                                           el.effectType === 'outline' ? { paintOrder: 'stroke', stroke: '#1e293b', strokeWidth: '2px', strokeLinejoin: 'round' } :
+                                           el.effectType === 'hollow' ? { paintOrder: 'stroke', stroke: '#1e293b', strokeWidth: '1px', fill: 'transparent' } :
+                                           el.effectType === 'splice' ? { paintOrder: 'stroke', stroke: '#1e293b', strokeWidth: '1px', fill: 'transparent', filter: 'drop-shadow(2px 2px 0px #cbd5e1)' } :
+                                           el.effectType === 'echo' ? { textShadow: '2px 2px 0px rgba(0,0,0,0.1), 4px 4px 0px rgba(0,0,0,0.1)' } :
+                                           el.effectType === 'glitch' ? { textShadow: '2px 0px #ef4444, -2px 0px #3b82f6' } :
+                                           el.effectType === 'neon' ? { textShadow: '0 0 10px #e879f9, 0 0 20px #e879f9', fill: '#fce7f3' } :
+                                           {}
+                                       }
+                                   >
+                                       <textPath href={`#curve-${el.id}`} startOffset="50%">
+                                           {el.content}
+                                       </textPath>
+                                   </text>
+                               </svg>
+                            ) : (
+                                <div style={{ 
+                                    fontSize: el.fontSize, 
+                                    color: el.color, 
+                                    fontFamily: el.fontFamily, 
+                                    fontWeight: el.fontWeight, 
+                                    fontStyle: el.fontStyle, 
+                                    textDecoration: el.textDecoration, 
+                                    opacity: el.opacity / 100, 
+                                    width: '100%', 
+                                    height: '100%', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: el.textAlign,
+                                    whiteSpace: 'pre',
+                                    overflow: 'hidden',
+                                    lineHeight: 1,
+                                    padding: el.effectType === 'background' ? '0 10px' : '0 5px',
+                                    
+                                    // Effect Styles
+                                    ...(el.effectType === 'shadow' ? { textShadow: '3px 3px 0px rgba(0,0,0,0.2)' } : {}),
+                                    ...(el.effectType === 'lift' ? { textShadow: '0px 5px 10px rgba(0,0,0,0.3)' } : {}),
+                                    ...(el.effectType === 'hollow' ? { WebkitTextStroke: '1px #1e293b', color: 'transparent' } : {}),
+                                    ...(el.effectType === 'splice' ? { WebkitTextStroke: '1px #1e293b', color: 'transparent', textShadow: '2px 2px 0px #cbd5e1' } : {}),
+                                    ...(el.effectType === 'outline' ? { WebkitTextStroke: '2px #1e293b', color: 'transparent', fontWeight: 'bold' } : {}),
+                                    ...(el.effectType === 'echo' ? { textShadow: '2px 2px 0px rgba(0,0,0,0.1), 4px 4px 0px rgba(0,0,0,0.1)' } : {}),
+                                    ...(el.effectType === 'glitch' ? { textShadow: '2px 0px #ef4444, -2px 0px #3b82f6' } : {}),
+                                    ...(el.effectType === 'neon' ? { textShadow: '0 0 10px #e879f9, 0 0 20px #e879f9', color: '#fce7f3' } : {}),
+                                    ...(el.effectType === 'background' ? { backgroundColor: '#fcd34d', color: '#000', borderRadius: '4px' } : {}),
+                                }}>
+                                    {el.content}
+                                </div>
+                            )
+                          )
                         )}
                         {el.type === 'sticker' && (
                            <div style={{ fontSize: el.fontSize, opacity: el.opacity / 100, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{el.content}</div>
                         )}
+                        {el.type === 'icon' && AVAILABLE_ICONS[el.content] && (
+                           <div style={{ color: el.color, opacity: el.opacity / 100, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              {(() => {
+                                const Icon = AVAILABLE_ICONS[el.content];
+                                return <Icon className="w-full h-full" strokeWidth={1.5} />;
+                              })()}
+                           </div>
+                        )}
                         {el.type === 'image' && (
-                          <img src={el.content} className="w-full h-full object-contain" style={{ opacity: el.opacity / 100, filter: `brightness(${el.brightness}%) contrast(${el.contrast}%) grayscale(${el.grayscale}%)` }} draggable={false} />
+                          <img src={el.content} className="w-full h-full object-cover" style={{ opacity: el.opacity / 100, filter: `brightness(${el.brightness}%) contrast(${el.contrast}%) grayscale(${el.grayscale}%)` }} draggable={false} />
                         )}
                         {el.type === 'shape' && (
                           <div className={`w-full h-full ${el.content === 'circle' ? 'rounded-full' : el.content === 'triangle' ? 'clip-triangle' : 'rounded-lg'}`} style={{ backgroundColor: el.backgroundColor || el.color, opacity: el.opacity / 100 }} />
                         )}
-                        
-                        {/* Resize Handle (Bottom Right) - Only show when selected */}
-                        {selectedId === el.id && (
-                          <>
-                            {/* Corner Indicators for Real Scale Feel */}
-                            <div className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-ci-blue"></div>
-                            <div className="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-ci-blue"></div>
-                            <div className="absolute -bottom-1 -left-1 w-2 h-2 border-b-2 border-l-2 border-ci-blue"></div>
-                            
-                            <div 
-                              className="absolute -bottom-2 -right-2 w-5 h-5 bg-white border-2 border-ci-blue rounded-full cursor-se-resize z-50 shadow-sm flex items-center justify-center"
-                              onMouseDown={(e) => handleResizeStart(e, el)}
-                            >
-                               <Maximize2 className="w-2 h-2 text-ci-blue" />
-                            </div>
-                          </>
-                        )}
                      </div>
                    </div>
                  ))}
+
+                 {/* Selection Overlay (Always on top) */}
+                 {selectedElement && selectedElement.side === viewSide && (
+                    <div 
+                        className="absolute pointer-events-none z-[100]"
+                        style={{ left: selectedElement.x, top: selectedElement.y, width: selectedElement.width, height: selectedElement.height }}
+                    >
+                         {/* Measurement Labels */}
+                         {showRulers && (isResizing || selectedId) && (
+                           <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-ci-blue text-white text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap z-50 shadow-sm pointer-events-none">
+                              {(selectedElement.width / pixelsPerCm).toFixed(1)} x {(selectedElement.height / pixelsPerCm).toFixed(1)} {unit === 'cm' ? 'ซม.' : 'นิ้ว'}
+                            </div>
+                         )}
+                         
+                         {/* Bounding Box Lines (Blue) */}
+                         <div className="absolute -top-[1px] -left-[1px] -right-[1px] -bottom-[1px] border border-ci-blue pointer-events-none"></div>
+
+                         {/* Corner Handles */}
+                         <div 
+                           className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border border-ci-blue rounded-full cursor-nw-resize z-50 shadow-sm hover:scale-125 transition-transform pointer-events-auto"
+                           onMouseDown={(e) => handleResizeStart(e, selectedElement, 'nw')} 
+                         ></div>
+                         <div 
+                           className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border border-ci-blue rounded-full cursor-ne-resize z-50 shadow-sm hover:scale-125 transition-transform pointer-events-auto"
+                           onMouseDown={(e) => handleResizeStart(e, selectedElement, 'ne')}
+                         ></div>
+                         <div 
+                           className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border border-ci-blue rounded-full cursor-sw-resize z-50 shadow-sm hover:scale-125 transition-transform pointer-events-auto"
+                           onMouseDown={(e) => handleResizeStart(e, selectedElement, 'sw')}
+                         ></div>
+                         <div 
+                           className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border border-ci-blue rounded-full cursor-se-resize z-50 shadow-sm hover:scale-125 transition-transform pointer-events-auto"
+                           onMouseDown={(e) => handleResizeStart(e, selectedElement, 'se')}
+                         ></div>
+
+                         {/* Side Handles */}
+                         <div className="absolute top-1/2 -left-[5px] -translate-y-1/2 w-2.5 h-5 bg-white border border-ci-blue rounded-full cursor-w-resize z-50 shadow-sm hover:scale-y-125 transition-transform pointer-events-auto" onMouseDown={(e) => handleResizeStart(e, selectedElement, 'w')}></div>
+                         <div className="absolute top-1/2 -right-[5px] -translate-y-1/2 w-2.5 h-5 bg-white border border-ci-blue rounded-full cursor-e-resize z-50 shadow-sm hover:scale-y-125 transition-transform pointer-events-auto" onMouseDown={(e) => handleResizeStart(e, selectedElement, 'e')}></div>
+                         
+                         {selectedElement.type !== 'text' && (
+                           <>
+                             <div className="absolute -top-[5px] left-1/2 -translate-x-1/2 w-5 h-2.5 bg-white border border-ci-blue rounded-full cursor-n-resize z-50 shadow-sm hover:scale-x-125 transition-transform pointer-events-auto" onMouseDown={(e) => handleResizeStart(e, selectedElement, 'n')}></div>
+                             <div className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-5 h-2.5 bg-white border border-ci-blue rounded-full cursor-s-resize z-50 shadow-sm hover:scale-x-125 transition-transform pointer-events-auto" onMouseDown={(e) => handleResizeStart(e, selectedElement, 's')}></div>
+                          </>
+                        )}
+                         
+                         {/* Rotate Handle */}
+                         <div 
+                             className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-6 h-6 bg-white border border-slate-300 rounded-full flex items-center justify-center cursor-move shadow-sm hover:bg-slate-50 z-50 pointer-events-auto"
+                             onMouseDown={(e) => handleDragStart(e, selectedElement)}
+                         >
+                            <Move className="w-3 h-3 text-slate-500" />
+                     </div>
+                   </div>
+                 )}
               </div>
            </div>
 
            {/* Zoom Control */}
            <div className="absolute bottom-6 right-6 bg-white rounded-lg shadow-md border border-slate-200 flex items-center p-1 gap-2 z-50">
-              <button onClick={() => setZoom(z => Math.max(50, z - 10))} className="p-1 hover:bg-slate-100 rounded"><ZoomOut className="w-4 h-4" /></button>
-              <span className="text-xs font-bold w-8 text-center">{zoom}%</span>
-              <button onClick={() => setZoom(z => Math.min(150, z + 10))} className="p-1 hover:bg-slate-100 rounded"><ZoomIn className="w-4 h-4" /></button>
+              <button onClick={() => setZoom(z => Math.max(50, z - 10))} className="p-1 hover:bg-slate-100 rounded text-slate-500 hover:text-ci-blue"><ZoomOut className="w-4 h-4" /></button>
+              <span className="text-xs font-bold w-8 text-center text-slate-700">{zoom}%</span>
+              <button onClick={() => setZoom(z => Math.min(150, z + 10))} className="p-1 hover:bg-slate-100 rounded text-slate-500 hover:text-ci-blue"><ZoomIn className="w-4 h-4" /></button>
            </div>
 
            {/* View Controls (Top Right) */}
-           <div className="absolute top-6 right-6 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col p-3 gap-3 z-50 min-w-[180px]">
+           <div className={`absolute top-6 right-6 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col z-50 transition-all duration-200 ${showControls ? 'w-[220px] p-3' : 'w-10 h-10 p-0 items-center justify-center overflow-hidden'}`}>
+              
+              {!showControls && (
+                  <button onClick={() => setShowControls(true)} className="w-full h-full flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-xl" title="Show View Options">
+                     <SlidersHorizontal className="w-5 h-5" />
+                  </button>
+              )}
+
+              <div className={`space-y-2 ${showControls ? 'opacity-100' : 'opacity-0 hidden'}`}>
+                  <div className="flex items-center justify-between">
+                       <span className="text-xs font-bold text-slate-800">ตัวเลือกมุมมอง</span>
+                       <button onClick={() => setShowControls(false)} className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600">
+                          <ChevronUp className="w-4 h-4" />
+                       </button>
+                  </div>
+                  
+                  <div className="h-px w-full bg-slate-100" />
+
               {/* Price Details */}
               <div className="space-y-1.5">
-                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Price Breakdown</span>
+                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">สรุปราคา</span>
                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-500">Shirt ({shirtSize})</span>
+                        <span className="text-slate-500">เสื้อ ({shirtSize})</span>
                     <span className="font-medium text-slate-900">฿{shirtBasePrice}</span>
                  </div>
                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-500">Screening</span>
+                        <span className="text-slate-500">ค่าสกรีน</span>
                     <span className="font-medium text-slate-900">+{printingPrice}</span>
                  </div>
               </div>
               <div className="h-px w-full bg-slate-100" />
 
               {/* Size Preview */}
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Preview Size</span>
-                <div className="flex bg-slate-100 rounded-lg p-0.5">
-                  {['S', 'M', 'XL'].map(s => (
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">ดูไซส์อื่น</span>
+                    <div className="grid grid-cols-5 gap-1">
+                      {SIZES.map(s => (
                     <button 
                       key={s}
                       onClick={() => setShirtSize(s)}
-                      className={`w-6 h-6 flex items-center justify-center rounded-md text-[10px] font-bold transition-all ${shirtSize === s ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                          className={`h-7 flex items-center justify-center rounded-md text-[10px] font-bold transition-all ${shirtSize === s ? 'bg-ci-blue text-white shadow-sm' : 'bg-slate-100 text-slate-400 hover:bg-blue-50 hover:text-ci-blue'}`}
                     >
                       {s}
                     </button>
@@ -799,7 +1752,7 @@ export default function DesignerClient() {
               <div className="h-px w-full bg-slate-100" />
               {/* Real Scale Toggle */}
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Real Scale</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">ขนาดจริง</span>
                 <button 
                   onClick={() => setShowRulers(!showRulers)} 
                   className={`w-8 h-5 rounded-full transition-colors relative ${showRulers ? 'bg-ci-blue' : 'bg-slate-200'}`}
@@ -810,15 +1763,17 @@ export default function DesignerClient() {
               {/* Unit Toggle */}
               {showRulers && (
                 <div className="flex items-center justify-between gap-2 animate-in slide-in-from-top-1 fade-in duration-200">
-                   <span className="text-[10px] font-bold text-slate-400 uppercase">Unit</span>
+                       <span className="text-[10px] font-bold text-slate-400 uppercase">หน่วย</span>
                    <button onClick={() => setUnit(u => u === 'cm' ? 'in' : 'cm')} className="px-2 py-1 rounded bg-slate-100 text-[10px] font-bold text-slate-600 hover:bg-slate-200 min-w-[2rem]">
-                      {unit}
+                          {unit === 'cm' ? 'ซม.' : 'นิ้ว'}
                    </button>
                 </div>
               )}
+              </div>
            </div>
         </div>
       </div>
     </div>
   );
 }
+
