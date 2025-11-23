@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Search, Filter, Grid3x3, List, Edit2, Trash2, Copy, Eye, MoreHorizontal, Plus, Calendar, SlidersHorizontal, CheckCircle2, Clock, AlertCircle, ShoppingCart, Package, PenTool } from 'lucide-react';
+import { Search, Filter, Grid3x3, List, Edit2, Trash2, Copy, Eye, MoreHorizontal, Plus, Calendar, SlidersHorizontal, CheckCircle2, Clock, AlertCircle, ShoppingCart, Package, PenTool, Globe, Lock, MoreVertical } from 'lucide-react';
 
 export default function TemplatesPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeDropdown, setActiveDropdown] = useState<number | string | null>(null);
 
   const statuses = [
     { id: 'all', name: 'ทั้งหมด', count: 12 },
@@ -16,82 +17,123 @@ export default function TemplatesPage() {
     { id: 'private', name: 'ส่วนตัว', count: 1 },
   ];
 
-  const myTemplates = [
-    {
-      id: 1,
-      name: 'My Cool Summer T-Shirt',
-      productType: 'Gildan Premium Cotton',
-      updatedAt: '2 นาทีที่แล้ว',
-      status: 'draft',
-      price: 450,
-      cost: 210,
-      profit: 240,
-      image: 'bg-blue-50',
-      variants: 4
-    },
-    {
-      id: 2,
-      name: 'Minimalist Logo Hoodie',
-      productType: 'Premium Pullover Hoodie',
-      updatedAt: '2 ชั่วโมงที่แล้ว',
-      status: 'published',
-      price: 890,
-      cost: 450,
-      profit: 440,
-      image: 'bg-slate-100',
-      variants: 6
-    },
-    {
-      id: 3,
-      name: 'Staff Uniform 2024',
-      productType: 'Polo Shirt',
-      updatedAt: '1 วันที่แล้ว',
-      status: 'private',
-      price: 350,
-      cost: 280,
-      profit: 70,
-      image: 'bg-indigo-50',
-      variants: 2
-    },
-    {
-      id: 4,
-      name: 'Coffee Mug - Cats Lover',
-      productType: 'Ceramic Mug 11oz',
-      updatedAt: '3 วันที่แล้ว',
-      status: 'published',
-      price: 290,
-      cost: 120,
-      profit: 170,
-      image: 'bg-amber-50',
-      variants: 1
-    },
-    {
-      id: 5,
-      name: 'Tote Bag - Save Earth',
-      productType: 'Canvas Tote Bag',
-      updatedAt: '5 วันที่แล้ว',
-      status: 'published',
-      price: 199,
-      cost: 85,
-      profit: 114,
-      image: 'bg-green-50',
-      variants: 1
-    },
-    {
-      id: 6,
-      name: 'Red Typography Tee',
-      productType: 'Anajak Oversized Tee',
-      updatedAt: '1 สัปดาห์ที่แล้ว',
-      status: 'draft',
-      price: 590,
-      cost: 250,
-      profit: 340,
-      image: 'bg-red-50',
-      variants: 3
-    },
-  ];
+  const [templates, setTemplates] = useState<any[]>([]);
 
-  const filteredTemplates = myTemplates.filter(template => {
+  useEffect(() => {
+    const MOCK_TEMPLATES = [
+      {
+        id: 1,
+        name: 'My Cool Summer T-Shirt',
+        productType: 'Gildan Premium Cotton',
+        updatedAt: '2 นาทีที่แล้ว',
+        status: 'draft',
+        price: 450,
+        cost: 210,
+        profit: 240,
+        image: 'bg-blue-50',
+        variants: 4
+      },
+      {
+        id: 2,
+        name: 'Minimalist Logo Hoodie',
+        productType: 'Premium Pullover Hoodie',
+        updatedAt: '2 ชั่วโมงที่แล้ว',
+        status: 'published',
+        price: 890,
+        cost: 450,
+        profit: 440,
+        image: 'bg-slate-100',
+        variants: 6
+      },
+      {
+        id: 3,
+        name: 'Staff Uniform 2024',
+        productType: 'Polo Shirt',
+        updatedAt: '1 วันที่แล้ว',
+        status: 'private',
+        price: 350,
+        cost: 280,
+        profit: 70,
+        image: 'bg-indigo-50',
+        variants: 2
+      },
+      {
+        id: 4,
+        name: 'Coffee Mug - Cats Lover',
+        productType: 'Ceramic Mug 11oz',
+        updatedAt: '3 วันที่แล้ว',
+        status: 'published',
+        price: 290,
+        cost: 120,
+        profit: 170,
+        image: 'bg-amber-50',
+        variants: 1
+      },
+      {
+        id: 5,
+        name: 'Tote Bag - Save Earth',
+        productType: 'Canvas Tote Bag',
+        updatedAt: '5 วันที่แล้ว',
+        status: 'published',
+        price: 199,
+        cost: 85,
+        profit: 114,
+        image: 'bg-green-50',
+        variants: 1
+      },
+      {
+        id: 6,
+        name: 'Red Typography Tee',
+        productType: 'Anajak Oversized Tee',
+        updatedAt: '1 สัปดาห์ที่แล้ว',
+        status: 'draft',
+        price: 590,
+        cost: 250,
+        profit: 340,
+        image: 'bg-red-50',
+        variants: 3
+      }
+    ];
+
+    const saved = localStorage.getItem('anajak_templates');
+    let savedTemplates: any[] = [];
+    if (saved) {
+        try {
+            const parsed = JSON.parse(saved);
+            savedTemplates = parsed.map((item: any) => ({
+                ...item,
+                productType: item.productName || 'Custom Product',
+                updatedAt: 'เมื่อสักครู่',
+                cost: Math.round(item.price * 0.6),
+                profit: Math.round(item.price * 0.4),
+                image: '',
+            }));
+        } catch (e) { console.error(e); }
+    }
+    
+    setTemplates([...savedTemplates, ...MOCK_TEMPLATES]);
+  }, []);
+
+  const handleUpdateStatus = (id: number | string, newStatus: string) => {
+    // 1. Update State
+    const updatedTemplates = templates.map(t => 
+      t.id === id ? { ...t, status: newStatus } : t
+    );
+    setTemplates(updatedTemplates);
+    setActiveDropdown(null);
+
+    // 2. Update LocalStorage
+    const saved = localStorage.getItem('anajak_templates');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const updatedSaved = parsed.map((t: any) => 
+        t.id === id ? { ...t, status: newStatus } : t
+      );
+      localStorage.setItem('anajak_templates', JSON.stringify(updatedSaved));
+    }
+  };
+
+  const filteredTemplates = templates.filter(template => {
     const matchStatus = selectedStatus === 'all' || template.status === selectedStatus;
     const matchSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchStatus && matchSearch;
@@ -234,12 +276,16 @@ export default function TemplatesPage() {
                 className={`group bg-white rounded-[2rem] border border-slate-100 overflow-hidden hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300 flex ${viewMode === 'list' ? 'flex-row items-center p-4 gap-6' : 'flex-col'}`}
               >
                 {/* Image Area */}
-                <div className={`relative overflow-hidden ${viewMode === 'list' ? 'w-48 h-48 rounded-2xl' : 'aspect-square'} ${template.image} flex-shrink-0`}>
-                  <div className="absolute inset-0 flex items-center justify-center text-slate-400/40 p-8 text-center">
-                    <div className="flex flex-col items-center transform group-hover:scale-110 transition-transform duration-500">
-                      <span className="text-4xl mb-2 opacity-50">👕</span>
+                <div className={`relative overflow-hidden ${viewMode === 'list' ? 'w-48 h-48 rounded-2xl' : 'aspect-square'} ${template.image || 'bg-slate-100'} flex-shrink-0`}>
+                  {template.previewImage ? (
+                    <img src={template.previewImage} alt={template.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-slate-400/40 p-8 text-center">
+                      <div className="flex flex-col items-center transform group-hover:scale-110 transition-transform duration-500">
+                        <span className="text-4xl mb-2 opacity-50">👕</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Floating Actions (Hover) */}
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
@@ -274,9 +320,52 @@ export default function TemplatesPage() {
                       </div>
                     )}
                     {viewMode === 'grid' && (
-                      <button className="text-slate-300 hover:text-slate-600 transition-colors">
-                        <MoreHorizontal className="w-5 h-5" />
-                      </button>
+                      <div className="relative">
+                        <button 
+                          onClick={() => setActiveDropdown(activeDropdown === template.id ? null : template.id)}
+                          className="text-slate-300 hover:text-slate-600 transition-colors"
+                        >
+                          <MoreHorizontal className="w-5 h-5" />
+                        </button>
+                        
+                        {/* Dropdown Menu */}
+                        {activeDropdown === template.id && (
+                          <div className="absolute right-0 top-8 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                            <div className="p-1">
+                              <button 
+                                onClick={() => handleUpdateStatus(template.id, 'published')}
+                                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${template.status === 'published' ? 'bg-emerald-50 text-emerald-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                              >
+                                <Globe className="w-4 h-4" />
+                                <span>วางขาย (Public)</span>
+                                {template.status === 'published' && <CheckCircle2 className="w-3 h-3 ml-auto" />}
+                              </button>
+                              <button 
+                                onClick={() => handleUpdateStatus(template.id, 'private')}
+                                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${template.status === 'private' ? 'bg-amber-50 text-amber-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                              >
+                                <Lock className="w-4 h-4" />
+                                <span>ส่วนตัว (Private)</span>
+                                {template.status === 'private' && <CheckCircle2 className="w-3 h-3 ml-auto" />}
+                              </button>
+                              <button 
+                                onClick={() => handleUpdateStatus(template.id, 'draft')}
+                                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${template.status === 'draft' ? 'bg-slate-100 text-slate-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                              >
+                                <Edit2 className="w-4 h-4" />
+                                <span>แบบร่าง (Draft)</span>
+                                {template.status === 'draft' && <CheckCircle2 className="w-3 h-3 ml-auto" />}
+                              </button>
+                            </div>
+                            <div className="border-t border-slate-100 p-1">
+                               <button className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                  <Trash2 className="w-4 h-4" />
+                                  <span>ลบผลงาน</span>
+                               </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
 
@@ -305,19 +394,28 @@ export default function TemplatesPage() {
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
-                      {template.status === 'draft' ? (
+                  <div className="flex gap-2">
+                    {template.status === 'draft' ? (
+                      <>
                         <button className="flex-1 py-2.5 bg-slate-100 text-slate-600 text-sm font-bold rounded-xl hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
                           <Edit2 className="w-4 h-4" />
-                          แก้ไขต่อ
+                          แก้ไข
                         </button>
-                      ) : (
-                        <button className="flex-1 py-2.5 bg-ci-blue text-white text-sm font-bold rounded-xl hover:bg-ci-blueDark shadow-lg shadow-ci-blue/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
-                          <ShoppingCart className="w-4 h-4" />
-                          สั่งผลิตเลย
+                        <button 
+                          onClick={() => handleUpdateStatus(template.id, 'published')}
+                          className="flex-1 py-2.5 bg-emerald-100 text-emerald-700 text-sm font-bold rounded-xl hover:bg-emerald-200 transition-all flex items-center justify-center gap-2"
+                        >
+                          <Globe className="w-4 h-4" />
+                          วางขาย
                         </button>
-                      )}
-                    </div>
+                      </>
+                    ) : (
+                      <button className="flex-1 py-2.5 bg-ci-blue text-white text-sm font-bold rounded-xl hover:bg-ci-blueDark shadow-lg shadow-ci-blue/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                        <ShoppingCart className="w-4 h-4" />
+                        สั่งผลิตเลย
+                      </button>
+                    )}
+                  </div>
                   </div>
                 </div>
               </div>

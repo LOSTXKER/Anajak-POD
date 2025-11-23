@@ -8,6 +8,7 @@ import {
   Upload,
   Shapes, 
   Shirt,
+  Save,
   Undo2, 
   Redo2, 
   ZoomIn, 
@@ -46,10 +47,15 @@ import {
   AlignLeft,
   AlignCenter,
   AlignRight,
+  X,
+  Store,
+  FileEdit,
+  Edit2,
   Heart, Star, Zap, Ghost, Flame, Sun, Moon, Cloud, Music, Camera, Video, Mic, Headphones, MapPin, Globe, Anchor, Compass, Feather, Key, Lock, Bell, Tag, Flag, Award, Gift, Trophy, Crown, Diamond, Skull, Rocket, Plane, Car, Bike, Leaf, Flower, TreeDeciduous, Snowflake, Droplets, Umbrella, Glasses, Watch,   Shirt as ShirtIcon, Scissors,
   Spline
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 // Constants
 const FONTS = [
@@ -129,13 +135,23 @@ interface DesignElement {
   curveType?: 'none' | 'circle' | 'arc' | 'wave';
   curveStrength?: number;
   effectType?: 'none' | 'shadow' | 'lift' | 'hollow' | 'splice' | 'outline' | 'echo' | 'glitch' | 'neon' | 'background';
+  effectColor?: string;
+  effectOffset?: number;
+  effectBlur?: number;
+  effectWidth?: number;
+  effectDirection?: number;
+  effectOpacity?: number;
 }
 
 export default function DesignerClient() {
+  const router = useRouter();
   // UI State
   const [activeTool, setActiveTool] = useState<'product' | 'text' | 'uploads' | 'elements' | 'layers' | 'ai' | 'library' | 'text-effects' | null>('text');
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [shirtColor, setShirtColor] = useState('#ffffff');
+  const [availableColors, setAvailableColors] = useState<string[]>(['#ffffff']); // Selected colors for the product
   const [shirtSize, setShirtSize] = useState('M'); // Preview size
   const [selectedSizes, setSelectedSizes] = useState<string[]>(['S', 'M', 'L', 'XL']);
   const [technique, setTechnique] = useState<'printing' | 'embroidery'>('printing');
@@ -158,13 +174,52 @@ export default function DesignerClient() {
   const [resizeHandle, setResizeHandle] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [tempText, setTempText] = useState('');
+  const [currentCartId, setCurrentCartId] = useState<string | null>(null); // ID of the cart item being edited
   
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    // Check if we are editing an existing cart item
+    const editItemId = localStorage.getItem('anajak_edit_item_id');
+    if (editItemId) {
+        const savedCart = localStorage.getItem('anajak_cart');
+        if (savedCart) {
+            try {
+                const cartItems = JSON.parse(savedCart);
+                const itemToEdit = cartItems.find((item: any) => item.id === editItemId);
+                if (itemToEdit) {
+                    setCurrentCartId(itemToEdit.id);
+                    setShirtColor(itemToEdit.color);
+                    setShirtSize(itemToEdit.size);
+                    setTechnique(itemToEdit.technique);
+                    if (itemToEdit.elements) {
+                        setElements(itemToEdit.elements);
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load item to edit', e);
+            }
+        }
+        // Clear the flag so refreshing doesn't reload it if we navigate away and back
+        localStorage.removeItem('anajak_edit_item_id');
+    }
+  }, []);
 
   // History State
   const [history, setHistory] = useState<DesignElement[][]>([[]]);
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
   
+  const toggleColorSelection = (color: string) => {
+    setShirtColor(color); // Always preview the clicked color
+    setAvailableColors(prev => {
+      if (prev.includes(color)) {
+         if (prev.length === 1) return prev; // Prevent deselecting the last color
+         return prev.filter(c => c !== color);
+      }
+      return [...prev, color];
+    });
+  };
+
   // Pricing Config
   const BASE_PRICE = 290;
   const SIZE_SURCHARGES: Record<string, number> = {
@@ -729,6 +784,74 @@ export default function DesignerClient() {
 
   const Divider = () => <div className="h-6 w-px bg-slate-200 mx-1"></div>;
 
+  const handleSaveClick = () => {
+    setShowReviewModal(true);
+  };
+
+  const handleFinalSave = (action: 'template' | 'cart') => {
+    // Common Item Data
+    const itemData = {
+      id: currentCartId || crypto.randomUUID(),
+      name: 'เสื้อยืด Cotton พรีเมียม', // Should be dynamic based on product
+      color: shirtColor,
+      colorName: COLORS.find(c => c.value === shirtColor)?.name || 'Custom',
+      availableColors: availableColors, // Save selected colors
+      size: shirtSize,
+      availableSizes: selectedSizes, // Save selected sizes
+      technique: technique,
+      price: currentPrice,
+      previewImage: viewSide === 'front' ? MOCKUP_IMAGES.front : MOCKUP_IMAGES.back,
+      elements: elements,
+      updatedAt: new Date().toISOString(),
+      variants: 1,
+      profit: 0 // Default profit
+    };
+
+    if (action === 'cart') {
+      // 1. Add to Cart
+      const cartItem = {
+        ...itemData,
+        quantity: 1,
+        timestamp: Date.now()
+      };
+
+      const existingCart = localStorage.getItem('anajak_cart');
+      let cart = existingCart ? JSON.parse(existingCart) : [];
+      
+      if (currentCartId) {
+          cart = cart.map((item: any) => item.id === currentCartId ? { ...cartItem, quantity: item.quantity } : item);
+      } else {
+          cart.push(cartItem);
+      }
+      
+      localStorage.setItem('anajak_cart', JSON.stringify(cart));
+      router.push('/cart');
+
+    } else {
+      // 2. Save as Template
+      const templateItem = {
+        ...itemData,
+        productName: itemData.name,
+        status: 'draft' // Default status is always draft now
+      };
+
+      const existingTemplates = localStorage.getItem('anajak_templates');
+      let templates = existingTemplates ? JSON.parse(existingTemplates) : [];
+      
+      const existingIndex = templates.findIndex((t: any) => t.id === templateItem.id);
+      if (existingIndex >= 0) {
+          templates[existingIndex] = templateItem;
+      } else {
+          templates.push(templateItem);
+      }
+      
+      localStorage.setItem('anajak_templates', JSON.stringify(templates));
+      router.push('/templates');
+    }
+    
+    setShowReviewModal(false);
+  };
+
   return (
     <div className="flex h-screen bg-slate-50/50 overflow-hidden font-sans text-slate-800">
       
@@ -788,8 +911,15 @@ export default function DesignerClient() {
                          key={effect.id}
                          onClick={() => updateElementWithHistory(selectedId, { 
                             effectType: effect.id as any,
-                            color: effect.id === 'neon' ? '#ec4899' : 
-                                   effect.id === 'background' ? '#fcd34d' : selectedElement?.color,
+                            effectColor: effect.id === 'neon' ? '#ec4899' : 
+                                   effect.id === 'background' ? '#fcd34d' : 
+                                   effect.id === 'shadow' ? '#000000' :
+                                   selectedElement?.color,
+                            effectOffset: effect.id === 'shadow' ? 4 : 2,
+                            effectBlur: effect.id === 'neon' ? 10 : effect.id === 'lift' ? 8 : 0,
+                            effectWidth: effect.id === 'outline' ? 2 : 1,
+                            effectOpacity: 100,
+                            effectDirection: 45,
                             backgroundColor: effect.id === 'background' ? '#fcd34d' : 'transparent'
                          })}
                          className={`flex items-center gap-3 p-3 rounded-xl border transition-all group text-left relative overflow-hidden ${selectedElement?.effectType === effect.id || (!selectedElement?.effectType && effect.id === 'none') ? 'border-ci-blue bg-blue-50/50 ring-1 ring-ci-blue' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}
@@ -805,6 +935,144 @@ export default function DesignerClient() {
                        </button>
                      ))}
                   </div>
+
+                  {/* Effect Settings */}
+                  {selectedElement?.effectType && selectedElement.effectType !== 'none' && (
+                    <div className="mt-4 space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <div className="flex items-center justify-between mb-2">
+                           <h4 className="text-xs font-bold text-slate-800">ปรับแต่งเอฟเฟกต์</h4>
+                        </div>
+
+                        {/* Color Picker */}
+                        {(['shadow', 'outline', 'neon', 'background', 'echo', 'hollow', 'splice', 'glitch'].includes(selectedElement.effectType)) && (
+                            <div className="space-y-2">
+                                <div className="flex justify-between">
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase">สีเอฟเฟกต์</label>
+                                    <div className="w-4 h-4 rounded border border-slate-200" style={{ backgroundColor: selectedElement.effectColor || '#000' }} />
+                                </div>
+                                <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                                    {[selectedElement.color, '#000000', '#ffffff', '#1e3a8a', '#dc2626', '#ea580c', '#eab308', '#16a34a', '#38bdf8', '#ec4899', '#7e22ce'].map((c, i) => (
+                                        <button 
+                                            key={i}
+                                            onClick={() => updateElementWithHistory(selectedId, { effectColor: c })}
+                                            className={`w-6 h-6 rounded-full border border-slate-200 flex-shrink-0 ${selectedElement.effectColor === c ? 'ring-2 ring-offset-1 ring-ci-blue' : ''}`}
+                                            style={{ backgroundColor: c }}
+                                        />
+                                    ))}
+                                    <input 
+                                        type="color" 
+                                        value={selectedElement.effectColor || '#000000'}
+                                        onChange={(e) => updateElement(selectedId, { effectColor: e.target.value })}
+                                        onBlur={() => addToHistory(elements)}
+                                        className="w-6 h-6 rounded-full border-0 p-0 overflow-hidden flex-shrink-0 cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Distance / Offset */}
+                        {['shadow', 'lift', 'echo', 'glitch'].includes(selectedElement.effectType) && (
+                           <div className="space-y-1">
+                              <div className="flex justify-between">
+                                 <label className="text-[10px] font-bold text-slate-500 uppercase">ระยะห่าง</label>
+                                 <span className="text-[10px] text-slate-400">{selectedElement.effectOffset ?? 0}</span>
+                              </div>
+                              <input 
+                                type="range" min="0" max="50" 
+                                value={selectedElement.effectOffset ?? 4} 
+                                onChange={(e) => updateElement(selectedId, { effectOffset: parseInt(e.target.value) })}
+                                onMouseUp={() => addToHistory(elements)}
+                                className="w-full accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none"
+                              />
+                           </div>
+                        )}
+
+                        {/* Direction */}
+                        {['shadow', 'echo'].includes(selectedElement.effectType) && (
+                           <div className="space-y-1">
+                              <div className="flex justify-between">
+                                 <label className="text-[10px] font-bold text-slate-500 uppercase">ทิศทาง</label>
+                                 <span className="text-[10px] text-slate-400">{selectedElement.effectDirection ?? 45}°</span>
+                              </div>
+                              <input 
+                                type="range" min="0" max="360" 
+                                value={selectedElement.effectDirection ?? 45} 
+                                onChange={(e) => updateElement(selectedId, { effectDirection: parseInt(e.target.value) })}
+                                onMouseUp={() => addToHistory(elements)}
+                                className="w-full accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none"
+                              />
+                           </div>
+                        )}
+
+                        {/* Blur */}
+                        {['shadow', 'lift', 'neon'].includes(selectedElement.effectType) && (
+                           <div className="space-y-1">
+                              <div className="flex justify-between">
+                                 <label className="text-[10px] font-bold text-slate-500 uppercase">ความฟุ้ง</label>
+                                 <span className="text-[10px] text-slate-400">{selectedElement.effectBlur ?? 0}</span>
+                              </div>
+                              <input 
+                                type="range" min="0" max="50" 
+                                value={selectedElement.effectBlur ?? 0} 
+                                onChange={(e) => updateElement(selectedId, { effectBlur: parseInt(e.target.value) })}
+                                onMouseUp={() => addToHistory(elements)}
+                                className="w-full accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none"
+                              />
+                           </div>
+                        )}
+
+                        {/* Width / Thickness */}
+                        {['outline', 'hollow', 'splice'].includes(selectedElement.effectType) && (
+                           <div className="space-y-1">
+                              <div className="flex justify-between">
+                                 <label className="text-[10px] font-bold text-slate-500 uppercase">ความหนาเส้น</label>
+                                 <span className="text-[10px] text-slate-400">{selectedElement.effectWidth ?? 1}px</span>
+                              </div>
+                              <input 
+                                type="range" min="0" max="10" step="0.5"
+                                value={selectedElement.effectWidth ?? 1} 
+                                onChange={(e) => updateElement(selectedId, { effectWidth: parseFloat(e.target.value) })}
+                                onMouseUp={() => addToHistory(elements)}
+                                className="w-full accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none"
+                              />
+                           </div>
+                        )}
+                        
+                        {/* Padding - for Background */}
+                        {['background'].includes(selectedElement.effectType) && (
+                           <div className="space-y-1">
+                              <div className="flex justify-between">
+                                 <label className="text-[10px] font-bold text-slate-500 uppercase">ขนาดพื้นหลัง</label>
+                                 <span className="text-[10px] text-slate-400">{selectedElement.effectWidth ?? 4}</span>
+                              </div>
+                              <input 
+                                type="range" min="0" max="20" 
+                                value={selectedElement.effectWidth ?? 4} 
+                                onChange={(e) => updateElement(selectedId, { effectWidth: parseInt(e.target.value) })}
+                                onMouseUp={() => addToHistory(elements)}
+                                className="w-full accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none"
+                              />
+                           </div>
+                        )}
+                        
+                         {/* Roundness - for Background */}
+                        {['background'].includes(selectedElement.effectType) && (
+                           <div className="space-y-1">
+                              <div className="flex justify-between">
+                                 <label className="text-[10px] font-bold text-slate-500 uppercase">ความมน</label>
+                                 <span className="text-[10px] text-slate-400">{selectedElement.effectBlur ?? 4}</span>
+                              </div>
+                              <input 
+                                type="range" min="0" max="20" 
+                                value={selectedElement.effectBlur ?? 4} 
+                                onChange={(e) => updateElement(selectedId, { effectBlur: parseInt(e.target.value) })}
+                                onMouseUp={() => addToHistory(elements)}
+                                className="w-full accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none"
+                              />
+                           </div>
+                        )}
+                    </div>
+                  )}
                </div>
 
                <div className="h-px w-full bg-slate-100" />
@@ -838,29 +1106,50 @@ export default function DesignerClient() {
 
                   {/* Curve Settings */}
                   {(selectedElement?.curveType === 'arc' || selectedElement?.curveType === 'circle' || selectedElement?.curveType === 'wave') && (
-                     <div className="mt-6 space-y-3 animate-in slide-in-from-top-2 fade-in duration-300 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                        <div className="flex justify-between items-center">
-                           <span className="text-xs font-bold text-slate-500">ระดับความโค้ง</span>
-                           <span className="text-xs font-bold text-ci-blue bg-blue-50 px-2 py-0.5 rounded">{selectedElement.curveStrength ?? 50}%</span>
-                        </div>
-                        <div className="relative h-6 flex items-center">
-                           <div className="absolute left-0 right-0 h-1 bg-slate-100 rounded-full"></div>
+                     <div className="mt-4 space-y-3 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                        {selectedElement.curveType !== 'circle' && (
+                           <>
+                              <div className="flex justify-between items-center">
+                                 <span className="text-xs font-bold text-slate-500">ระดับความโค้ง</span>
+                                 <span className="text-xs font-bold text-ci-blue bg-blue-50 px-2 py-0.5 rounded">{selectedElement.curveStrength ?? 50}%</span>
+                              </div>
+                              <div className="relative h-6 flex items-center">
+                                 <div className="absolute left-0 right-0 h-1 bg-slate-100 rounded-full"></div>
+                                 <input 
+                                    type="range" 
+                                    min="0" 
+                                    max="100" 
+                                    value={selectedElement.curveStrength ?? 50} 
+                                    onChange={(e) => updateElement(selectedId, { curveStrength: parseInt(e.target.value) })} 
+                                    onMouseUp={() => addToHistory(elements)}
+                                    className="w-full absolute inset-0 opacity-0 cursor-pointer z-10" 
+                                 />
+                                 <div 
+                                    className="absolute h-4 w-4 bg-white border-2 border-ci-blue rounded-full shadow-sm pointer-events-none transition-all"
+                                    style={{ left: `calc(${selectedElement.curveStrength ?? 50}% - 8px)` }}
+                                 />
+                                 <div 
+                                    className="absolute left-0 h-1 bg-ci-blue rounded-l-full pointer-events-none"
+                                    style={{ width: `${selectedElement.curveStrength ?? 50}%` }}
+                                 />
+                              </div>
+                           </>
+                        )}
+                        
+                        {/* Diameter / Width Control for all curve types */}
+                        <div className="pt-2 border-t border-slate-100 mt-2">
+                           <div className="flex justify-between items-center mb-2">
+                              <span className="text-xs font-bold text-slate-500">ความกว้าง (เส้นผ่านศูนย์กลาง)</span>
+                              <span className="text-xs font-bold text-slate-400">{Math.round(selectedElement.width)} px</span>
+                           </div>
                            <input 
                               type="range" 
-                              min="0" 
-                              max="100" 
-                              value={selectedElement.curveStrength ?? 50} 
-                              onChange={(e) => updateElement(selectedId, { curveStrength: parseInt(e.target.value) })} 
+                              min="100" 
+                              max="800" 
+                              value={selectedElement.width} 
+                              onChange={(e) => updateElement(selectedId, { width: parseInt(e.target.value) })}
                               onMouseUp={() => addToHistory(elements)}
-                              className="w-full absolute inset-0 opacity-0 cursor-pointer z-10" 
-                           />
-                           <div 
-                              className="absolute h-4 w-4 bg-white border-2 border-ci-blue rounded-full shadow-sm pointer-events-none transition-all"
-                              style={{ left: `calc(${selectedElement.curveStrength ?? 50}% - 8px)` }}
-                           />
-                           <div 
-                              className="absolute left-0 h-1 bg-ci-blue rounded-l-full pointer-events-none"
-                              style={{ width: `${selectedElement.curveStrength ?? 50}%` }}
+                              className="w-full accent-ci-blue h-1 bg-slate-200 rounded-lg appearance-none" 
                            />
                         </div>
                      </div>
@@ -903,20 +1192,39 @@ export default function DesignerClient() {
                 {/* Colors */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">สีเสื้อ</label>
-                    <span className="text-xs font-bold text-slate-700">{COLORS.find(c => c.value === shirtColor)?.name}</span>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">สีเสื้อที่ต้องการ</label>
+                    <button onClick={() => setAvailableColors(availableColors.length === COLORS.length ? [shirtColor] : COLORS.map(c => c.value))} className="text-[10px] font-bold text-ci-blue hover:underline">
+                      {availableColors.length === COLORS.length ? 'ล้างค่า' : 'เลือกทั้งหมด'}
+                    </button>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    {COLORS.map((c) => (
-                      <button 
-                        key={c.value} 
-                        onClick={() => setShirtColor(c.value)} 
-                        className={`w-8 h-8 rounded-full shadow-sm transition-transform hover:scale-110 relative ${shirtColor === c.value ? 'ring-2 ring-offset-2 ring-ci-blue scale-110' : 'ring-1 ring-slate-200'}`}
-                        style={{ backgroundColor: c.value }}
-                        title={c.name}
-                      />
-                    ))}
+                    {COLORS.map((c) => {
+                      const isSelected = availableColors.includes(c.value);
+                      const isActive = shirtColor === c.value;
+                      
+                      return (
+                        <button 
+                          key={c.value} 
+                          onClick={() => toggleColorSelection(c.value)} 
+                          className={`w-8 h-8 rounded-full shadow-sm transition-all relative group ${isActive ? 'ring-2 ring-offset-2 ring-ci-blue scale-110 z-10' : 'ring-1 ring-slate-200 hover:scale-105 hover:shadow-md'}`}
+                          style={{ backgroundColor: c.value }}
+                          title={c.name}
+                        >
+                           {/* Selected Indicator (Checkmark) */}
+                           {isSelected && (
+                             <div className="absolute inset-0 flex items-center justify-center">
+                               <div className="bg-black/20 rounded-full p-0.5 backdrop-blur-[1px]">
+                                 <Check className="w-3 h-3 text-white stroke-[3]" />
+                               </div>
+                             </div>
+                           )}
+                        </button>
+                      );
+                    })}
                   </div>
+                  <p className="text-[10px] text-slate-400">
+                    * คลิกเพื่อเลือกสีเสื้อที่ต้องการสั่งทำ (สีปัจจุบัน: <span className="font-bold text-slate-600">{COLORS.find(c => c.value === shirtColor)?.name}</span>)
+                  </p>
                 </div>
 
                 {/* Sizes */}
@@ -1294,9 +1602,9 @@ export default function DesignerClient() {
               <button className="h-10 px-4 text-slate-500 font-bold text-sm hover:text-ci-blue hover:bg-blue-50 rounded-xl border border-transparent hover:border-blue-100 transition-all">
                 ดูตัวอย่าง
               </button>
-              <button className="h-10 px-6 bg-gradient-to-r from-ci-blue to-blue-600 text-white rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-ci-blue/30 hover:-translate-y-0.5 transition-all flex items-center gap-2 active:translate-y-0">
-                 <ShoppingCart className="w-4 h-4" />
-                 <span>ใส่ตะกร้า</span>
+              <button onClick={handleSaveClick} className="h-10 px-6 bg-gradient-to-r from-ci-blue to-blue-600 text-white rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-ci-blue/30 hover:-translate-y-0.5 transition-all flex items-center gap-2 active:translate-y-0">
+                 <Save className="w-4 h-4" />
+                 <span>บันทึก</span>
               </button>
            </div>
         </div>
@@ -1540,7 +1848,11 @@ export default function DesignerClient() {
                                        <path id={`curve-${el.id}`} d={
                                            el.curveType === 'circle' 
                                             ? (() => {
-                                                return `M 0,${el.height/2} a ${el.width/2},${el.height/2} 0 1,1 ${el.width},0 a ${el.width/2},${el.height/2} 0 1,1 -${el.width},0`;
+                                                const rx = el.width / 2;
+                                                const ry = el.height / 2;
+                                                // Start at bottom, go clockwise (Left -> Top -> Right -> Bottom)
+                                                // This places 50% offset at the Top
+                                                return `M ${rx},${el.height} a ${rx},${ry} 0 1,1 0,-${el.height} a ${rx},${ry} 0 1,1 0,${el.height}`;
                                             })()
                                             : el.curveType === 'arc'
                                             ? (() => {
@@ -1555,26 +1867,63 @@ export default function DesignerClient() {
                                             })()
                                        } />
                                    </defs>
+                                   
+                                   {/* Outline/Stroke Layer (Behind) */}
+                                   {['outline', 'hollow', 'splice'].includes(el.effectType || '') && (
+                                      <text 
+                                          fontSize={el.fontSize}
+                                          fontFamily={el.fontFamily}
+                                          fontWeight={el.fontWeight}
+                                          fontStyle={el.fontStyle}
+                                          opacity={el.opacity / 100}
+                                          dominantBaseline="middle"
+                                          textAnchor="middle"
+                                          fill="transparent"
+                                          stroke={el.effectColor ?? '#1e293b'}
+                                          strokeWidth={`${el.effectType === 'hollow' || el.effectType === 'splice' ? (el.effectWidth ?? 1) : (el.effectWidth ?? 2)}px`}
+                                          strokeLinejoin="round"
+                                          filter={el.effectType === 'splice' ? 'drop-shadow(2px 2px 0px #cbd5e1)' : undefined}
+                                      >
+                                          <textPath href={`#curve-${el.id}`} startOffset="50%">
+                                              {el.content}
+                                          </textPath>
+                                      </text>
+                                   )}
+
+                                   {/* Main Text Layer */}
                                    <text 
                                        fontSize={el.fontSize}
                                        fontFamily={el.fontFamily}
                                        fontWeight={el.fontWeight}
                                        fontStyle={el.fontStyle}
-                                       fill={el.color}
+                                       fill={['hollow', 'splice', 'outline'].includes(el.effectType || '') ? 'transparent' : el.color}
                                        opacity={el.opacity / 100}
                                        dominantBaseline="middle"
                                        textAnchor="middle"
-                                       style={
-                                           el.effectType === 'shadow' ? { textShadow: '3px 3px 0px rgba(0,0,0,0.2)' } :
-                                           el.effectType === 'lift' ? { textShadow: '0px 5px 10px rgba(0,0,0,0.3)' } :
-                                           el.effectType === 'outline' ? { paintOrder: 'stroke', stroke: '#1e293b', strokeWidth: '2px', strokeLinejoin: 'round' } :
-                                           el.effectType === 'hollow' ? { paintOrder: 'stroke', stroke: '#1e293b', strokeWidth: '1px', fill: 'transparent' } :
-                                           el.effectType === 'splice' ? { paintOrder: 'stroke', stroke: '#1e293b', strokeWidth: '1px', fill: 'transparent', filter: 'drop-shadow(2px 2px 0px #cbd5e1)' } :
-                                           el.effectType === 'echo' ? { textShadow: '2px 2px 0px rgba(0,0,0,0.1), 4px 4px 0px rgba(0,0,0,0.1)' } :
-                                           el.effectType === 'glitch' ? { textShadow: '2px 0px #ef4444, -2px 0px #3b82f6' } :
-                                           el.effectType === 'neon' ? { textShadow: '0 0 10px #e879f9, 0 0 20px #e879f9', fill: '#fce7f3' } :
-                                           {}
-                                       }
+                                       style={{
+                                           ...(el.effectType === 'shadow' || el.effectType === 'lift' || el.effectType === 'echo' || el.effectType === 'glitch' ? { 
+                                                textShadow: (() => {
+                                                    const rad = (el.effectDirection ?? 45) * (Math.PI / 180);
+                                                    const dist = el.effectOffset ?? (el.effectType === 'shadow' ? 4 : 2);
+                                                    const x = Math.round(Math.cos(rad) * dist);
+                                                    const y = Math.round(Math.sin(rad) * dist);
+                                                    const blur = el.effectBlur ?? 0;
+                                                    const color = el.effectColor ?? 'rgba(0,0,0,0.2)';
+                                                    
+                                                    if (el.effectType === 'echo') {
+                                                        return `${x}px ${y}px 0px ${color}, ${x*2}px ${y*2}px 0px ${color}`;
+                                                    }
+                                                    if (el.effectType === 'glitch') {
+                                                        return `${dist}px 0px ${el.effectColor ?? '#ef4444'}, -${dist}px 0px #3b82f6`;
+                                                    }
+                                                    return `${x}px ${y}px ${blur}px ${color}`;
+                                                })()
+                                           } : {}),
+                                           ...(el.effectType === 'neon' ? { 
+                                                textShadow: `0 0 ${el.effectBlur ?? 10}px ${el.effectColor ?? '#ec4899'}, 0 0 ${(el.effectBlur ?? 10)*2}px ${el.effectColor ?? '#ec4899'}`, 
+                                                fill: '#ffffff' 
+                                           } : {}),
+                                       }}
                                    >
                                        <textPath href={`#curve-${el.id}`} startOffset="50%">
                                            {el.content}
@@ -1598,18 +1947,50 @@ export default function DesignerClient() {
                                     whiteSpace: 'pre',
                                     overflow: 'hidden',
                                     lineHeight: 1,
-                                    padding: el.effectType === 'background' ? '0 10px' : '0 5px',
+                                    padding: el.effectType === 'background' ? `0 ${el.effectWidth ?? 4}px` : '0 5px',
                                     
                                     // Effect Styles
-                                    ...(el.effectType === 'shadow' ? { textShadow: '3px 3px 0px rgba(0,0,0,0.2)' } : {}),
-                                    ...(el.effectType === 'lift' ? { textShadow: '0px 5px 10px rgba(0,0,0,0.3)' } : {}),
-                                    ...(el.effectType === 'hollow' ? { WebkitTextStroke: '1px #1e293b', color: 'transparent' } : {}),
-                                    ...(el.effectType === 'splice' ? { WebkitTextStroke: '1px #1e293b', color: 'transparent', textShadow: '2px 2px 0px #cbd5e1' } : {}),
-                                    ...(el.effectType === 'outline' ? { WebkitTextStroke: '2px #1e293b', color: 'transparent', fontWeight: 'bold' } : {}),
-                                    ...(el.effectType === 'echo' ? { textShadow: '2px 2px 0px rgba(0,0,0,0.1), 4px 4px 0px rgba(0,0,0,0.1)' } : {}),
-                                    ...(el.effectType === 'glitch' ? { textShadow: '2px 0px #ef4444, -2px 0px #3b82f6' } : {}),
-                                    ...(el.effectType === 'neon' ? { textShadow: '0 0 10px #e879f9, 0 0 20px #e879f9', color: '#fce7f3' } : {}),
-                                    ...(el.effectType === 'background' ? { backgroundColor: '#fcd34d', color: '#000', borderRadius: '4px' } : {}),
+                                    ...(el.effectType === 'shadow' || el.effectType === 'lift' || el.effectType === 'echo' || el.effectType === 'glitch' ? { 
+                                         textShadow: (() => {
+                                             const rad = (el.effectDirection ?? 45) * (Math.PI / 180);
+                                             const dist = el.effectOffset ?? (el.effectType === 'shadow' ? 4 : 2);
+                                             const x = Math.round(Math.cos(rad) * dist);
+                                             const y = Math.round(Math.sin(rad) * dist);
+                                             const blur = el.effectBlur ?? 0;
+                                             const color = el.effectColor ?? 'rgba(0,0,0,0.2)';
+                                             
+                                             if (el.effectType === 'echo') {
+                                                 return `${x}px ${y}px 0px ${color}, ${x*2}px ${y*2}px 0px ${color}`;
+                                             }
+                                             if (el.effectType === 'glitch') {
+                                                 return `${dist}px 0px #ef4444, -${dist}px 0px #3b82f6`;
+                                             }
+                                             return `${x}px ${y}px ${blur}px ${color}`;
+                                         })()
+                                    } : {}),
+                                    ...(el.effectType === 'neon' ? { 
+                                         textShadow: `0 0 ${el.effectBlur ?? 10}px ${el.effectColor ?? '#ec4899'}, 0 0 ${(el.effectBlur ?? 10)*2}px ${el.effectColor ?? '#ec4899'}`, 
+                                         color: '#ffffff' 
+                                    } : {}),
+                                    ...(el.effectType === 'hollow' ? { 
+                                         WebkitTextStroke: `${el.effectWidth ?? 1}px ${el.effectColor ?? '#1e293b'}`, 
+                                         color: 'transparent' 
+                                    } : {}),
+                                    ...(el.effectType === 'splice' ? { 
+                                         WebkitTextStroke: `${el.effectWidth ?? 1}px ${el.effectColor ?? '#1e293b'}`, 
+                                         color: 'transparent', 
+                                         textShadow: '2px 2px 0px #cbd5e1' 
+                                    } : {}),
+                                    ...(el.effectType === 'outline' ? { 
+                                         WebkitTextStroke: `${el.effectWidth ?? 2}px ${el.effectColor ?? '#1e293b'}`, 
+                                         color: 'transparent', 
+                                         fontWeight: 'bold' 
+                                    } : {}),
+                                    ...(el.effectType === 'background' ? { 
+                                         backgroundColor: el.effectColor ?? '#fcd34d', 
+                                         color: '#ffffff', 
+                                         borderRadius: `${el.effectBlur ?? 4}px` 
+                                    } : {}),
                                 }}>
                                     {el.content}
                                 </div>
@@ -1734,19 +2115,45 @@ export default function DesignerClient() {
               </div>
               <div className="h-px w-full bg-slate-100" />
 
-              {/* Size Preview */}
+              {/* Color Preview (Selected Colors Only) */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">เปลี่ยนสีเสื้อ (ที่เลือกไว้)</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {availableColors.map((colorValue) => {
+                    const colorObj = COLORS.find(c => c.value === colorValue);
+                    return (
+                      <button 
+                        key={colorValue} 
+                        onClick={() => setShirtColor(colorValue)} 
+                        className={`w-5 h-5 rounded-full shadow-sm transition-transform hover:scale-110 ${shirtColor === colorValue ? 'ring-2 ring-offset-1 ring-ci-blue scale-110' : 'ring-1 ring-slate-200'}`}
+                        style={{ backgroundColor: colorValue }}
+                        title={colorObj?.name || 'Custom Color'}
+                      />
+                    );
+                  })}
+                  {availableColors.length === 0 && (
+                     <span className="text-xs text-slate-400">- กรุณาเลือกสีจากเมนูสินค้า -</span>
+                  )}
+                </div>
+              </div>
+              <div className="h-px w-full bg-slate-100" />
+
+              {/* Size Preview (Selected Sizes Only) */}
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">ดูไซส์อื่น</span>
-                    <div className="grid grid-cols-5 gap-1">
-                      {SIZES.map(s => (
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">ดูไซส์อื่น (ที่เลือกไว้)</span>
+                    <div className="flex flex-wrap gap-1">
+                      {SIZES.filter(s => selectedSizes.includes(s)).map(s => (
                     <button 
                       key={s}
                       onClick={() => setShirtSize(s)}
-                          className={`h-7 flex items-center justify-center rounded-md text-[10px] font-bold transition-all ${shirtSize === s ? 'bg-ci-blue text-white shadow-sm' : 'bg-slate-100 text-slate-400 hover:bg-blue-50 hover:text-ci-blue'}`}
+                          className={`h-7 min-w-[2rem] px-1 flex items-center justify-center rounded-md text-[10px] font-bold transition-all ${shirtSize === s ? 'bg-ci-blue text-white shadow-sm' : 'bg-slate-100 text-slate-400 hover:bg-blue-50 hover:text-ci-blue'}`}
                     >
                       {s}
                     </button>
                   ))}
+                  {selectedSizes.length === 0 && (
+                     <span className="text-xs text-slate-400">- กรุณาเลือกไซส์จากเมนูสินค้า -</span>
+                  )}
                 </div>
               </div>
               <div className="h-px w-full bg-slate-100" />
@@ -1773,6 +2180,151 @@ export default function DesignerClient() {
            </div>
         </div>
       </div>
+      {/* Review Modal (Modern Full Screen Overlay) */}
+      {showReviewModal && (
+        <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col animate-in slide-in-from-bottom-10 duration-300">
+           {/* Header */}
+           <div className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-10">
+              <div className="flex items-center gap-4">
+                 <button onClick={() => setShowReviewModal(false)} className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-all">
+                    <ChevronLeft className="w-6 h-6" />
+                 </button>
+                 <div>
+                    <h2 className="text-xl font-bold text-slate-900">ตรวจสอบรายละเอียด</h2>
+                    <p className="text-sm text-slate-500">ขั้นตอนสุดท้ายก่อนบันทึก</p>
+                 </div>
+              </div>
+           </div>
+
+           {/* Content */}
+           <div className="flex-1 overflow-y-auto">
+              <div className="max-w-6xl mx-auto p-4 md:p-8">
+                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    {/* Left: Product Preview Gallery */}
+                    <div className="lg:col-span-7 space-y-6">
+                       <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm relative overflow-hidden group">
+                          <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] opacity-20"></div>
+                          
+                          <div className="relative z-10 flex flex-col items-center">
+                             <div className="w-full flex justify-between items-center mb-8">
+                                <span className="px-4 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-full uppercase tracking-wider shadow-lg shadow-slate-900/20">
+                                   {viewSide === 'front' ? 'ด้านหน้า (Front)' : 'ด้านหลัง (Back)'}
+                                </span>
+                                <div className="flex bg-slate-100 rounded-full p-1 border border-slate-200">
+                                   <button onClick={() => setViewSide('front')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${viewSide === 'front' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>Front</button>
+                                   <button onClick={() => setViewSide('back')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${viewSide === 'back' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>Back</button>
+                                </div>
+                             </div>
+                             
+                             <div className="relative w-full max-w-[500px] aspect-square transition-transform duration-500 group-hover:scale-105">
+                                <img 
+                                   src={viewSide === 'front' ? MOCKUP_IMAGES.front : MOCKUP_IMAGES.back} 
+                                   alt="Product Preview" 
+                                   className="w-full h-full object-contain drop-shadow-2xl" 
+                                />
+                             </div>
+                          </div>
+                       </div>
+                       
+                       {/* Mini Specs Row */}
+                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="bg-white p-4 rounded-2xl border border-slate-100 text-center">
+                             <p className="text-xs text-slate-400 font-bold uppercase mb-1">สีที่เลือก ({availableColors.length})</p>
+                             <div className="flex items-center justify-center -space-x-2">
+                                {availableColors.slice(0, 4).map((c, i) => (
+                                  <div key={i} className="w-6 h-6 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: c }} />
+                                ))}
+                                {availableColors.length > 4 && (
+                                  <div className="w-6 h-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[8px] font-bold text-slate-500">
+                                    +{availableColors.length - 4}
+                                  </div>
+                                )}
+                             </div>
+                          </div>
+                          <div className="bg-white p-4 rounded-2xl border border-slate-100 text-center">
+                             <p className="text-xs text-slate-400 font-bold uppercase mb-1">ไซส์ที่เลือก ({selectedSizes.length})</p>
+                             <span className="font-black text-slate-800 text-lg">{selectedSizes.length > 2 ? 'Multiple' : selectedSizes.join(', ')}</span>
+                          </div>
+                          <div className="bg-white p-4 rounded-2xl border border-slate-100 text-center">
+                             <p className="text-xs text-slate-400 font-bold uppercase mb-1">เทคนิค</p>
+                             <span className="font-bold text-slate-700 text-sm">{technique === 'printing' ? 'DTG' : 'Embroidery'}</span>
+                          </div>
+                          <div className="bg-white p-4 rounded-2xl border border-slate-100 text-center">
+                             <p className="text-xs text-slate-400 font-bold uppercase mb-1">เลเยอร์</p>
+                             <span className="font-bold text-slate-700 text-sm">{elements.length} ชิ้น</span>
+                          </div>
+                       </div>
+                    </div>
+
+                    {/* Right: Actions & Pricing */}
+                    <div className="lg:col-span-5 space-y-6 sticky top-24">
+                       <div className="bg-white rounded-[2rem] p-6 md:p-8 border border-slate-100 shadow-xl shadow-slate-200/50">
+                          <div className="mb-8">
+                             <h3 className="text-2xl font-black text-slate-900 mb-2">สรุปรายการสั่งทำ</h3>
+                             <p className="text-slate-500 leading-relaxed">
+                                ตรวจสอบความถูกต้องของดีไซน์ก่อนบันทึก หรือสั่งผลิต หากต้องการแก้ไขสามารถกดปุ่มย้อนกลับได้
+                             </p>
+                          </div>
+
+                          <div className="space-y-4 mb-8">
+                             <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3">
+                                <div className="flex items-center justify-between">
+                                   <span className="text-sm font-bold text-slate-600">สีที่เลือก:</span>
+                                   <div className="flex flex-wrap justify-end gap-1 max-w-[60%]">
+                                      {availableColors.map(c => (
+                                         <div key={c} className="w-4 h-4 rounded-full border border-slate-200 shadow-sm" style={{ backgroundColor: c }} title={COLORS.find(col => col.value === c)?.name} />
+                                      ))}
+                                   </div>
+                                </div>
+                                <div className="flex items-center justify-between border-t border-slate-200/50 pt-3">
+                                   <span className="text-sm font-bold text-slate-600">ไซส์ที่เลือก:</span>
+                                   <span className="text-sm font-bold text-slate-900">{selectedSizes.join(', ')}</span>
+                                </div>
+                             </div>
+
+                             <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <span className="font-bold text-slate-600">ราคาต่อชิ้น</span>
+                                <span className="font-bold text-slate-900 text-lg">฿{currentPrice.toLocaleString()}</span>
+                             </div>
+                             {/* Profit Estimation (Optional display) */}
+                             <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                                <div className="flex flex-col">
+                                   <span className="font-bold text-emerald-800">กำไรโดยประมาณ</span>
+                                   <span className="text-[10px] text-emerald-600 uppercase font-bold tracking-wide">หากนำไปขายต่อ</span>
+                                </div>
+                                <span className="font-bold text-emerald-600 text-lg">+฿{Math.round(currentPrice * 0.4).toLocaleString()}</span>
+                             </div>
+                          </div>
+
+                          <div className="space-y-3">
+                             <button onClick={() => handleFinalSave('cart')} className="w-full h-14 bg-gradient-to-r from-ci-blue to-blue-600 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-ci-blue/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 group">
+                                <div className="bg-white/20 p-1.5 rounded-lg group-hover:rotate-12 transition-transform">
+                                   <ShoppingCart className="w-5 h-5" />
+                                </div>
+                                ใส่ตะกร้าสั่งผลิต
+                             </button>
+                             
+                             <button onClick={() => handleFinalSave('template')} className="w-full h-14 bg-white border-2 border-slate-100 text-slate-700 rounded-xl font-bold text-lg hover:bg-slate-50 hover:border-slate-200 transition-all flex items-center justify-center gap-3">
+                                <Save className="w-5 h-5 text-slate-400" />
+                                บันทึกเป็นเทมเพลต
+                             </button>
+                          </div>
+                          
+                          <div className="mt-6 text-center">
+                             <p className="text-xs text-slate-400">
+                                *ราคานี้รวมค่าสกรีนและค่าเสื้อแล้ว (ยังไม่รวมค่าส่ง)
+                             </p>
+                          </div>
+                       </div>
+                    </div>
+
+                 </div>
+              </div>
+           </div>
+        </div>
+      )}
+
     </div>
   );
 }
