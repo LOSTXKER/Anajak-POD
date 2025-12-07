@@ -498,3 +498,4 @@ const CLUSTER_DISTANCE = 50; // ⚠️ ปรับตามมาตรฐา�
 **Last Updated**: December 2024  
 **Author**: POD Design System Team
 
+

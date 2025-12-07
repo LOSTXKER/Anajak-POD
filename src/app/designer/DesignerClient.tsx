@@ -900,7 +900,7 @@ export default function DesignerClient() {
       const printAreaWidth = (PRINT_AREA_WIDTH_CM / 51) * 500; // ~295px for size M
       const printAreaCenterX = printAreaWidth / 2; // ~147px (center of print area)
       const printAreaCenterY = 150; // Upper-middle of print area (starts at y=0 of print area div)
-      
+
       const newEl: DesignElement = {
       id: Date.now().toString(), type, content, 
       x: printAreaCenterX - width/2, y: printAreaCenterY - height/2, // Center in print area
@@ -1752,7 +1752,7 @@ ${svgElements}
                      className="w-full h-full object-cover rounded-md" 
                      alt={selectedProduct.title}
                    />
-                </div>
+                   </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="flex-1 min-w-0">
@@ -1762,7 +1762,7 @@ ${svgElements}
                           {selectedProduct.badge}
                         </span>
                       )}
-                    </div>
+                </div>
                     <span className="bg-ci-blue text-white text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0">
                       ฿{selectedProduct.price}
                     </span>
@@ -1795,7 +1795,7 @@ ${svgElements}
               {/* Section Divider */}
               <div className="h-px bg-slate-100" />
 
-              {/* Technique Selector */}
+                {/* Technique Selector */}
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-1 h-4 bg-ci-blue rounded-full" />
@@ -1806,9 +1806,9 @@ ${svgElements}
                      { id: 'dtf', label: 'DTF', desc: 'คิดตามจุด', icon: '🎨' }, 
                      { id: 'dtg', label: 'DTG', desc: 'ราคาเหมา', icon: '🖨️' }
                    ].map((t) => (
-                     <button 
-                       key={t.id}
-                       onClick={() => setTechnique(t.id as any)}
+                       <button 
+                         key={t.id}
+                         onClick={() => setTechnique(t.id as any)}
                        className={`flex-1 py-2 rounded-md text-xs font-bold transition-all ${technique === t.id ? 'bg-white text-ci-blue shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                      >
                        <div className="flex flex-col items-center gap-0.5">
@@ -1818,10 +1818,10 @@ ${svgElements}
                          </div>
                          <span className="text-[9px] opacity-70">{t.desc}</span>
                        </div>
-                     </button>
-                   ))}
+                       </button>
+                     ))}
+                  </div>
                 </div>
-              </div>
 
               {/* Print Size & Price Breakdown */}
               {allClusters.length > 0 && (
@@ -1914,7 +1914,7 @@ ${svgElements}
               {/* Section Divider */}
               <div className="h-px bg-slate-100" />
 
-              {/* Colors */}
+                {/* Colors */}
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -1922,39 +1922,39 @@ ${svgElements}
                     <label className="text-xs font-bold text-slate-700">สีเสื้อ</label>
                     <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">{availableColors.length} สี</span>
                   </div>
-                  <button onClick={() => setAvailableColors(availableColors.length === COLORS.length ? [shirtColor] : COLORS.map(c => c.value))} className="text-[10px] font-bold text-ci-blue hover:underline">
-                    {availableColors.length === COLORS.length ? 'ล้างค่า' : 'เลือกทั้งหมด'}
-                  </button>
-                </div>
+                    <button onClick={() => setAvailableColors(availableColors.length === COLORS.length ? [shirtColor] : COLORS.map(c => c.value))} className="text-[10px] font-bold text-ci-blue hover:underline">
+                      {availableColors.length === COLORS.length ? 'ล้างค่า' : 'เลือกทั้งหมด'}
+                    </button>
+                  </div>
                 
                 <div className="flex flex-wrap gap-2">
-                  {COLORS.map((c) => {
-                    const isSelected = availableColors.includes(c.value);
-                    const isActive = shirtColor === c.value;
-                    return (
-                      <button 
-                        key={c.value} 
-                        onClick={() => toggleColorSelection(c.value)} 
+                    {COLORS.map((c) => {
+                      const isSelected = availableColors.includes(c.value);
+                      const isActive = shirtColor === c.value;
+                      return (
+                        <button 
+                          key={c.value} 
+                          onClick={() => toggleColorSelection(c.value)} 
                         className={`w-8 h-8 rounded-lg transition-all relative group ${isActive ? 'ring-2 ring-ci-blue scale-110 z-10' : 'ring-1 ring-slate-200 hover:scale-105'}`}
-                        style={{ backgroundColor: c.value }}
-                        title={c.name}
-                      >
-                         {isSelected && (
-                           <div className="absolute inset-0 flex items-center justify-center">
+                          style={{ backgroundColor: c.value }}
+                          title={c.name}
+                        >
+                           {isSelected && (
+                             <div className="absolute inset-0 flex items-center justify-center">
                              <Check className={`w-3.5 h-3.5 ${c.value === '#ffffff' ? 'text-ci-blue' : 'text-white'} drop-shadow-sm`} strokeWidth={3} />
-                           </div>
-                         )}
+                             </div>
+                           )}
                          {isActive && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-ci-blue rounded-full" />}
-                      </button>
-                    );
-                  })}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
 
               {/* Section Divider */}
               <div className="h-px bg-slate-100" />
 
-              {/* Sizes */}
+                {/* Sizes */}
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -1962,22 +1962,22 @@ ${svgElements}
                     <label className="text-xs font-bold text-slate-700">ไซส์</label>
                     <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">{selectedSizes.length} ไซส์</span>
                   </div>
-                  <button onClick={() => setSelectedSizes(selectedSizes.length === SIZES.length ? [] : [...SIZES])} className="text-[10px] font-bold text-ci-blue hover:underline">
-                    {selectedSizes.length === SIZES.length ? 'ล้างค่า' : 'เลือกทั้งหมด'}
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {SIZES.map((s) => {
-                    const isSelected = selectedSizes.includes(s);
+                    <button onClick={() => setSelectedSizes(selectedSizes.length === SIZES.length ? [] : [...SIZES])} className="text-[10px] font-bold text-ci-blue hover:underline">
+                      {selectedSizes.length === SIZES.length ? 'ล้างค่า' : 'เลือกทั้งหมด'}
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {SIZES.map((s) => {
+                      const isSelected = selectedSizes.includes(s);
                     const isActive = shirtSize === s;
-                    return (
-                      <button 
-                        key={s} 
-                        onClick={() => {
-                           const newSizes = isSelected ? selectedSizes.filter(sz => sz !== s) : [...selectedSizes, s];
-                           setSelectedSizes(newSizes);
-                           if (!isSelected) setShirtSize(s); 
-                        }}
+                      return (
+                        <button 
+                          key={s} 
+                          onClick={() => {
+                             const newSizes = isSelected ? selectedSizes.filter(sz => sz !== s) : [...selectedSizes, s];
+                             setSelectedSizes(newSizes);
+                             if (!isSelected) setShirtSize(s); 
+                          }}
                         className={`min-w-[42px] px-3 py-2 rounded-lg text-xs font-bold border transition-all relative ${
                           isSelected 
                             ? 'bg-ci-blue text-white border-ci-blue' 
@@ -1988,9 +1988,9 @@ ${svgElements}
                         {isActive && isSelected && (
                           <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border border-white" />
                         )}
-                      </button>
-                    );
-                  })}
+                        </button>
+                      );
+                    })}
                 </div>
               </div>
             </div>
@@ -2125,7 +2125,7 @@ ${svgElements}
                 <div className="text-left">
                   <p className="text-sm font-bold text-slate-700">อัปโหลดรูปภาพ</p>
                   <p className="text-xs text-slate-400">JPG, PNG</p>
-                </div>
+            </div>
               </button>
 
               {/* Divider */}
@@ -2133,22 +2133,22 @@ ${svgElements}
                 <div className="flex-1 h-px bg-slate-200" />
                 <span className="text-[10px] text-slate-400 font-medium">คลังของฉัน</span>
                 <div className="flex-1 h-px bg-slate-200" />
-              </div>
-               
+                    </div>
+                 
               {/* Library Grid */}
               <div className="grid grid-cols-2 gap-3">
-                {MY_LIBRARY_ASSETS.map((asset) => (
-                  <div key={asset.id} className="group relative aspect-square bg-slate-100 rounded-xl overflow-hidden cursor-pointer border border-slate-200 hover:border-ci-blue hover:shadow-md transition-all" onClick={() => addElement('image', asset.url)}>
-                     <img src={asset.url} className="w-full h-full object-cover" />
-                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                     <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                       <p className="text-[10px] text-white font-bold truncate">{asset.name}</p>
-                     </div>
-                     <button className="absolute top-2 right-2 p-1 bg-white/90 rounded-full shadow-sm opacity-0 group-hover:opacity-100 hover:bg-white text-slate-600 hover:text-red-500 transition-all transform translate-y-2 group-hover:translate-y-0">
-                       <Trash2 className="w-3 h-3" />
-                     </button>
-                  </div>
-                ))}
+                 {MY_LIBRARY_ASSETS.map((asset) => (
+                   <div key={asset.id} className="group relative aspect-square bg-slate-100 rounded-xl overflow-hidden cursor-pointer border border-slate-200 hover:border-ci-blue hover:shadow-md transition-all" onClick={() => addElement('image', asset.url)}>
+                      <img src={asset.url} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                      <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                        <p className="text-[10px] text-white font-bold truncate">{asset.name}</p>
+                      </div>
+                      <button className="absolute top-2 right-2 p-1 bg-white/90 rounded-full shadow-sm opacity-0 group-hover:opacity-100 hover:bg-white text-slate-600 hover:text-red-500 transition-all transform translate-y-2 group-hover:translate-y-0">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                   </div>
+                 ))}
 
                 {/* Empty State if no assets */}
                 {MY_LIBRARY_ASSETS.length === 0 && (
@@ -2157,7 +2157,7 @@ ${svgElements}
                     <p className="text-xs">ยังไม่มีรูปภาพในคลัง</p>
                   </div>
                 )}
-              </div>
+               </div>
             </div>
           )}
           {activeTool === 'ai' && (
@@ -2411,21 +2411,21 @@ ${svgElements}
                     <button onClick={redo} disabled={currentHistoryIndex >= history.length - 1} className={`p-1.5 rounded transition-colors ${currentHistoryIndex >= history.length - 1 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:bg-white hover:shadow-sm hover:text-ci-blue'}`} title="ทำซ้ำ (Ctrl+Shift+Z)">
                       <Redo2 className="w-4 h-4" />
                     </button>
-              </div>
-              
+           </div>
+
               {/* Inline Stepper - Compact */}
               <div className="hidden md:flex items-center gap-0.5 text-xs">
-                 {STEPS.map((step, i) => (
+              {STEPS.map((step, i) => (
                    <div key={step.id} className="flex items-center">
                      {i > 0 && <div className="w-3 h-px bg-slate-200 mx-1" />}
                      <div className={`flex items-center gap-1 px-2 py-1 rounded-md ${step.status === 'completed' ? 'text-green-600' : step.status === 'current' ? 'text-ci-blue bg-blue-50' : 'text-slate-300'}`}>
                        <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold ${step.status === 'completed' ? 'bg-green-100 text-green-600' : step.status === 'current' ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-400'}`}>
-                         {step.status === 'completed' ? <Check className="w-2.5 h-2.5" /> : step.id}
-                       </div>
+                      {step.status === 'completed' ? <Check className="w-2.5 h-2.5" /> : step.id}
+                    </div>
                        <span className="font-semibold hidden lg:inline">{step.label}</span>
-                     </div>
-                   </div>
-                 ))}
+                  </div>
+                </div>
+              ))}
               </div>
            </div>
 
@@ -2612,8 +2612,8 @@ ${svgElements}
                     <span className="w-10 text-center font-medium text-slate-600">{zoom}%</span>
                     <button onClick={() => setZoom(Math.min(200, zoom + 25))} className="p-1 hover:bg-slate-100 rounded"><Plus className="w-3 h-3" /></button>
                  </div>
-              </div>
-           )}
+           </div>
+        )}
         </div>
 
         {/* Canvas - Centered in available space */}
@@ -2781,7 +2781,7 @@ ${svgElements}
                      </div>
                    );
                  })}
-                 
+
                  {/* Snap Guides */}
                  {snapX !== null && (
                     <div className="absolute top-0 bottom-0 w-px bg-ci-blue z-50 pointer-events-none" style={{ left: snapX }}></div>
@@ -3084,13 +3084,13 @@ ${svgElements}
 
               {/* Price Details */}
               <div className="space-y-2">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">สรุปราคา</span>
+                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">สรุปราคา</span>
                 
                 {/* Shirt Price */}
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-500">เสื้อ ({shirtSize})</span>
+                 <div className="flex justify-between items-center text-xs">
+                        <span className="text-slate-500">เสื้อ ({shirtSize})</span>
                   <span className="font-medium text-slate-900">฿{BASE_PRICE + sizeSurcharge}</span>
-                </div>
+                 </div>
 
                 {/* Printing Price Breakdown */}
                 {allClusters.length > 0 ? (
@@ -3127,8 +3127,8 @@ ${svgElements}
                     </div>
                   </div>
                 ) : (
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-500">ค่าสกรีน</span>
+                 <div className="flex justify-between items-center text-xs">
+                        <span className="text-slate-500">ค่าสกรีน</span>
                     <span className="font-medium text-slate-400">฿0</span>
                   </div>
                 )}
@@ -3138,7 +3138,7 @@ ${svgElements}
                 <div className="flex justify-between items-center text-sm pt-1">
                   <span className="font-bold text-slate-700">ราคารวม</span>
                   <span className="font-bold text-ci-blue text-base">฿{currentPrice}</span>
-                </div>
+                 </div>
               </div>
               <div className="h-px w-full bg-slate-100" />
 
@@ -3214,145 +3214,155 @@ ${svgElements}
                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform shadow-sm ${showMeasurementGuides ? 'left-4' : 'left-1'}`} />
                 </button>
               </div>
-              </div>
            </div>
         </div>
+      </div>
       </div>
       {/* Review Modal (Premium Redesign) */}
       {showReviewModal && (
         <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-100 to-slate-50 flex flex-col animate-in slide-in-from-bottom-10 duration-300">
-           {/* Header */}
-           <div className="h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-20">
-              <div className="flex items-center gap-3">
-                 <button onClick={() => setShowReviewModal(false)} className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center text-slate-700 hover:from-slate-200 hover:to-slate-100 transition-all shadow-sm">
-                    <ChevronLeft className="w-5 h-5" />
+           {/* Header - Responsive */}
+           <div className="h-12 sm:h-14 lg:h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200 flex items-center justify-between px-3 sm:px-4 lg:px-6 sticky top-0 z-20">
+              <div className="flex items-center gap-2 sm:gap-3">
+                 <button onClick={() => setShowReviewModal(false)} className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center text-slate-700 hover:from-slate-200 hover:to-slate-100 transition-all shadow-sm">
+                    <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                  </button>
                  <div>
-                    <h2 className="text-lg font-bold text-slate-900">ตรวจสอบและสั่งผลิต</h2>
-                    <p className="text-xs text-slate-500">ตรวจสอบรายละเอียดก่อนดำเนินการ</p>
+                    <h2 className="text-sm sm:text-base lg:text-lg font-bold text-slate-900">ตรวจสอบและสั่งผลิต</h2>
+                    <p className="text-[10px] sm:text-xs text-slate-500 hidden sm:block">ตรวจสอบรายละเอียดก่อนดำเนินการ</p>
                  </div>
               </div>
 
-              {/* Process Stepper */}
-              <div className="hidden md:flex items-center gap-1.5">
+              {/* Process Stepper - Hidden on mobile */}
+              <div className="hidden lg:flex items-center gap-1.5">
                  {[
                    { id: 1, label: 'สินค้า', status: 'completed' },
                    { id: 2, label: 'ออกแบบ', status: 'completed' },
                    { id: 3, label: 'ตรวจสอบ', status: 'current' },
                  ].map((step, i) => (
                    <div key={step.id} className="flex items-center gap-1.5">
-                     {i > 0 && <div className={`w-12 h-0.5 ${step.status === 'current' || i <= 1 ? 'bg-green-400' : 'bg-slate-200'}`} />}
-                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${step.status === 'completed' ? 'bg-green-500 text-white shadow-lg shadow-green-500/30' : step.status === 'current' ? 'bg-ci-blue text-white shadow-lg shadow-ci-blue/30' : 'bg-slate-100 text-slate-400'}`}>
-                       <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${step.status === 'completed' ? 'bg-white/20' : step.status === 'current' ? 'bg-white/20' : 'bg-white/50'}`}>
-                         {step.status === 'completed' ? <Check className="w-3 h-3" /> : step.id}
+                     {i > 0 && <div className={`w-8 lg:w-12 h-0.5 ${step.status === 'current' || i <= 1 ? 'bg-green-400' : 'bg-slate-200'}`} />}
+                     <div className={`flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1 lg:py-1.5 rounded-full transition-all ${step.status === 'completed' ? 'bg-green-500 text-white shadow-lg shadow-green-500/30' : step.status === 'current' ? 'bg-ci-blue text-white shadow-lg shadow-ci-blue/30' : 'bg-slate-100 text-slate-400'}`}>
+                       <div className={`w-4 h-4 lg:w-5 lg:h-5 rounded-full flex items-center justify-center text-[10px] lg:text-xs font-bold ${step.status === 'completed' ? 'bg-white/20' : step.status === 'current' ? 'bg-white/20' : 'bg-white/50'}`}>
+                         {step.status === 'completed' ? <Check className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> : step.id}
                        </div>
-                       <span className="text-xs font-bold">{step.label}</span>
+                       <span className="text-[10px] lg:text-xs font-bold">{step.label}</span>
                      </div>
                    </div>
+                 ))}
+              </div>
+              
+              {/* Mini Stepper for tablet/mobile */}
+              <div className="flex lg:hidden items-center gap-1">
+                 {[1, 2, 3].map((step) => (
+                   <div 
+                     key={step} 
+                     className={`w-6 h-1.5 rounded-full ${step <= 2 ? 'bg-green-500' : 'bg-ci-blue'}`}
+                   />
                  ))}
               </div>
            </div>
 
            {/* Content */}
            <div className="flex-1 overflow-y-auto pb-24">
-              <div className="max-w-7xl mx-auto p-6">
+              <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-6">
                  
-                 {/* Product Hero Banner */}
-                 <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden mb-6">
-                    <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-6 relative overflow-hidden">
+                 {/* Product Hero Banner - Compact on mobile */}
+                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl border border-slate-200 overflow-hidden mb-4 sm:mb-6">
+                    <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-3 sm:p-5 lg:p-6 relative overflow-hidden">
                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50"></div>
-                       <div className="relative z-10 flex items-center gap-6">
-                          <div className="w-28 h-28 bg-white rounded-2xl p-3 shadow-2xl flex-shrink-0 ring-4 ring-white/10">
+                       <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5">
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-white rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-xl sm:shadow-2xl flex-shrink-0 ring-2 sm:ring-4 ring-white/10">
                              <img 
                                 src={selectedProduct.imageUrl || 'https://www.pngall.com/wp-content/uploads/2016/04/T-Shirt-PNG-File.png'} 
-                                className="w-full h-full object-cover rounded-xl" 
+                                className="w-full h-full object-cover rounded-lg" 
                                 alt={selectedProduct.title}
                              />
                           </div>
-                          <div className="flex-1">
-                             <div className="flex items-center gap-3 mb-2">
-                                <h3 className="text-2xl font-black text-white">{selectedProduct.title}</h3>
+                          <div className="flex-1 min-w-0">
+                             <div className="flex flex-wrap items-center gap-2 mb-1 sm:mb-2">
+                                <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-white truncate">{selectedProduct.title}</h3>
                                 {selectedProduct.badge && (
-                                   <span className="px-3 py-1 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-xs font-black rounded-lg shadow-lg">
+                                   <span className="px-2 py-0.5 sm:px-3 sm:py-1 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-[10px] sm:text-xs font-black rounded-md sm:rounded-lg shadow-lg whitespace-nowrap">
                                       {selectedProduct.badge}
-                                   </span>
+                                </span>
                                 )}
                              </div>
-                             <p className="text-sm text-slate-300 mb-3">{selectedProduct.description}</p>
-                             <div className="flex flex-wrap items-center gap-2 text-xs">
-                                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-lg backdrop-blur">
+                             <p className="text-xs sm:text-sm text-slate-300 mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-none">{selectedProduct.description}</p>
+                             <div className="hidden sm:flex flex-wrap items-center gap-2 text-xs">
+                                <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-white/10 rounded-md sm:rounded-lg backdrop-blur">
                                    <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
                                    <span className="text-slate-200 font-medium">{selectedProduct.fabricGrade}</span>
                                 </div>
-                                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-lg backdrop-blur">
+                                <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-white/10 rounded-md sm:rounded-lg backdrop-blur">
                                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full" />
                                    <span className="text-slate-200 font-medium">{selectedProduct.fiberType}</span>
                                 </div>
                                 {selectedProduct.thickness && (
-                                   <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-lg backdrop-blur">
+                                   <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-white/10 rounded-md sm:rounded-lg backdrop-blur">
                                       <div className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
                                       <span className="text-slate-200 font-medium">{selectedProduct.thickness}</span>
                                    </div>
                                 )}
                              </div>
                           </div>
-                          <div className="text-right">
-                             <p className="text-xs text-slate-400 mb-1 uppercase tracking-wider">ราคาฐาน</p>
-                             <p className="text-4xl font-black text-white">฿{selectedProduct.price}</p>
+                          <div className="absolute top-3 right-3 sm:static text-right">
+                             <p className="text-[10px] sm:text-xs text-slate-400 mb-0.5 sm:mb-1 uppercase tracking-wider">ราคาฐาน</p>
+                             <p className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">฿{selectedProduct.price}</p>
                              {sizeSurcharge > 0 && (
-                                <p className="text-xs text-amber-400 font-bold mt-1">+฿{sizeSurcharge} ({shirtSize})</p>
+                                <p className="text-[10px] sm:text-xs text-amber-400 font-bold mt-0.5 sm:mt-1">+฿{sizeSurcharge} ({shirtSize})</p>
                              )}
                           </div>
                        </div>
-                    </div>
-                 </div>
-
-                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                </div>
+                             </div>
+                             
+                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
                     
                     {/* Left & Center Columns (Span 2) */}
-                    <div className="lg:col-span-2 space-y-6">
+                    <div className="xl:col-span-2 space-y-4 sm:space-y-6">
                        {/* Mockup Preview with Interactive Colors */}
-                       <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-                          <div className="p-6">
-                             <div className="flex items-center justify-between mb-4">
+                       <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+                          <div className="p-3 sm:p-4 lg:p-6">
+                             <div className="flex items-center justify-between mb-3 sm:mb-4">
                                 <div>
-                                   <h4 className="font-bold text-slate-900 text-lg flex items-center gap-2">
-                                      <Shirt className="w-5 h-5 text-ci-blue" />
+                                   <h4 className="font-bold text-slate-900 text-sm sm:text-base lg:text-lg flex items-center gap-1.5 sm:gap-2">
+                                      <Shirt className="w-4 h-4 sm:w-5 sm:h-5 text-ci-blue" />
                                       ตัวอย่างดีไซน์
                                    </h4>
-                                   <p className="text-xs text-slate-500 mt-0.5">
+                                   <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">
                                       {COLORS.find(c => c.value === shirtColor)?.name} • {shirtSize}
                                    </p>
                                 </div>
-                                <div className="flex bg-slate-100 rounded-xl p-1 shadow-inner">
-                                   <button onClick={() => setViewSide('front')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewSide === 'front' ? 'bg-white shadow-md text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>
+                                <div className="flex bg-slate-100 rounded-lg sm:rounded-xl p-0.5 sm:p-1 shadow-inner">
+                                   <button onClick={() => setViewSide('front')} className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-bold transition-all ${viewSide === 'front' ? 'bg-white shadow-md text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>
                                       ด้านหน้า
                                    </button>
-                                   <button onClick={() => setViewSide('back')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewSide === 'back' ? 'bg-white shadow-md text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>
+                                   <button onClick={() => setViewSide('back')} className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-bold transition-all ${viewSide === 'back' ? 'bg-white shadow-md text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>
                                       ด้านหลัง
                                    </button>
                                 </div>
                              </div>
 
-                             {/* Mockup Display */}
-                             <div className="relative bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-12 mb-5">
+                             {/* Mockup Display - Compact on mobile */}
+                             <div className="relative bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl sm:rounded-2xl p-4 sm:p-8 lg:p-12 mb-3 sm:mb-5">
                                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]"></div>
-                                <div className="relative aspect-square flex items-center justify-center">
-                                   <img 
-                                      src={viewSide === 'front' ? MOCKUP_IMAGES.front : MOCKUP_IMAGES.back} 
+                                <div className="relative aspect-square max-h-[300px] sm:max-h-none flex items-center justify-center mx-auto">
+                                <img 
+                                   src={viewSide === 'front' ? MOCKUP_IMAGES.front : MOCKUP_IMAGES.back} 
                                       alt="Preview" 
-                                      className="max-w-full max-h-full object-contain drop-shadow-2xl transition-all duration-500 hover:scale-105" 
+                                      className="max-w-full max-h-full object-contain drop-shadow-xl sm:drop-shadow-2xl transition-all duration-500 hover:scale-105" 
                                    />
                                 </div>
                              </div>
 
-                             {/* Interactive Color Selector */}
+                             {/* Interactive Color Selector - Scrollable on mobile */}
                              <div>
-                                <div className="flex items-center gap-2 mb-3">
-                                   <div className="w-1 h-4 bg-ci-blue rounded-full"></div>
-                                   <span className="text-xs font-black text-slate-700 uppercase tracking-wider">สีที่มีจำหน่าย ({availableColors.length})</span>
+                                <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                                   <div className="w-1 h-3 sm:h-4 bg-ci-blue rounded-full"></div>
+                                   <span className="text-[10px] sm:text-xs font-black text-slate-700 uppercase tracking-wider">สีที่มีจำหน่าย ({availableColors.length})</span>
                                 </div>
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                                    {availableColors.map(c => {
                                       const colorName = COLORS.find(col => col.value === c)?.name;
                                       const isActive = shirtColor === c;
@@ -3360,22 +3370,22 @@ ${svgElements}
                                          <button
                                             key={c}
                                             onClick={() => setShirtColor(c)}
-                                            className={`group relative flex items-center gap-2.5 px-4 py-3 rounded-xl border-2 transition-all ${
+                                            className={`group relative flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-3 rounded-lg sm:rounded-xl border-2 transition-all ${
                                                isActive 
                                                   ? 'bg-ci-blue border-ci-blue shadow-lg shadow-ci-blue/30 scale-105' 
                                                   : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-md hover:scale-105'
                                             }`}
                                          >
                                             <div 
-                                               className={`w-7 h-7 rounded-full border-2 shadow-md transition-all ${
+                                               className={`w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 rounded-full border-2 shadow-sm sm:shadow-md transition-all ${
                                                   isActive ? 'border-white scale-110' : 'border-slate-300'
                                                }`} 
                                                style={{ backgroundColor: c }} 
                                             />
-                                            <span className={`text-sm font-bold ${isActive ? 'text-white' : 'text-slate-700'}`}>
+                                            <span className={`text-[10px] sm:text-xs lg:text-sm font-bold ${isActive ? 'text-white' : 'text-slate-700'}`}>
                                                {colorName}
                                             </span>
-                                            {isActive && <Check className="w-4 h-4 text-white" />}
+                                            {isActive && <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />}
                                          </button>
                                       );
                                    })}
@@ -3383,179 +3393,179 @@ ${svgElements}
                              </div>
                           </div>
                        </div>
-
-                       {/* Design Stats Grid */}
-                       <div className="grid grid-cols-3 gap-4">
-                          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:scale-105 transition-all">
-                             <div className="flex items-center justify-between mb-3">
-                                <Layers className="w-6 h-6 opacity-80" />
-                                <span className="text-3xl font-black">{elements.length}</span>
+                       
+                       {/* Design Stats Grid - 2 cols on mobile, 3 on desktop */}
+                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
+                          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:scale-105 transition-all">
+                             <div className="flex items-center justify-between mb-1.5 sm:mb-3">
+                                <Layers className="w-4 h-4 sm:w-6 sm:h-6 opacity-80" />
+                                <span className="text-xl sm:text-3xl font-black">{elements.length}</span>
                              </div>
-                             <p className="text-sm font-bold opacity-90">Element</p>
-                             <p className="text-xs opacity-70 mt-0.5">องค์ประกอบ</p>
+                             <p className="text-xs sm:text-sm font-bold opacity-90">Element</p>
+                             <p className="text-[10px] sm:text-xs opacity-70 mt-0.5 hidden sm:block">องค์ประกอบ</p>
                           </div>
-                          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-5 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:scale-105 transition-all">
-                             <div className="flex items-center justify-between mb-3">
-                                <div className="text-2xl">🎨</div>
-                                <span className="text-3xl font-black">{allClusters.length}</span>
+                          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:scale-105 transition-all">
+                             <div className="flex items-center justify-between mb-1.5 sm:mb-3">
+                                <div className="text-base sm:text-2xl">🎨</div>
+                                <span className="text-xl sm:text-3xl font-black">{allClusters.length}</span>
                              </div>
-                             <p className="text-sm font-bold opacity-90">จุดสกรีน</p>
-                             <p className="text-xs opacity-70 mt-0.5">Print Points</p>
+                             <p className="text-xs sm:text-sm font-bold opacity-90">จุดสกรีน</p>
+                             <p className="text-[10px] sm:text-xs opacity-70 mt-0.5 hidden sm:block">Print Points</p>
                           </div>
-                          <div className="bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl p-5 text-white shadow-lg shadow-pink-500/30 hover:shadow-xl hover:scale-105 transition-all">
-                             <div className="flex items-center justify-between mb-3">
-                                <div className="text-2xl">{technique === 'dtf' ? '🎨' : '🖨️'}</div>
-                                <span className="text-xl font-black">{technique.toUpperCase()}</span>
+                          <div className="col-span-2 sm:col-span-1 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-white shadow-lg shadow-pink-500/30 hover:shadow-xl hover:scale-105 transition-all">
+                             <div className="flex items-center justify-between mb-1.5 sm:mb-3">
+                                <div className="text-base sm:text-2xl">{technique === 'dtf' ? '🎨' : '🖨️'}</div>
+                                <span className="text-base sm:text-xl font-black">{technique.toUpperCase()}</span>
                              </div>
-                             <p className="text-sm font-bold opacity-90">เทคนิค</p>
-                             <p className="text-xs opacity-70 mt-0.5">Technique</p>
+                             <p className="text-xs sm:text-sm font-bold opacity-90">เทคนิค</p>
+                             <p className="text-[10px] sm:text-xs opacity-70 mt-0.5 hidden sm:block">Technique</p>
                           </div>
                        </div>
                     </div>
 
-                    {/* Right Column (Sticky Sidebar) */}
-                    <div className="space-y-6 lg:sticky lg:top-24 h-fit">
+                    {/* Right Column - Not sticky on mobile */}
+                    <div className="space-y-4 sm:space-y-6 xl:sticky xl:top-24 h-fit">
                        {/* Sizes Display */}
-                       <div className="bg-white rounded-2xl p-5 shadow-lg border border-slate-200">
-                          <div className="flex items-center gap-2 mb-4">
-                             <Maximize2 className="w-5 h-5 text-slate-600" />
-                             <h4 className="font-bold text-slate-900">ไซส์ที่เลือก</h4>
-                             <span className="ml-auto px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg">
+                       <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-lg border border-slate-200">
+                          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                             <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />
+                             <h4 className="font-bold text-slate-900 text-sm sm:text-base">ไซส์ที่เลือก</h4>
+                             <span className="ml-auto px-2 py-0.5 sm:px-2.5 sm:py-1 bg-slate-100 text-slate-600 text-[10px] sm:text-xs font-bold rounded-md sm:rounded-lg">
                                 {selectedSizes.length} ไซส์
                              </span>
                           </div>
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1.5 sm:gap-2">
                              {selectedSizes.map(size => (
-                                <div key={size} className="flex-1 min-w-[70px] text-center px-4 py-3 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-slate-200 shadow-sm hover:shadow-md hover:scale-105 transition-all">
-                                   <span className="text-base font-black text-slate-800">{size}</span>
+                                <div key={size} className="flex-1 min-w-[50px] sm:min-w-[70px] text-center px-2 sm:px-4 py-2 sm:py-3 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg sm:rounded-xl border-2 border-slate-200 shadow-sm hover:shadow-md hover:scale-105 transition-all">
+                                   <span className="text-sm sm:text-base font-black text-slate-800">{size}</span>
                                 </div>
                              ))}
-                          </div>
-                       </div>
-
-                       {/* Printing Cost Breakdown - Enhanced */}
-                       {allClusters.length > 0 && (
-                          <div className="bg-white rounded-2xl p-5 shadow-lg border border-slate-200">
-                             <div className="flex items-center gap-2 mb-4">
-                                <div className="p-2 bg-gradient-to-br from-pink-100 to-pink-50 rounded-xl">
-                                   <div className="text-xl">🎨</div>
-                                </div>
-                                <div className="flex-1">
-                                   <h4 className="font-bold text-slate-900">ค่าสกรีน</h4>
-                                   <p className="text-xs text-slate-500">{technique.toUpperCase()} • {allClusters.length} จุด</p>
-                                </div>
+                                  </div>
                              </div>
-                             <div className="space-y-2.5 mb-3">
+
+                       {/* Printing Cost Breakdown - Compact on mobile */}
+                       {allClusters.length > 0 && (
+                          <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-lg border border-slate-200">
+                             <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                                <div className="p-1.5 sm:p-2 bg-gradient-to-br from-pink-100 to-pink-50 rounded-lg sm:rounded-xl">
+                                   <div className="text-base sm:text-xl">🎨</div>
+                          </div>
+                                <div className="flex-1">
+                                   <h4 className="font-bold text-slate-900 text-sm sm:text-base">ค่าสกรีน</h4>
+                                   <p className="text-[10px] sm:text-xs text-slate-500">{technique.toUpperCase()} • {allClusters.length} จุด</p>
+                          </div>
+                          </div>
+                             <div className="space-y-2 sm:space-y-2.5 mb-2 sm:mb-3">
                                 {clusterPrices.map((cp, idx) => {
                                    const areaCm2 = (cp.bbox.widthCm * cp.bbox.heightCm).toFixed(1);
                                    return (
-                                      <div key={idx} className={`p-4 rounded-xl border-2 transition-all hover:shadow-md ${
+                                      <div key={idx} className={`p-2.5 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all hover:shadow-md ${
                                          cp.isFirstPoint 
                                             ? 'bg-gradient-to-r from-pink-50 to-rose-50 border-pink-300 shadow-sm' 
                                             : 'bg-slate-50 border-slate-200'
                                       }`}>
-                                         <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-2">
-                                               <div className={`p-1.5 rounded-lg ${cp.isFirstPoint ? 'bg-pink-500' : 'bg-slate-400'}`}>
-                                                  <div className="w-2 h-2 bg-white rounded-full" />
-                                               </div>
-                                               <span className={`text-xs font-black uppercase tracking-wide ${cp.isFirstPoint ? 'text-pink-700' : 'text-slate-600'}`}>
+                                         <div className="flex items-center justify-between mb-1 sm:mb-2">
+                                            <div className="flex items-center gap-1.5 sm:gap-2">
+                                               <div className={`p-1 sm:p-1.5 rounded-md sm:rounded-lg ${cp.isFirstPoint ? 'bg-pink-500' : 'bg-slate-400'}`}>
+                                                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full" />
+                          </div>
+                                               <span className={`text-[10px] sm:text-xs font-black uppercase tracking-wide ${cp.isFirstPoint ? 'text-pink-700' : 'text-slate-600'}`}>
                                                   {cp.isFirstPoint ? 'จุดแรก' : 'จุดถัดไป'}
                                                </span>
-                                            </div>
-                                            <span className={`text-xl font-black ${cp.isFirstPoint ? 'text-pink-600' : 'text-slate-700'}`}>
+                       </div>
+                                            <span className={`text-base sm:text-xl font-black ${cp.isFirstPoint ? 'text-pink-600' : 'text-slate-700'}`}>
                                                ฿{cp.totalPrice}
                                             </span>
-                                         </div>
-                                         <div className="flex items-center justify-between text-xs">
+                    </div>
+                                         <div className="flex items-center justify-between text-[10px] sm:text-xs">
                                             <span className="text-slate-500 font-medium">ขนาด {cp.tier.size}</span>
-                                            <span className="font-bold text-slate-600 bg-white/60 px-2 py-1 rounded-md">{areaCm2} cm²</span>
+                                            <span className="font-bold text-slate-600 bg-white/60 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">{areaCm2} cm²</span>
                                          </div>
                                       </div>
                                    );
                                 })}
                              </div>
-                             <div className="pt-3 border-t-2 border-slate-200">
-                                <div className="flex items-center justify-between px-2">
-                                   <span className="text-sm font-bold text-slate-700">รวมค่าสกรีนทั้งหมด</span>
-                                   <span className="text-2xl font-black text-ci-blue">฿{printingPrice}</span>
+                             <div className="pt-2 sm:pt-3 border-t-2 border-slate-200">
+                                <div className="flex items-center justify-between px-1 sm:px-2">
+                                   <span className="text-xs sm:text-sm font-bold text-slate-700">รวมค่าสกรีน</span>
+                                   <span className="text-lg sm:text-2xl font-black text-ci-blue">฿{printingPrice}</span>
                                 </div>
                              </div>
                           </div>
                        )}
 
-                       {/* Price Summary & Actions - Premium */}
-                       <div className="bg-gradient-to-br from-ci-blue via-blue-600 to-blue-700 rounded-2xl p-6 text-white shadow-2xl shadow-ci-blue/40">
-                          <div className="flex items-center gap-3 mb-5">
-                             <div className="p-2.5 bg-white/20 rounded-xl backdrop-blur">
-                                <ShoppingCart className="w-6 h-6" />
+                       {/* Price Summary & Actions - Compact on mobile */}
+                       <div className="bg-gradient-to-br from-ci-blue via-blue-600 to-blue-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white shadow-2xl shadow-ci-blue/40">
+                          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
+                             <div className="p-2 sm:p-2.5 bg-white/20 rounded-lg sm:rounded-xl backdrop-blur">
+                                <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
                              </div>
                              <div>
-                                <h4 className="font-bold text-xl">สรุปราคา</h4>
-                                <p className="text-xs text-blue-100">ราคาต่อชิ้น</p>
+                                <h4 className="font-bold text-base sm:text-xl">สรุปราคา</h4>
+                                <p className="text-[10px] sm:text-xs text-blue-100">ราคาต่อชิ้น</p>
                              </div>
                           </div>
 
-                          <div className="space-y-3 mb-5">
-                             <div className="flex items-center justify-between text-sm py-2 px-3 bg-white/10 rounded-lg backdrop-blur">
+                          <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-5">
+                             <div className="flex items-center justify-between text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-3 bg-white/10 rounded-md sm:rounded-lg backdrop-blur">
                                 <span className="text-blue-100 font-medium">ราคาสินค้า</span>
-                                <span className="font-bold text-lg">฿{selectedProduct.price + sizeSurcharge}</span>
-                             </div>
+                                <span className="font-bold text-base sm:text-lg">฿{selectedProduct.price + sizeSurcharge}</span>
+                                   </div>
                              {printingPrice > 0 && (
-                                <div className="flex items-center justify-between text-sm py-2 px-3 bg-white/10 rounded-lg backdrop-blur">
+                                <div className="flex items-center justify-between text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-3 bg-white/10 rounded-md sm:rounded-lg backdrop-blur">
                                    <span className="text-blue-100 font-medium">ค่าสกรีน ({allClusters.length} จุด)</span>
-                                   <span className="font-bold text-lg">฿{printingPrice}</span>
+                                   <span className="font-bold text-base sm:text-lg">฿{printingPrice}</span>
                                 </div>
                              )}
-                             <div className="h-px bg-white/30 my-2" />
-                             <div className="flex items-center justify-between py-3 px-3 bg-white/20 rounded-xl backdrop-blur">
-                                <span className="font-bold text-lg">ราคารวม</span>
-                                <span className="font-black text-4xl">฿{currentPrice}</span>
+                             <div className="h-px bg-white/30 my-1 sm:my-2" />
+                             <div className="flex items-center justify-between py-2 sm:py-3 px-2 sm:px-3 bg-white/20 rounded-lg sm:rounded-xl backdrop-blur">
+                                <span className="font-bold text-sm sm:text-lg">ราคารวม</span>
+                                <span className="font-black text-2xl sm:text-4xl">฿{currentPrice}</span>
+                                </div>
                              </div>
-                          </div>
 
-                          {/* Bulk Pricing Estimator */}
-                          <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 mb-5 border border-white/20">
-                             <div className="flex items-center justify-between mb-3">
-                                <span className="text-sm font-bold text-white">ประมาณการราคาจำนวนมาก</span>
-                                <Info className="w-4 h-4 text-blue-200" />
+                          {/* Bulk Pricing Estimator - More compact on mobile */}
+                          <div className="bg-white/10 backdrop-blur-lg rounded-lg sm:rounded-xl p-2.5 sm:p-4 mb-3 sm:mb-5 border border-white/20">
+                             <div className="flex items-center justify-between mb-2 sm:mb-3">
+                                <span className="text-xs sm:text-sm font-bold text-white">ประมาณการราคาจำนวนมาก</span>
+                                <Info className="w-3 h-3 sm:w-4 sm:h-4 text-blue-200" />
                              </div>
-                             <div className="grid grid-cols-3 gap-2 text-center">
-                                <div className="bg-white/10 rounded-lg p-3 hover:bg-white/20 transition-all">
-                                   <p className="text-xs text-blue-200 mb-1 font-medium">10 ตัว</p>
-                                   <p className="text-base font-black">฿{(currentPrice * 10).toLocaleString()}</p>
+                             <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
+                                <div className="bg-white/10 rounded-md sm:rounded-lg p-2 sm:p-3 hover:bg-white/20 transition-all">
+                                   <p className="text-[10px] sm:text-xs text-blue-200 mb-0.5 sm:mb-1 font-medium">10 ตัว</p>
+                                   <p className="text-xs sm:text-base font-black">฿{(currentPrice * 10).toLocaleString()}</p>
                                 </div>
-                                <div className="bg-white/10 rounded-lg p-3 hover:bg-white/20 transition-all">
-                                   <p className="text-xs text-blue-200 mb-1 font-medium">50 ตัว</p>
-                                   <p className="text-base font-black">฿{(currentPrice * 50).toLocaleString()}</p>
-                                </div>
-                                <div className="bg-white/10 rounded-lg p-3 hover:bg-white/20 transition-all">
-                                   <p className="text-xs text-blue-200 mb-1 font-medium">100 ตัว</p>
-                                   <p className="text-base font-black">฿{(currentPrice * 100).toLocaleString()}</p>
+                                <div className="bg-white/10 rounded-md sm:rounded-lg p-2 sm:p-3 hover:bg-white/20 transition-all">
+                                   <p className="text-[10px] sm:text-xs text-blue-200 mb-0.5 sm:mb-1 font-medium">50 ตัว</p>
+                                   <p className="text-xs sm:text-base font-black">฿{(currentPrice * 50).toLocaleString()}</p>
+                             </div>
+                                <div className="bg-white/10 rounded-md sm:rounded-lg p-2 sm:p-3 hover:bg-white/20 transition-all">
+                                   <p className="text-[10px] sm:text-xs text-blue-200 mb-0.5 sm:mb-1 font-medium">100 ตัว</p>
+                                   <p className="text-xs sm:text-base font-black">฿{(currentPrice * 100).toLocaleString()}</p>
                                 </div>
                              </div>
-                             <p className="text-xs text-blue-100 text-center mt-2 opacity-80">
+                             <p className="text-[10px] sm:text-xs text-blue-100 text-center mt-1.5 sm:mt-2 opacity-80 hidden sm:block">
                                 *ประมาณการสำหรับอ้างอิงเท่านั้น
                              </p>
                           </div>
-                          
-                          {/* Action Buttons - Enhanced */}
-                          <div className="space-y-3">
-                             <button onClick={() => handleFinalSave('cart')} className="w-full h-14 bg-white text-ci-blue rounded-xl font-black text-base hover:bg-blue-50 hover:shadow-2xl transition-all flex items-center justify-center gap-3 group shadow-xl">
-                                <div className="p-2 bg-ci-blue/10 rounded-lg group-hover:rotate-12 transition-transform">
-                                   <ShoppingCart className="w-5 h-5" />
+
+                          {/* Action Buttons - Compact on mobile */}
+                          <div className="space-y-2 sm:space-y-3">
+                             <button onClick={() => handleFinalSave('cart')} className="w-full h-11 sm:h-14 bg-white text-ci-blue rounded-lg sm:rounded-xl font-black text-sm sm:text-base hover:bg-blue-50 hover:shadow-2xl transition-all flex items-center justify-center gap-2 sm:gap-3 group shadow-xl">
+                                <div className="p-1.5 sm:p-2 bg-ci-blue/10 rounded-md sm:rounded-lg group-hover:rotate-12 transition-transform">
+                                   <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </div>
                                 <span>ใส่ตะกร้าสั่งผลิต</span>
                              </button>
-                             <button onClick={() => handleFinalSave('template')} className="w-full h-12 bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 rounded-xl font-bold hover:bg-white/20 hover:border-white/50 transition-all flex items-center justify-center gap-2 shadow-lg">
-                                <Save className="w-4 h-4" />
+                             <button onClick={() => handleFinalSave('template')} className="w-full h-10 sm:h-12 bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 rounded-lg sm:rounded-xl font-bold text-xs sm:text-base hover:bg-white/20 hover:border-white/50 transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg">
+                                <Save className="w-3 h-3 sm:w-4 sm:h-4" />
                                 บันทึกเป็นเทมเพลต
                              </button>
                           </div>
                           
-                          <p className="text-xs text-blue-100 text-center mt-5 opacity-80">
+                          <p className="text-[10px] sm:text-xs text-blue-100 text-center mt-3 sm:mt-5 opacity-80">
                              *ราคายังไม่รวมค่าจัดส่ง
-                          </p>
+                             </p>
                        </div>
                     </div>
 
@@ -3955,4 +3965,5 @@ function ShortcutRow({ keys, desc }: { keys: string[]; desc: string }) {
     </div>
   );
 }
+
 
