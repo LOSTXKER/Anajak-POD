@@ -3505,27 +3505,71 @@ ${svgElements}
               </div>
             </div>
             
-            {/* Footer */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-white">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full border-2 border-white shadow" style={{ backgroundColor: shirtColor }} />
-                  <span className="text-sm text-slate-600">{COLORS.find(c => c.value === shirtColor)?.name}</span>
+            {/* Footer with Color & Size Controls */}
+            <div className="px-6 py-4 border-t border-slate-100 bg-white space-y-4">
+              {/* Color Selector */}
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">สีเสื้อ</label>
+                <div className="flex flex-wrap gap-2">
+                  {availableColors.map((colorValue) => {
+                    const colorObj = COLORS.find(c => c.value === colorValue);
+                    return (
+                      <button 
+                        key={colorValue} 
+                        onClick={() => setShirtColor(colorValue)} 
+                        className={`w-8 h-8 rounded-lg shadow-sm transition-all ${shirtColor === colorValue ? 'ring-2 ring-ci-blue scale-110' : 'ring-1 ring-slate-200 hover:scale-105'}`}
+                        style={{ backgroundColor: colorValue }}
+                        title={colorObj?.name || 'Custom Color'}
+                      >
+                        {shirtColor === colorValue && (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Check className={`w-4 h-4 ${colorValue === '#ffffff' ? 'text-ci-blue' : 'text-white'} drop-shadow-sm`} strokeWidth={3} />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-                <span className="text-slate-300">•</span>
-                <span className="text-sm text-slate-600">{shirtSize}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => { setShowPreviewModal(false); setShowExportModal(true); }} 
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium text-sm transition-all flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>ดาวน์โหลด</span>
-                </button>
-                <button onClick={() => setShowPreviewModal(false)} className="px-6 py-2 bg-ci-blue text-white rounded-lg font-bold text-sm hover:bg-blue-600 transition-all">
-                  ปิด
-                </button>
+
+              {/* Size Selector */}
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">ไซส์</label>
+                <div className="flex flex-wrap gap-2">
+                  {selectedSizes.map(s => (
+                    <button 
+                      key={s}
+                      onClick={() => setShirtSize(s)}
+                      className={`h-8 min-w-[2.5rem] px-3 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
+                        shirtSize === s 
+                          ? 'bg-ci-blue text-white shadow-md scale-105' 
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                <div className="text-sm text-slate-600">
+                  <span className="font-medium">ราคา: </span>
+                  <span className="font-bold text-ci-blue text-base">฿{currentPrice}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => { setShowPreviewModal(false); setShowExportModal(true); }} 
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium text-sm transition-all flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>ดาวน์โหลด</span>
+                  </button>
+                  <button onClick={() => setShowPreviewModal(false)} className="px-6 py-2 bg-ci-blue text-white rounded-lg font-bold text-sm hover:bg-blue-600 transition-all">
+                    ปิด
+                  </button>
+                </div>
               </div>
             </div>
           </div>
