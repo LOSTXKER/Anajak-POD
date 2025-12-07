@@ -3218,32 +3218,32 @@ ${svgElements}
            </div>
         </div>
       </div>
-      {/* Review Modal (Redesigned 2024) */}
+      {/* Review Modal (Premium Redesign) */}
       {showReviewModal && (
-        <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col animate-in slide-in-from-bottom-10 duration-300">
+        <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-100 to-slate-50 flex flex-col animate-in slide-in-from-bottom-10 duration-300">
            {/* Header */}
-           <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm">
+           <div className="h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-20">
               <div className="flex items-center gap-3">
-                 <button onClick={() => setShowReviewModal(false)} className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-all">
+                 <button onClick={() => setShowReviewModal(false)} className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center text-slate-700 hover:from-slate-200 hover:to-slate-100 transition-all shadow-sm">
                     <ChevronLeft className="w-5 h-5" />
                  </button>
                  <div>
-                    <h2 className="text-lg font-bold text-slate-900">ตรวจสอบรายละเอียด</h2>
-                    <p className="text-xs text-slate-500">ก่อนบันทึกหรือสั่งผลิต</p>
+                    <h2 className="text-lg font-bold text-slate-900">ตรวจสอบและสั่งผลิต</h2>
+                    <p className="text-xs text-slate-500">ตรวจสอบรายละเอียดก่อนดำเนินการ</p>
                  </div>
               </div>
 
               {/* Process Stepper */}
-              <div className="hidden md:flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-1.5">
                  {[
                    { id: 1, label: 'สินค้า', status: 'completed' },
                    { id: 2, label: 'ออกแบบ', status: 'completed' },
                    { id: 3, label: 'ตรวจสอบ', status: 'current' },
                  ].map((step, i) => (
-                   <div key={step.id} className="flex items-center gap-2">
-                     {i > 0 && <ChevronRight className="w-3 h-3 text-slate-300" />}
-                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${step.status === 'completed' ? 'bg-green-50 text-green-700' : step.status === 'current' ? 'bg-blue-50 text-ci-blue' : 'bg-slate-50 text-slate-400'}`}>
-                       <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${step.status === 'completed' ? 'bg-green-100' : step.status === 'current' ? 'bg-ci-blue text-white' : 'bg-slate-200'}`}>
+                   <div key={step.id} className="flex items-center gap-1.5">
+                     {i > 0 && <div className={`w-12 h-0.5 ${step.status === 'current' || i <= 1 ? 'bg-green-400' : 'bg-slate-200'}`} />}
+                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${step.status === 'completed' ? 'bg-green-500 text-white shadow-lg shadow-green-500/30' : step.status === 'current' ? 'bg-ci-blue text-white shadow-lg shadow-ci-blue/30' : 'bg-slate-100 text-slate-400'}`}>
+                       <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${step.status === 'completed' ? 'bg-white/20' : step.status === 'current' ? 'bg-white/20' : 'bg-white/50'}`}>
                          {step.status === 'completed' ? <Check className="w-3 h-3" /> : step.id}
                        </div>
                        <span className="text-xs font-bold">{step.label}</span>
@@ -3254,191 +3254,306 @@ ${svgElements}
            </div>
 
            {/* Content */}
-           <div className="flex-1 overflow-y-auto">
+           <div className="flex-1 overflow-y-auto pb-24">
               <div className="max-w-7xl mx-auto p-6">
-                 {/* Product Info Banner */}
-                 <div className="bg-gradient-to-r from-slate-900 to-slate-700 rounded-2xl p-6 mb-6 shadow-xl">
-                    <div className="flex items-center gap-6">
-                       <div className="w-20 h-20 bg-white rounded-xl p-2 flex-shrink-0">
-                          <img 
-                             src={selectedProduct.imageUrl || 'https://www.pngall.com/wp-content/uploads/2016/04/T-Shirt-PNG-File.png'} 
-                             className="w-full h-full object-cover rounded-lg" 
-                             alt={selectedProduct.title}
-                          />
-                       </div>
-                       <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                             <h3 className="text-xl font-bold text-white">{selectedProduct.title}</h3>
-                             {selectedProduct.badge && (
-                                <span className="px-2 py-0.5 bg-white/20 text-white text-xs font-bold rounded-md">
-                                   {selectedProduct.badge}
-                                </span>
+                 
+                 {/* Product Hero Banner */}
+                 <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden mb-6">
+                    <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-6 relative overflow-hidden">
+                       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50"></div>
+                       <div className="relative z-10 flex items-center gap-6">
+                          <div className="w-28 h-28 bg-white rounded-2xl p-3 shadow-2xl flex-shrink-0 ring-4 ring-white/10">
+                             <img 
+                                src={selectedProduct.imageUrl || 'https://www.pngall.com/wp-content/uploads/2016/04/T-Shirt-PNG-File.png'} 
+                                className="w-full h-full object-cover rounded-xl" 
+                                alt={selectedProduct.title}
+                             />
+                          </div>
+                          <div className="flex-1">
+                             <div className="flex items-center gap-3 mb-2">
+                                <h3 className="text-2xl font-black text-white">{selectedProduct.title}</h3>
+                                {selectedProduct.badge && (
+                                   <span className="px-3 py-1 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-xs font-black rounded-lg shadow-lg">
+                                      {selectedProduct.badge}
+                                   </span>
+                                )}
+                             </div>
+                             <p className="text-sm text-slate-300 mb-3">{selectedProduct.description}</p>
+                             <div className="flex flex-wrap items-center gap-2 text-xs">
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-lg backdrop-blur">
+                                   <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
+                                   <span className="text-slate-200 font-medium">{selectedProduct.fabricGrade}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-lg backdrop-blur">
+                                   <div className="w-1.5 h-1.5 bg-green-400 rounded-full" />
+                                   <span className="text-slate-200 font-medium">{selectedProduct.fiberType}</span>
+                                </div>
+                                {selectedProduct.thickness && (
+                                   <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-lg backdrop-blur">
+                                      <div className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
+                                      <span className="text-slate-200 font-medium">{selectedProduct.thickness}</span>
+                                   </div>
+                                )}
+                             </div>
+                          </div>
+                          <div className="text-right">
+                             <p className="text-xs text-slate-400 mb-1 uppercase tracking-wider">ราคาฐาน</p>
+                             <p className="text-4xl font-black text-white">฿{selectedProduct.price}</p>
+                             {sizeSurcharge > 0 && (
+                                <p className="text-xs text-amber-400 font-bold mt-1">+฿{sizeSurcharge} ({shirtSize})</p>
                              )}
                           </div>
-                          <p className="text-sm text-slate-300">{selectedProduct.description}</p>
-                          <div className="flex items-center gap-4 mt-2 text-xs text-slate-400">
-                             <span>• {selectedProduct.fabricGrade}</span>
-                             <span>• {selectedProduct.fiberType}</span>
-                             {selectedProduct.thickness && <span>• {selectedProduct.thickness}</span>}
-                          </div>
-                       </div>
-                       <div className="text-right">
-                          <p className="text-xs text-slate-400 mb-1">ราคาสินค้า</p>
-                          <p className="text-2xl font-bold text-white">฿{selectedProduct.price}</p>
                        </div>
                     </div>
                  </div>
 
-                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    {/* Left Column */}
-                    <div className="space-y-6">
-                       {/* Design Preview */}
-                       <div className="bg-white rounded-2xl p-6 border border-slate-200">
-                          <div className="flex items-center justify-between mb-4">
-                             <h4 className="font-bold text-slate-900">ตัวอย่างดีไซน์</h4>
-                             <div className="flex bg-slate-100 rounded-lg p-1">
-                                <button onClick={() => setViewSide('front')} className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${viewSide === 'front' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>หน้า</button>
-                                <button onClick={() => setViewSide('back')} className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${viewSide === 'back' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>หลัง</button>
-                             </div>
-                          </div>
-                          <div className="relative bg-slate-50 rounded-xl p-8 aspect-square flex items-center justify-center">
-                             <img 
-                                src={viewSide === 'front' ? MOCKUP_IMAGES.front : MOCKUP_IMAGES.back} 
-                                alt="Preview" 
-                                className="max-w-full max-h-full object-contain drop-shadow-xl" 
-                             />
-                          </div>
-                       </div>
-
-                       {/* Design Specs */}
-                       <div className="bg-white rounded-2xl p-6 border border-slate-200">
-                          <h4 className="font-bold text-slate-900 mb-4">รายละเอียดการออกแบบ</h4>
-                          <div className="space-y-3">
-                             <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                                <span className="text-sm text-slate-600">จำนวน Element</span>
-                                <span className="font-bold text-slate-900">{elements.length} ชิ้น</span>
-                             </div>
-                             <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                                <span className="text-sm text-slate-600">เทคนิคการพิมพ์</span>
-                                <span className="font-bold text-slate-900">{technique.toUpperCase()}</span>
-                             </div>
-                             {allClusters.length > 0 && (
-                                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                                   <span className="text-sm text-slate-600">จำนวนจุดสกรีน</span>
-                                   <span className="font-bold text-slate-900">{allClusters.length} จุด</span>
+                    {/* Left & Center Columns (Span 2) */}
+                    <div className="lg:col-span-2 space-y-6">
+                       {/* Mockup Preview with Interactive Colors */}
+                       <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+                          <div className="p-6">
+                             <div className="flex items-center justify-between mb-4">
+                                <div>
+                                   <h4 className="font-bold text-slate-900 text-lg flex items-center gap-2">
+                                      <Shirt className="w-5 h-5 text-ci-blue" />
+                                      ตัวอย่างดีไซน์
+                                   </h4>
+                                   <p className="text-xs text-slate-500 mt-0.5">
+                                      {COLORS.find(c => c.value === shirtColor)?.name} • {shirtSize}
+                                   </p>
                                 </div>
-                             )}
-                          </div>
-                       </div>
-                    </div>
+                                <div className="flex bg-slate-100 rounded-xl p-1 shadow-inner">
+                                   <button onClick={() => setViewSide('front')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewSide === 'front' ? 'bg-white shadow-md text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>
+                                      ด้านหน้า
+                                   </button>
+                                   <button onClick={() => setViewSide('back')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewSide === 'back' ? 'bg-white shadow-md text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>
+                                      ด้านหลัง
+                                   </button>
+                                </div>
+                             </div>
 
-                    {/* Right Column */}
-                    <div className="space-y-6">
-                       {/* Colors & Sizes */}
-                       <div className="bg-white rounded-2xl p-6 border border-slate-200">
-                          <h4 className="font-bold text-slate-900 mb-4">สีและไซส์ที่เลือก</h4>
-                          
-                          <div className="space-y-4">
-                             {/* Colors */}
+                             {/* Mockup Display */}
+                             <div className="relative bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-12 mb-5">
+                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]"></div>
+                                <div className="relative aspect-square flex items-center justify-center">
+                                   <img 
+                                      src={viewSide === 'front' ? MOCKUP_IMAGES.front : MOCKUP_IMAGES.back} 
+                                      alt="Preview" 
+                                      className="max-w-full max-h-full object-contain drop-shadow-2xl transition-all duration-500 hover:scale-105" 
+                                   />
+                                </div>
+                             </div>
+
+                             {/* Interactive Color Selector */}
                              <div>
-                                <div className="flex items-center justify-between mb-2">
-                                   <span className="text-sm text-slate-600 font-medium">สี</span>
-                                   <span className="text-xs text-slate-400">{availableColors.length} สี</span>
+                                <div className="flex items-center gap-2 mb-3">
+                                   <div className="w-1 h-4 bg-ci-blue rounded-full"></div>
+                                   <span className="text-xs font-black text-slate-700 uppercase tracking-wider">สีที่มีจำหน่าย ({availableColors.length})</span>
                                 </div>
                                 <div className="flex flex-wrap gap-2">
                                    {availableColors.map(c => {
                                       const colorName = COLORS.find(col => col.value === c)?.name;
+                                      const isActive = shirtColor === c;
                                       return (
-                                         <div key={c} className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200">
-                                            <div className="w-5 h-5 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: c }} />
-                                            <span className="text-xs font-medium text-slate-700">{colorName}</span>
-                                         </div>
+                                         <button
+                                            key={c}
+                                            onClick={() => setShirtColor(c)}
+                                            className={`group relative flex items-center gap-2.5 px-4 py-3 rounded-xl border-2 transition-all ${
+                                               isActive 
+                                                  ? 'bg-ci-blue border-ci-blue shadow-lg shadow-ci-blue/30 scale-105' 
+                                                  : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-md hover:scale-105'
+                                            }`}
+                                         >
+                                            <div 
+                                               className={`w-7 h-7 rounded-full border-2 shadow-md transition-all ${
+                                                  isActive ? 'border-white scale-110' : 'border-slate-300'
+                                               }`} 
+                                               style={{ backgroundColor: c }} 
+                                            />
+                                            <span className={`text-sm font-bold ${isActive ? 'text-white' : 'text-slate-700'}`}>
+                                               {colorName}
+                                            </span>
+                                            {isActive && <Check className="w-4 h-4 text-white" />}
+                                         </button>
                                       );
                                    })}
-                                </div>
-                             </div>
-
-                             {/* Sizes */}
-                             <div className="pt-3 border-t border-slate-100">
-                                <div className="flex items-center justify-between mb-2">
-                                   <span className="text-sm text-slate-600 font-medium">ไซส์</span>
-                                   <span className="text-xs text-slate-400">{selectedSizes.length} ไซส์</span>
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                   {selectedSizes.map(size => (
-                                      <div key={size} className="px-3 py-2 bg-slate-50 rounded-lg border border-slate-200">
-                                         <span className="text-sm font-bold text-slate-700">{size}</span>
-                                      </div>
-                                   ))}
                                 </div>
                              </div>
                           </div>
                        </div>
 
-                       {/* Printing Cost Breakdown */}
+                       {/* Design Stats Grid */}
+                       <div className="grid grid-cols-3 gap-4">
+                          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:scale-105 transition-all">
+                             <div className="flex items-center justify-between mb-3">
+                                <Layers className="w-6 h-6 opacity-80" />
+                                <span className="text-3xl font-black">{elements.length}</span>
+                             </div>
+                             <p className="text-sm font-bold opacity-90">Element</p>
+                             <p className="text-xs opacity-70 mt-0.5">องค์ประกอบ</p>
+                          </div>
+                          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-5 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:scale-105 transition-all">
+                             <div className="flex items-center justify-between mb-3">
+                                <div className="text-2xl">🎨</div>
+                                <span className="text-3xl font-black">{allClusters.length}</span>
+                             </div>
+                             <p className="text-sm font-bold opacity-90">จุดสกรีน</p>
+                             <p className="text-xs opacity-70 mt-0.5">Print Points</p>
+                          </div>
+                          <div className="bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl p-5 text-white shadow-lg shadow-pink-500/30 hover:shadow-xl hover:scale-105 transition-all">
+                             <div className="flex items-center justify-between mb-3">
+                                <div className="text-2xl">{technique === 'dtf' ? '🎨' : '🖨️'}</div>
+                                <span className="text-xl font-black">{technique.toUpperCase()}</span>
+                             </div>
+                             <p className="text-sm font-bold opacity-90">เทคนิค</p>
+                             <p className="text-xs opacity-70 mt-0.5">Technique</p>
+                          </div>
+                       </div>
+                    </div>
+
+                    {/* Right Column (Sticky Sidebar) */}
+                    <div className="space-y-6 lg:sticky lg:top-24 h-fit">
+                       {/* Sizes Display */}
+                       <div className="bg-white rounded-2xl p-5 shadow-lg border border-slate-200">
+                          <div className="flex items-center gap-2 mb-4">
+                             <Maximize2 className="w-5 h-5 text-slate-600" />
+                             <h4 className="font-bold text-slate-900">ไซส์ที่เลือก</h4>
+                             <span className="ml-auto px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg">
+                                {selectedSizes.length} ไซส์
+                             </span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                             {selectedSizes.map(size => (
+                                <div key={size} className="flex-1 min-w-[70px] text-center px-4 py-3 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-slate-200 shadow-sm hover:shadow-md hover:scale-105 transition-all">
+                                   <span className="text-base font-black text-slate-800">{size}</span>
+                                </div>
+                             ))}
+                          </div>
+                       </div>
+
+                       {/* Printing Cost Breakdown - Enhanced */}
                        {allClusters.length > 0 && (
-                          <div className="bg-white rounded-2xl p-6 border border-slate-200">
-                             <h4 className="font-bold text-slate-900 mb-4">รายละเอียดค่าสกรีน</h4>
-                             <div className="space-y-2">
+                          <div className="bg-white rounded-2xl p-5 shadow-lg border border-slate-200">
+                             <div className="flex items-center gap-2 mb-4">
+                                <div className="p-2 bg-gradient-to-br from-pink-100 to-pink-50 rounded-xl">
+                                   <div className="text-xl">🎨</div>
+                                </div>
+                                <div className="flex-1">
+                                   <h4 className="font-bold text-slate-900">ค่าสกรีน</h4>
+                                   <p className="text-xs text-slate-500">{technique.toUpperCase()} • {allClusters.length} จุด</p>
+                                </div>
+                             </div>
+                             <div className="space-y-2.5 mb-3">
                                 {clusterPrices.map((cp, idx) => {
                                    const areaCm2 = (cp.bbox.widthCm * cp.bbox.heightCm).toFixed(1);
                                    return (
-                                      <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                                         <div className="flex items-center gap-2">
-                                            <div className={`w-2 h-2 rounded-full ${cp.isFirstPoint ? 'bg-pink-500' : 'bg-slate-400'}`} />
-                                            <div>
-                                               <p className="text-sm font-medium text-slate-700">
-                                                  {cp.isFirstPoint ? 'จุดแรก' : 'จุดถัดไป'} ({cp.tier.size})
-                                               </p>
-                                               <p className="text-xs text-slate-500">{areaCm2} cm²</p>
+                                      <div key={idx} className={`p-4 rounded-xl border-2 transition-all hover:shadow-md ${
+                                         cp.isFirstPoint 
+                                            ? 'bg-gradient-to-r from-pink-50 to-rose-50 border-pink-300 shadow-sm' 
+                                            : 'bg-slate-50 border-slate-200'
+                                      }`}>
+                                         <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-2">
+                                               <div className={`p-1.5 rounded-lg ${cp.isFirstPoint ? 'bg-pink-500' : 'bg-slate-400'}`}>
+                                                  <div className="w-2 h-2 bg-white rounded-full" />
+                                               </div>
+                                               <span className={`text-xs font-black uppercase tracking-wide ${cp.isFirstPoint ? 'text-pink-700' : 'text-slate-600'}`}>
+                                                  {cp.isFirstPoint ? 'จุดแรก' : 'จุดถัดไป'}
+                                               </span>
                                             </div>
+                                            <span className={`text-xl font-black ${cp.isFirstPoint ? 'text-pink-600' : 'text-slate-700'}`}>
+                                               ฿{cp.totalPrice}
+                                            </span>
                                          </div>
-                                         <span className="font-bold text-slate-900">฿{cp.totalPrice}</span>
+                                         <div className="flex items-center justify-between text-xs">
+                                            <span className="text-slate-500 font-medium">ขนาด {cp.tier.size}</span>
+                                            <span className="font-bold text-slate-600 bg-white/60 px-2 py-1 rounded-md">{areaCm2} cm²</span>
+                                         </div>
                                       </div>
                                    );
                                 })}
-                                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border-t-2 border-blue-200 mt-2">
-                                   <span className="font-bold text-blue-900">รวมค่าสกรีน</span>
-                                   <span className="font-bold text-blue-900 text-lg">฿{printingPrice}</span>
+                             </div>
+                             <div className="pt-3 border-t-2 border-slate-200">
+                                <div className="flex items-center justify-between px-2">
+                                   <span className="text-sm font-bold text-slate-700">รวมค่าสกรีนทั้งหมด</span>
+                                   <span className="text-2xl font-black text-ci-blue">฿{printingPrice}</span>
                                 </div>
                              </div>
                           </div>
                        )}
 
-                       {/* Price Summary */}
-                       <div className="bg-gradient-to-br from-ci-blue to-blue-600 rounded-2xl p-6 text-white shadow-xl">
-                          <h4 className="font-bold mb-4">สรุปราคา</h4>
-                          <div className="space-y-2 mb-4">
-                             <div className="flex items-center justify-between text-sm">
-                                <span className="text-blue-100">ราคาสินค้า</span>
-                                <span className="font-medium">฿{selectedProduct.price + sizeSurcharge}</span>
+                       {/* Price Summary & Actions - Premium */}
+                       <div className="bg-gradient-to-br from-ci-blue via-blue-600 to-blue-700 rounded-2xl p-6 text-white shadow-2xl shadow-ci-blue/40">
+                          <div className="flex items-center gap-3 mb-5">
+                             <div className="p-2.5 bg-white/20 rounded-xl backdrop-blur">
+                                <ShoppingCart className="w-6 h-6" />
                              </div>
-                             {printingPrice > 0 && (
-                                <div className="flex items-center justify-between text-sm">
-                                   <span className="text-blue-100">ค่าสกรีน</span>
-                                   <span className="font-medium">฿{printingPrice}</span>
-                                </div>
-                             )}
-                             <div className="flex items-center justify-between pt-3 border-t border-white/20">
-                                <span className="font-bold text-lg">ราคาต่อชิ้น</span>
-                                <span className="font-bold text-2xl">฿{currentPrice}</span>
+                             <div>
+                                <h4 className="font-bold text-xl">สรุปราคา</h4>
+                                <p className="text-xs text-blue-100">ราคาต่อชิ้น</p>
                              </div>
                           </div>
+
+                          <div className="space-y-3 mb-5">
+                             <div className="flex items-center justify-between text-sm py-2 px-3 bg-white/10 rounded-lg backdrop-blur">
+                                <span className="text-blue-100 font-medium">ราคาสินค้า</span>
+                                <span className="font-bold text-lg">฿{selectedProduct.price + sizeSurcharge}</span>
+                             </div>
+                             {printingPrice > 0 && (
+                                <div className="flex items-center justify-between text-sm py-2 px-3 bg-white/10 rounded-lg backdrop-blur">
+                                   <span className="text-blue-100 font-medium">ค่าสกรีน ({allClusters.length} จุด)</span>
+                                   <span className="font-bold text-lg">฿{printingPrice}</span>
+                                </div>
+                             )}
+                             <div className="h-px bg-white/30 my-2" />
+                             <div className="flex items-center justify-between py-3 px-3 bg-white/20 rounded-xl backdrop-blur">
+                                <span className="font-bold text-lg">ราคารวม</span>
+                                <span className="font-black text-4xl">฿{currentPrice}</span>
+                             </div>
+                          </div>
+
+                          {/* Bulk Pricing Estimator */}
+                          <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 mb-5 border border-white/20">
+                             <div className="flex items-center justify-between mb-3">
+                                <span className="text-sm font-bold text-white">ประมาณการราคาจำนวนมาก</span>
+                                <Info className="w-4 h-4 text-blue-200" />
+                             </div>
+                             <div className="grid grid-cols-3 gap-2 text-center">
+                                <div className="bg-white/10 rounded-lg p-3 hover:bg-white/20 transition-all">
+                                   <p className="text-xs text-blue-200 mb-1 font-medium">10 ตัว</p>
+                                   <p className="text-base font-black">฿{(currentPrice * 10).toLocaleString()}</p>
+                                </div>
+                                <div className="bg-white/10 rounded-lg p-3 hover:bg-white/20 transition-all">
+                                   <p className="text-xs text-blue-200 mb-1 font-medium">50 ตัว</p>
+                                   <p className="text-base font-black">฿{(currentPrice * 50).toLocaleString()}</p>
+                                </div>
+                                <div className="bg-white/10 rounded-lg p-3 hover:bg-white/20 transition-all">
+                                   <p className="text-xs text-blue-200 mb-1 font-medium">100 ตัว</p>
+                                   <p className="text-base font-black">฿{(currentPrice * 100).toLocaleString()}</p>
+                                </div>
+                             </div>
+                             <p className="text-xs text-blue-100 text-center mt-2 opacity-80">
+                                *ประมาณการสำหรับอ้างอิงเท่านั้น
+                             </p>
+                          </div>
                           
-                          {/* Actions */}
-                          <div className="space-y-2 pt-4 border-t border-white/20">
-                             <button onClick={() => handleFinalSave('cart')} className="w-full h-12 bg-white text-ci-blue rounded-xl font-bold hover:bg-blue-50 transition-all flex items-center justify-center gap-2 group">
-                                <ShoppingCart className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                                ใส่ตะกร้าสั่งผลิต
+                          {/* Action Buttons - Enhanced */}
+                          <div className="space-y-3">
+                             <button onClick={() => handleFinalSave('cart')} className="w-full h-14 bg-white text-ci-blue rounded-xl font-black text-base hover:bg-blue-50 hover:shadow-2xl transition-all flex items-center justify-center gap-3 group shadow-xl">
+                                <div className="p-2 bg-ci-blue/10 rounded-lg group-hover:rotate-12 transition-transform">
+                                   <ShoppingCart className="w-5 h-5" />
+                                </div>
+                                <span>ใส่ตะกร้าสั่งผลิต</span>
                              </button>
-                             <button onClick={() => handleFinalSave('template')} className="w-full h-12 bg-white/10 backdrop-blur text-white border border-white/20 rounded-xl font-medium hover:bg-white/20 transition-all flex items-center justify-center gap-2">
+                             <button onClick={() => handleFinalSave('template')} className="w-full h-12 bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 rounded-xl font-bold hover:bg-white/20 hover:border-white/50 transition-all flex items-center justify-center gap-2 shadow-lg">
                                 <Save className="w-4 h-4" />
                                 บันทึกเป็นเทมเพลต
                              </button>
                           </div>
                           
-                          <p className="text-xs text-blue-100 text-center mt-4">
+                          <p className="text-xs text-blue-100 text-center mt-5 opacity-80">
                              *ราคายังไม่รวมค่าจัดส่ง
                           </p>
                        </div>

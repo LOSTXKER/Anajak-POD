@@ -1,0 +1,36 @@
+# Review Modal Redesign Plan
+
+## Current Issues:
+1. Product info banner is simple and lacks visual appeal
+2. Mockup preview doesn't show color interactivity
+3. No bulk pricing estimator
+4. Price summary could be more visual
+5. Layout is 3-column but only uses 2
+
+## Improvements:
+1. **Product Banner**: Premium gradient + grid pattern + better specs display
+2. **Mockup Section**: Interactive color selector with real-time preview
+3. **Design Stats**: 3 gradient cards showing Elements/Print Points/Technique
+4. **Price Breakdown**: Enhanced visual hierarchy with first point highlighting
+5. **Bulk Estimator**: Show prices for 10/50/100 units
+6. **Sticky Pricing**: Right sidebar stays visible while scrolling
+7. **Better Typography**: Larger, bolder, more hierarchy
+8. **Micro-interactions**: Hover effects, transitions, shadows
+
+## New Layout:
+```
+Grid: lg:grid-cols-3
+
+Column 1-2 (span 2):
+- Product Banner (premium gradient)
+- Mockup Preview (with clickable colors)
+- Design Stats (3 cards)
+
+Column 3:
+- Sizes Display
+- Printing Breakdown  
+- Price Summary (sticky)
+  - Bulk Estimator
+  - Action Buttons
+```
+
