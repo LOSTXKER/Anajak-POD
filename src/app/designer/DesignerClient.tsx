@@ -1801,89 +1801,6 @@ ${svgElements}
                 </div>
               </div>
 
-              {/* Section Divider */}
-              <div className="h-px bg-slate-100" />
-
-              {/* Colors */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-4 bg-ci-blue rounded-full" />
-                    <label className="text-xs font-bold text-slate-700">สีเสื้อ</label>
-                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">{availableColors.length} สี</span>
-                  </div>
-                  <button onClick={() => setAvailableColors(availableColors.length === COLORS.length ? [shirtColor] : COLORS.map(c => c.value))} className="text-[10px] font-bold text-ci-blue hover:underline">
-                    {availableColors.length === COLORS.length ? 'ล้างค่า' : 'เลือกทั้งหมด'}
-                  </button>
-                </div>
-                
-                <div className="flex flex-wrap gap-2">
-                  {COLORS.map((c) => {
-                    const isSelected = availableColors.includes(c.value);
-                    const isActive = shirtColor === c.value;
-                    return (
-                      <button 
-                        key={c.value} 
-                        onClick={() => toggleColorSelection(c.value)} 
-                        className={`w-8 h-8 rounded-lg transition-all relative group ${isActive ? 'ring-2 ring-ci-blue scale-110 z-10' : 'ring-1 ring-slate-200 hover:scale-105'}`}
-                        style={{ backgroundColor: c.value }}
-                        title={c.name}
-                      >
-                         {isSelected && (
-                           <div className="absolute inset-0 flex items-center justify-center">
-                             <Check className={`w-3.5 h-3.5 ${c.value === '#ffffff' ? 'text-ci-blue' : 'text-white'} drop-shadow-sm`} strokeWidth={3} />
-                           </div>
-                         )}
-                         {isActive && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-ci-blue rounded-full" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Section Divider */}
-              <div className="h-px bg-slate-100" />
-
-              {/* Sizes */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-4 bg-ci-blue rounded-full" />
-                    <label className="text-xs font-bold text-slate-700">ไซส์</label>
-                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">{selectedSizes.length} ไซส์</span>
-                  </div>
-                  <button onClick={() => setSelectedSizes(selectedSizes.length === SIZES.length ? [] : [...SIZES])} className="text-[10px] font-bold text-ci-blue hover:underline">
-                    {selectedSizes.length === SIZES.length ? 'ล้างค่า' : 'เลือกทั้งหมด'}
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {SIZES.map((s) => {
-                    const isSelected = selectedSizes.includes(s);
-                    const isActive = shirtSize === s;
-                    return (
-                      <button 
-                        key={s} 
-                        onClick={() => {
-                           const newSizes = isSelected ? selectedSizes.filter(sz => sz !== s) : [...selectedSizes, s];
-                           setSelectedSizes(newSizes);
-                           if (!isSelected) setShirtSize(s); 
-                        }}
-                        className={`min-w-[42px] px-3 py-2 rounded-lg text-xs font-bold border transition-all relative ${
-                          isSelected 
-                            ? 'bg-ci-blue text-white border-ci-blue' 
-                            : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:text-slate-700'
-                        }`}
-                      >
-                        {s}
-                        {isActive && isSelected && (
-                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border border-white" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
               {/* Print Size & Price Breakdown */}
               {allClusters.length > 0 && (
                 <>
@@ -1971,6 +1888,89 @@ ${svgElements}
                   </div>
                 </>
               )}
+
+              {/* Section Divider */}
+              <div className="h-px bg-slate-100" />
+
+              {/* Colors */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1 h-4 bg-ci-blue rounded-full" />
+                    <label className="text-xs font-bold text-slate-700">สีเสื้อ</label>
+                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">{availableColors.length} สี</span>
+                  </div>
+                  <button onClick={() => setAvailableColors(availableColors.length === COLORS.length ? [shirtColor] : COLORS.map(c => c.value))} className="text-[10px] font-bold text-ci-blue hover:underline">
+                    {availableColors.length === COLORS.length ? 'ล้างค่า' : 'เลือกทั้งหมด'}
+                  </button>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  {COLORS.map((c) => {
+                    const isSelected = availableColors.includes(c.value);
+                    const isActive = shirtColor === c.value;
+                    return (
+                      <button 
+                        key={c.value} 
+                        onClick={() => toggleColorSelection(c.value)} 
+                        className={`w-8 h-8 rounded-lg transition-all relative group ${isActive ? 'ring-2 ring-ci-blue scale-110 z-10' : 'ring-1 ring-slate-200 hover:scale-105'}`}
+                        style={{ backgroundColor: c.value }}
+                        title={c.name}
+                      >
+                         {isSelected && (
+                           <div className="absolute inset-0 flex items-center justify-center">
+                             <Check className={`w-3.5 h-3.5 ${c.value === '#ffffff' ? 'text-ci-blue' : 'text-white'} drop-shadow-sm`} strokeWidth={3} />
+                           </div>
+                         )}
+                         {isActive && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-ci-blue rounded-full" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Section Divider */}
+              <div className="h-px bg-slate-100" />
+
+              {/* Sizes */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1 h-4 bg-ci-blue rounded-full" />
+                    <label className="text-xs font-bold text-slate-700">ไซส์</label>
+                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">{selectedSizes.length} ไซส์</span>
+                  </div>
+                  <button onClick={() => setSelectedSizes(selectedSizes.length === SIZES.length ? [] : [...SIZES])} className="text-[10px] font-bold text-ci-blue hover:underline">
+                    {selectedSizes.length === SIZES.length ? 'ล้างค่า' : 'เลือกทั้งหมด'}
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {SIZES.map((s) => {
+                    const isSelected = selectedSizes.includes(s);
+                    const isActive = shirtSize === s;
+                    return (
+                      <button 
+                        key={s} 
+                        onClick={() => {
+                           const newSizes = isSelected ? selectedSizes.filter(sz => sz !== s) : [...selectedSizes, s];
+                           setSelectedSizes(newSizes);
+                           if (!isSelected) setShirtSize(s); 
+                        }}
+                        className={`min-w-[42px] px-3 py-2 rounded-lg text-xs font-bold border transition-all relative ${
+                          isSelected 
+                            ? 'bg-ci-blue text-white border-ci-blue' 
+                            : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:text-slate-700'
+                        }`}
+                      >
+                        {s}
+                        {isActive && isSelected && (
+                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border border-white" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
           {activeTool === 'text' && (
