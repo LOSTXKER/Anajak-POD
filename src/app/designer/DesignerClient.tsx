@@ -75,6 +75,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { getProducts, type Product } from '@/lib/mockData';
 
 // Constants
 const CANVAS_WIDTH = 300;
@@ -216,6 +217,8 @@ export default function DesignerClient() {
   const [shirtSize, setShirtSize] = useState('M'); // Preview size
   const [selectedSizes, setSelectedSizes] = useState<string[]>(['S', 'M', 'L', 'XL']);
   const [technique, setTechnique] = useState<'dtf' | 'dtg'>('dtf');
+  const products = getProducts();
+  const [selectedProduct, setSelectedProduct] = useState<Product>(products[0]); // Default to first product
   const [showFilters, setShowFilters] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -303,8 +306,8 @@ export default function DesignerClient() {
     });
   };
 
-  // Pricing Config
-  const BASE_PRICE = 290;
+  // Pricing Config (base price from selected product)
+  const BASE_PRICE = selectedProduct.price;
   const SIZE_SURCHARGES: Record<string, number> = {
     '2XL': 40, '3XL': 60, '4XL': 80, '5XL': 100
   };
@@ -1375,7 +1378,7 @@ ${svgElements}
     // Common Item Data
     const itemData = {
       id: currentCartId || crypto.randomUUID(),
-      name: 'เสื้อยืด Cotton พรีเมียม', // Should be dynamic based on product
+      name: selectedProduct.title,
       color: shirtColor,
       colorName: COLORS.find(c => c.value === shirtColor)?.name || 'Custom',
       availableColors: availableColors, // Save selected colors
@@ -1740,19 +1743,74 @@ ${svgElements}
           )}
           {activeTool === 'product' && (
             <div className="space-y-5">
-              {/* Compact Product Card - Horizontal */}
-              <div className="flex gap-3 p-3 bg-gradient-to-r from-slate-50 to-white rounded-xl border border-slate-100">
-                <div className="w-16 h-16 bg-white rounded-lg border border-slate-200 p-1.5 flex-shrink-0">
-                   <img src="https://www.pngall.com/wp-content/uploads/2016/04/T-Shirt-PNG-File.png" className="w-full h-full object-contain mix-blend-multiply" />
+              {/* Product Selector */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-1 h-4 bg-ci-blue rounded-full" />
+                  <label className="text-xs font-bold text-slate-700">เลือกสินค้า</label>
+                </div>
+                <div className="space-y-2 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
+                  {products.map((product) => (
+                    <button
+                      key={product.id}
+                      onClick={() => setSelectedProduct(product)}
+                      className={`w-full flex gap-3 p-2.5 rounded-lg border transition-all text-left ${
+                        selectedProduct.id === product.id
+                          ? 'bg-blue-50 border-ci-blue ring-2 ring-ci-blue/20'
+                          : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="w-12 h-12 bg-white rounded-md border border-slate-200 p-1 flex-shrink-0">
+                        <img
+                          src={product.imageUrl || 'https://www.pngall.com/wp-content/uploads/2016/04/T-Shirt-PNG-File.png'}
+                          className="w-full h-full object-cover rounded-sm"
+                          alt={product.title}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-bold text-slate-800 text-xs leading-tight line-clamp-1">
+                            {product.title}
+                          </h4>
+                          {product.badge && (
+                            <span className="text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded-md flex-shrink-0 font-medium">
+                              {product.badge}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">{product.description}</p>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-xs font-bold text-ci-blue">฿{product.price}</span>
+                          {selectedProduct.id === product.id && (
+                            <Check className="w-3.5 h-3.5 text-ci-blue" />
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section Divider */}
+              <div className="h-px bg-slate-100" />
+
+              {/* Current Product Summary */}
+              <div className="flex gap-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                <div className="w-16 h-16 bg-white rounded-lg border border-blue-100 p-1.5 flex-shrink-0">
+                   <img 
+                     src={selectedProduct.imageUrl || 'https://www.pngall.com/wp-content/uploads/2016/04/T-Shirt-PNG-File.png'} 
+                     className="w-full h-full object-cover rounded-md" 
+                     alt={selectedProduct.title}
+                   />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-bold text-slate-800 text-sm leading-tight">เสื้อยืด Cotton พรีเมียม</h3>
+                    <h3 className="font-bold text-slate-800 text-sm leading-tight">{selectedProduct.title}</h3>
                     <span className="bg-ci-blue text-white text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0">
                       ฿{currentPrice}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2">ผ้าคอตตอน 100% คุณภาพสูง</p>
+                  <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2">{selectedProduct.description}</p>
                 </div>
               </div>
 
