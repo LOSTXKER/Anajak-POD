@@ -227,6 +227,7 @@ export default function DesignerClient() {
   const [showMeasurementGuides, setShowMeasurementGuides] = useState(false);
   const [unit, setUnit] = useState<'cm' | 'in'>('cm');
   const [viewSide, setViewSide] = useState<'front' | 'back'>('front');
+  const [mockupStyle, setMockupStyle] = useState<'2d' | '3d'>('2d');
   const [showControls, setShowControls] = useState(true); // Default expanded to show summary
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
