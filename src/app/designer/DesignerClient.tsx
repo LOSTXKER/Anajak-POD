@@ -2413,18 +2413,18 @@ ${svgElements}
                     </button>
            </div>
 
-              {/* Inline Stepper - Compact */}
+              {/* Inline Stepper - Consistent Style */}
               <div className="hidden md:flex items-center gap-0.5 text-xs">
               {STEPS.map((step, i) => (
                    <div key={step.id} className="flex items-center">
-                     {i > 0 && <div className="w-3 h-px bg-slate-200 mx-1" />}
-                     <div className={`flex items-center gap-1 px-2 py-1 rounded-md ${step.status === 'completed' ? 'text-green-600' : step.status === 'current' ? 'text-ci-blue bg-blue-50' : 'text-slate-300'}`}>
-                       <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold ${step.status === 'completed' ? 'bg-green-100 text-green-600' : step.status === 'current' ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-400'}`}>
-                      {step.status === 'completed' ? <Check className="w-2.5 h-2.5" /> : step.id}
-                    </div>
+                     {i > 0 && <div className="w-4 h-px bg-slate-200 mx-1" />}
+                     <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${step.status === 'completed' ? 'text-green-600' : step.status === 'current' ? 'text-ci-blue bg-blue-50' : 'text-slate-300'}`}>
+                       <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step.status === 'completed' ? 'bg-green-500 text-white' : step.status === 'current' ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-400'}`}>
+                         {step.status === 'completed' ? <Check className="w-3 h-3" /> : step.id}
+                       </div>
                        <span className="font-semibold hidden lg:inline">{step.label}</span>
-                  </div>
-                </div>
+                     </div>
+                   </div>
               ))}
               </div>
            </div>
@@ -3230,15 +3230,23 @@ ${svgElements}
                  <ChevronLeft className="w-5 h-5" />
               </button>
               <h2 className="text-lg font-bold text-slate-900 flex-1">ตรวจสอบรายการ</h2>
-              <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                 <span className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
-                 <span className="hidden sm:inline">สินค้า</span>
-                 <div className="w-4 h-px bg-slate-300" />
-                 <span className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
-                 <span className="hidden sm:inline">ออกแบบ</span>
-                 <div className="w-4 h-px bg-slate-300" />
-                 <span className="w-6 h-6 rounded-full bg-ci-blue text-white flex items-center justify-center text-[10px] font-bold">3</span>
-                 <span className="hidden sm:inline font-medium text-ci-blue">ตรวจสอบ</span>
+              {/* Stepper - Same style as main header */}
+              <div className="flex items-center gap-0.5 text-xs">
+                 {[
+                   { id: 1, label: 'เลือกสินค้า', status: 'completed' },
+                   { id: 2, label: 'ออกแบบ', status: 'completed' },
+                   { id: 3, label: 'ตรวจสอบ', status: 'current' },
+                 ].map((step, i) => (
+                   <div key={step.id} className="flex items-center">
+                     {i > 0 && <div className="w-4 h-px bg-slate-200 mx-1" />}
+                     <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${step.status === 'completed' ? 'text-green-600' : step.status === 'current' ? 'text-ci-blue bg-blue-50' : 'text-slate-300'}`}>
+                       <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step.status === 'completed' ? 'bg-green-500 text-white' : step.status === 'current' ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-400'}`}>
+                         {step.status === 'completed' ? <Check className="w-3 h-3" /> : step.id}
+                       </div>
+                       <span className="font-semibold hidden sm:inline">{step.label}</span>
+                     </div>
+                   </div>
+                 ))}
               </div>
            </div>
 
