@@ -211,6 +211,7 @@ export default function DesignerClient() {
   const [activeTool, setActiveTool] = useState<'product' | 'text' | 'uploads' | 'elements' | 'layers' | 'ai' | 'text-effects' | null>('text');
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showProductModal, setShowProductModal] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [shirtColor, setShirtColor] = useState('#ffffff');
   const [availableColors, setAvailableColors] = useState<string[]>(['#ffffff']); // Selected colors for the product
@@ -1743,60 +1744,9 @@ ${svgElements}
           )}
           {activeTool === 'product' && (
             <div className="space-y-5">
-              {/* Product Selector */}
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-1 h-4 bg-ci-blue rounded-full" />
-                  <label className="text-xs font-bold text-slate-700">เลือกสินค้า</label>
-                </div>
-                <div className="space-y-2 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
-                  {products.map((product) => (
-                    <button
-                      key={product.id}
-                      onClick={() => setSelectedProduct(product)}
-                      className={`w-full flex gap-3 p-2.5 rounded-lg border transition-all text-left ${
-                        selectedProduct.id === product.id
-                          ? 'bg-blue-50 border-ci-blue ring-2 ring-ci-blue/20'
-                          : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                      }`}
-                    >
-                      <div className="w-12 h-12 bg-white rounded-md border border-slate-200 p-1 flex-shrink-0">
-                        <img
-                          src={product.imageUrl || 'https://www.pngall.com/wp-content/uploads/2016/04/T-Shirt-PNG-File.png'}
-                          className="w-full h-full object-cover rounded-sm"
-                          alt={product.title}
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <h4 className="font-bold text-slate-800 text-xs leading-tight line-clamp-1">
-                            {product.title}
-                          </h4>
-                          {product.badge && (
-                            <span className="text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded-md flex-shrink-0 font-medium">
-                              {product.badge}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">{product.description}</p>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-xs font-bold text-ci-blue">฿{product.price}</span>
-                          {selectedProduct.id === product.id && (
-                            <Check className="w-3.5 h-3.5 text-ci-blue" />
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Section Divider */}
-              <div className="h-px bg-slate-100" />
-
-              {/* Current Product Summary */}
-              <div className="flex gap-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-                <div className="w-16 h-16 bg-white rounded-lg border border-blue-100 p-1.5 flex-shrink-0">
+              {/* Current Product Card with Change Button */}
+              <div className="flex gap-3 p-3 bg-gradient-to-r from-slate-50 to-white rounded-xl border border-slate-100">
+                <div className="w-16 h-16 bg-white rounded-lg border border-slate-200 p-1.5 flex-shrink-0">
                    <img 
                      src={selectedProduct.imageUrl || 'https://www.pngall.com/wp-content/uploads/2016/04/T-Shirt-PNG-File.png'} 
                      className="w-full h-full object-cover rounded-md" 
@@ -1804,13 +1754,27 @@ ${svgElements}
                    />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-bold text-slate-800 text-sm leading-tight">{selectedProduct.title}</h3>
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-slate-800 text-sm leading-tight line-clamp-1">{selectedProduct.title}</h3>
+                      {selectedProduct.badge && (
+                        <span className="inline-block text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded-md mt-0.5 font-medium">
+                          {selectedProduct.badge}
+                        </span>
+                      )}
+                    </div>
                     <span className="bg-ci-blue text-white text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0">
-                      ฿{currentPrice}
+                      ฿{selectedProduct.price}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2">{selectedProduct.description}</p>
+                  <p className="text-[10px] text-slate-500 mb-2 line-clamp-1">{selectedProduct.description}</p>
+                  <button
+                    onClick={() => setShowProductModal(true)}
+                    className="w-full py-1.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-ci-blue hover:text-ci-blue transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <Shirt className="w-3.5 h-3.5" />
+                    เปลี่ยนสินค้า
+                  </button>
                 </div>
               </div>
 
@@ -3629,6 +3593,92 @@ ${svgElements}
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Product Selection Modal */}
+      {showProductModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowProductModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-ci-blue/10 rounded-lg">
+                  <Shirt className="w-5 h-5 text-ci-blue" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-slate-800">เลือกสินค้า</h3>
+                  <p className="text-xs text-slate-500">เลือกสินค้าที่ต้องการออกแบบ</p>
+                </div>
+              </div>
+              <button onClick={() => setShowProductModal(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Product Grid */}
+            <div className="p-6 overflow-y-auto max-h-[calc(85vh-140px)] custom-scrollbar">
+              <div className="grid grid-cols-2 gap-4">
+                {products.map((product) => (
+                  <button
+                    key={product.id}
+                    onClick={() => {
+                      setSelectedProduct(product);
+                      setShowProductModal(false);
+                    }}
+                    className={`flex flex-col gap-3 p-4 rounded-xl border-2 transition-all text-left hover:shadow-lg ${
+                      selectedProduct.id === product.id
+                        ? 'bg-blue-50 border-ci-blue ring-2 ring-ci-blue/20'
+                        : 'bg-white border-slate-200 hover:border-ci-blue'
+                    }`}
+                  >
+                    <div className="aspect-square w-full bg-slate-50 rounded-lg overflow-hidden border border-slate-200">
+                      <img
+                        src={product.imageUrl || 'https://www.pngall.com/wp-content/uploads/2016/04/T-Shirt-PNG-File.png'}
+                        className="w-full h-full object-cover"
+                        alt={product.title}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <h4 className="font-bold text-slate-800 text-sm leading-tight flex-1">
+                          {product.title}
+                        </h4>
+                        {selectedProduct.id === product.id && (
+                          <Check className="w-4 h-4 text-ci-blue flex-shrink-0" />
+                        )}
+                      </div>
+                      {product.badge && (
+                        <span className="inline-block text-[10px] px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md mb-1.5 font-medium">
+                          {product.badge}
+                        </span>
+                      )}
+                      <p className="text-[11px] text-slate-500 line-clamp-2 mb-2">{product.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-bold text-ci-blue">฿{product.price}</span>
+                        {product.fabricGrade && (
+                          <span className="text-[10px] text-slate-400">{product.fabricGrade}</span>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+              <p className="text-xs text-slate-500">
+                สินค้าที่เลือก: <span className="font-bold text-slate-700">{selectedProduct.title}</span>
+              </p>
+              <button 
+                onClick={() => setShowProductModal(false)} 
+                className="px-6 py-2 bg-ci-blue text-white rounded-lg font-bold text-sm hover:bg-blue-600 transition-all"
+              >
+                ยืนยัน
+              </button>
             </div>
           </div>
         </div>
