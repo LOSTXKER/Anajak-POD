@@ -3364,7 +3364,7 @@ ${svgElements}
                                       <button 
                                          key={size}
                                          onClick={() => setShirtSize(size)}
-                                         className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${shirtSize === size ? 'bg-ci-blue text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                                         className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all border-2 ${shirtSize === size ? 'border-ci-blue bg-blue-50 text-ci-blue' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'}`}
                                       >
                                          {size}
                                       </button>
@@ -3386,10 +3386,10 @@ ${svgElements}
                                          <button 
                                             key={c} 
                                             onClick={() => setShirtColor(c)}
-                                            className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-all hover:scale-105 ${isActive ? 'bg-ci-blue shadow-md' : 'bg-slate-50 hover:bg-slate-100'}`}
+                                            className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-all hover:scale-105 border-2 ${isActive ? 'border-ci-blue bg-blue-50' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'}`}
                                          >
-                                            <div className={`w-5 h-5 rounded-full border-2 ${isActive ? 'border-white' : 'border-slate-200'}`} style={{ backgroundColor: c }} />
-                                            <span className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-slate-600'}`}>{colorName}</span>
+                                            <div className={`w-5 h-5 rounded-full border-2 ${isActive ? 'border-ci-blue' : 'border-slate-300'}`} style={{ backgroundColor: c }} />
+                                            <span className={`text-xs font-semibold ${isActive ? 'text-ci-blue' : 'text-slate-600'}`}>{colorName}</span>
                                          </button>
                                       );
                                    })}
