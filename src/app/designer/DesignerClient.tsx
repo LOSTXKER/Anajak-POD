@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Type, 
   Image as ImageIcon, 
@@ -20,10 +20,12 @@ import {
   ChevronDown,
   Trash2, 
   Copy, 
+  Clipboard,
   Layers, 
   Bold,
   Italic,
   Underline,
+  Strikethrough,
   ArrowUp,
   ArrowDown,
   SlidersHorizontal,
@@ -39,7 +41,6 @@ import {
   Sparkles,
   ExternalLink,
   Search,
-  Library,
   FolderOpen,
   Grid,
   List,
@@ -47,22 +48,72 @@ import {
   AlignLeft,
   AlignCenter,
   AlignRight,
+  AlignHorizontalDistributeCenter,
+  AlignVerticalDistributeCenter,
+  AlignStartVertical,
+  AlignEndVertical,
+  AlignCenterVertical,
+  AlignStartHorizontal,
+  AlignEndHorizontal,
+  AlignCenterHorizontal,
   X,
   Store,
   FileEdit,
   Edit2,
-  Heart, Star, Zap, Ghost, Flame, Sun, Moon, Cloud, Music, Camera, Video, Mic, Headphones, MapPin, Globe, Anchor, Compass, Feather, Key, Lock, Bell, Tag, Flag, Award, Gift, Trophy, Crown, Diamond, Skull, Rocket, Plane, Car, Bike, Leaf, Flower, TreeDeciduous, Snowflake, Droplets, Umbrella, Glasses, Watch,   Shirt as ShirtIcon, Scissors,
-  Spline
+  Heart, Star, Zap, Ghost, Flame, Sun, Moon, Cloud, Music, Camera, Video, Mic, Headphones, MapPin, Globe, Anchor, Compass, Feather, Key, Lock, Unlock, Bell, Tag, Flag, Award, Gift, Trophy, Crown, Diamond, Skull, Rocket, Plane, Car, Bike, Leaf, Flower, TreeDeciduous, Snowflake, Droplets, Umbrella, Glasses, Watch, Shirt as ShirtIcon, Scissors,
+  Spline,
+  RotateCw,
+  FlipHorizontal,
+  FlipVertical,
+  Download,
+  Eye,
+  EyeOff,
+  Box,
+  GripVertical,
+  ChevronUpCircle,
+  ChevronDownCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 // Constants
+const CANVAS_WIDTH = 300;
+const CANVAS_HEIGHT = 400;
+
 const FONTS = [
-  { name: 'Sarabun', family: 'font-sans' },
-  { name: 'Kanit', family: 'font-serif' },
-  { name: 'Prompt', family: 'font-mono' },
-  { name: 'Mitr', family: 'font-sans' },
+  // Thai Fonts
+  { name: 'Sarabun', category: 'thai', style: 'sans-serif' },
+  { name: 'Kanit', category: 'thai', style: 'sans-serif' },
+  { name: 'Prompt', category: 'thai', style: 'sans-serif' },
+  { name: 'Mitr', category: 'thai', style: 'sans-serif' },
+  { name: 'IBM Plex Sans Thai', category: 'thai', style: 'sans-serif' },
+  { name: 'Bai Jamjuree', category: 'thai', style: 'sans-serif' },
+  { name: 'K2D', category: 'thai', style: 'sans-serif' },
+  { name: 'Chakra Petch', category: 'thai', style: 'sans-serif' },
+  { name: 'Pridi', category: 'thai', style: 'serif' },
+  { name: 'Thasadith', category: 'thai', style: 'sans-serif' },
+  { name: 'Itim', category: 'thai', style: 'handwriting' },
+  { name: 'Mali', category: 'thai', style: 'handwriting' },
+  { name: 'Sriracha', category: 'thai', style: 'handwriting' },
+  { name: 'Charm', category: 'thai', style: 'handwriting' },
+  { name: 'Charmonman', category: 'thai', style: 'handwriting' },
+  { name: 'Srisakdi', category: 'thai', style: 'display' },
+  // English Fonts
+  { name: 'Montserrat', category: 'english', style: 'sans-serif' },
+  { name: 'Poppins', category: 'english', style: 'sans-serif' },
+  { name: 'Oswald', category: 'english', style: 'sans-serif' },
+  { name: 'Playfair Display', category: 'english', style: 'serif' },
+  { name: 'Bebas Neue', category: 'english', style: 'display' },
+  { name: 'Righteous', category: 'english', style: 'display' },
+  { name: 'Lobster', category: 'english', style: 'handwriting' },
+  { name: 'Pacifico', category: 'english', style: 'handwriting' },
+  { name: 'Dancing Script', category: 'english', style: 'handwriting' },
+  { name: 'Shadows Into Light', category: 'english', style: 'handwriting' },
+  { name: 'Permanent Marker', category: 'english', style: 'display' },
+  { name: 'Bangers', category: 'english', style: 'display' },
+  { name: 'Creepster', category: 'english', style: 'display' },
+  { name: 'Special Elite', category: 'english', style: 'display' },
+  { name: 'Press Start 2P', category: 'english', style: 'display' },
 ];
 
 const SHAPES = [
@@ -128,6 +179,8 @@ interface DesignElement {
   fontStyle?: string;
   textDecoration?: string;
   textAlign?: 'left' | 'center' | 'right';
+  letterSpacing?: number;
+  lineHeight?: number;
   brightness?: number;
   contrast?: number;
   grayscale?: number;
@@ -136,17 +189,25 @@ interface DesignElement {
   curveStrength?: number;
   effectType?: 'none' | 'shadow' | 'lift' | 'hollow' | 'splice' | 'outline' | 'echo' | 'glitch' | 'neon' | 'background';
   effectColor?: string;
+  effectColor2?: string;
   effectOffset?: number;
   effectBlur?: number;
   effectWidth?: number;
   effectDirection?: number;
   effectOpacity?: number;
+  textColorOnBg?: string;
+  textStrokeColor?: string;
+  textStrokeWidth?: number;
+  locked?: boolean;
+  visible?: boolean;
+  flipX?: boolean;
+  flipY?: boolean;
 }
 
 export default function DesignerClient() {
   const router = useRouter();
   // UI State
-  const [activeTool, setActiveTool] = useState<'product' | 'text' | 'uploads' | 'elements' | 'layers' | 'ai' | 'library' | 'text-effects' | null>('text');
+  const [activeTool, setActiveTool] = useState<'product' | 'text' | 'uploads' | 'elements' | 'layers' | 'ai' | 'text-effects' | null>('text');
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [zoom, setZoom] = useState(100);
@@ -162,7 +223,7 @@ export default function DesignerClient() {
   const [showRulers, setShowRulers] = useState(false);
   const [unit, setUnit] = useState<'cm' | 'in'>('cm');
   const [viewSide, setViewSide] = useState<'front' | 'back'>('front');
-  const [showControls, setShowControls] = useState(true);
+  const [showControls, setShowControls] = useState(false); // Default collapsed for more canvas space
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   const [fontSearchQuery, setFontSearchQuery] = useState('');
@@ -176,7 +237,29 @@ export default function DesignerClient() {
   const [tempText, setTempText] = useState('');
   const [currentCartId, setCurrentCartId] = useState<string | null>(null); // ID of the cart item being edited
   
+  // New states for rotation and clipboard
+  const [isRotating, setIsRotating] = useState(false);
+  const [clipboard, setClipboard] = useState<DesignElement | null>(null);
+  const [showAlignMenu, setShowAlignMenu] = useState(false);
+  
+  // Keyboard shortcuts modal
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+  
+  // Multi-select
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  
+  // Export modal
+  const [showExportModal, setShowExportModal] = useState(false);
+  
+  // Preview modal
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewMode, setPreviewMode] = useState<'2d' | '3d'>('2d');
+  
+  // View options panel
+  const [showViewOptions, setShowViewOptions] = useState(false);
+  
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Check if we are editing an existing cart item
@@ -289,11 +372,16 @@ export default function DesignerClient() {
   const [elements, setElements] = useState<DesignElement[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   
+  // Get selected element(s)
+  const selectedElement = elements.find(el => el.id === selectedId);
+  const selectedElements = elements.filter(el => selectedIds.includes(el.id));
+  
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragStartPos = useRef({ x: 0, y: 0 });
   const elementStartPos = useRef({ x: 0, y: 0, width: 0, height: 0, fontSize: 0, rotation: 0 });
+  const rotationStartAngle = useRef(0);
 
   const currentShirtSpec = SHIRT_SPECS[shirtSize] || SHIRT_SPECS['M'];
   const pixelsPerCm = BASE_SHIRT_WIDTH_PX / currentShirtSpec.width;
@@ -301,8 +389,6 @@ export default function DesignerClient() {
   // Calculate print area dimensions relative to shirt
   const printAreaWidthPercent = (PRINT_AREA_WIDTH_CM / currentShirtSpec.width) * 100;
   const printAreaHeightPercent = (PRINT_AREA_HEIGHT_CM / (currentShirtSpec.width * 1.2)) * 100; // Aspect ratio approx
-  
-  const selectedElement = elements.find(el => el.id === selectedId);
 
   const STEPS = [
     { id: 1, label: 'เลือกสินค้า', status: 'completed' },
@@ -608,23 +694,6 @@ export default function DesignerClient() {
     }
   }, [selectedElement, activeTool]);
 
-  // Text Measurement Helper
-  const measureText = (text: string, fontSize: number, fontFamily: string) => {
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    if (!context) return { width: 200, height: 50 };
-
-    context.font = `${fontSize}px ${fontFamily}`;
-    const metrics = context.measureText(text);
-    
-    // Height estimation (Canvas measureText height is tricky, usually fontSize * 1.2 is decent for tight fit)
-    // But for Thai, we need a bit more.
-    const width = Math.ceil(metrics.width);
-    const height = Math.ceil(fontSize * 1.2); // Tight fit for line-height 1 + buffer
-
-    return { width, height };
-  };
-
   // Helpers
   const addElement = (type: ElementType, content: string, extraProps: any = {}) => {
     // Default dimensions based on type
@@ -644,9 +713,17 @@ export default function DesignerClient() {
       height = 100;
     }
 
+      // Position at center of print area
+      // Print area is approximately 60% of 500px canvas width = ~300px
+      // Elements' x/y are relative to the print area div (not the canvas)
+      // So to center: x = printAreaWidth/2 - elementWidth/2
+      const printAreaWidth = (PRINT_AREA_WIDTH_CM / 51) * 500; // ~295px for size M
+      const printAreaCenterX = printAreaWidth / 2; // ~147px (center of print area)
+      const printAreaCenterY = 150; // Upper-middle of print area (starts at y=0 of print area div)
+      
       const newEl: DesignElement = {
       id: Date.now().toString(), type, content, 
-      x: 250 - width/2, y: 300 - height/2, // Start at center
+      x: printAreaCenterX - width/2, y: printAreaCenterY - height/2, // Center in print area
       width, height,
       rotation: 0, opacity: 100,
       color: '#000000', fontSize: 32, fontFamily: 'Sarabun', fontWeight: 'normal', fontStyle: 'normal', textAlign: 'center',
@@ -664,24 +741,217 @@ export default function DesignerClient() {
     if (!id) return;
     const newElements = elements.map(el => el.id === id ? { ...el, ...changes } : el);
     setElements(newElements);
-    // Note: For continuous updates like color picker, we might want to debounce history
-    // But for now, let's add history for simple clicks. 
-    // Ideally we separate "committing" changes vs "previewing".
-    // For simplicity in this context, we might skip addToHistory here and rely on explicit actions or just add it.
-    // Let's add it to be safe, though it might create many history steps for sliders.
   };
-  
-  // Better update for history: only call addToHistory on "final" actions.
-  // But since updateElement is used by sliders, we need to be careful.
-  // Let's create a separate function for "Finalize Update" or just use mouseUp on sliders.
-  // For buttons (bold, italic, align), we should add history.
-  
+
   const updateElementWithHistory = (id: string | null, changes: Partial<DesignElement>) => {
-      if (!id) return;
-      const newElements = elements.map(el => el.id === id ? { ...el, ...changes } : el);
+    if (!id) return;
+    const newElements = elements.map(el => el.id === id ? { ...el, ...changes } : el);
+    setElements(newElements);
+    addToHistory(newElements);
+  };
+
+  // Copy element to clipboard
+  const copyElement = useCallback(() => {
+    if (selectedId) {
+      const el = elements.find(e => e.id === selectedId);
+      if (el) setClipboard({ ...el });
+    }
+  }, [selectedId, elements]);
+
+  // Paste element from clipboard
+  const pasteElement = useCallback(() => {
+    if (clipboard) {
+      const newEl: DesignElement = {
+        ...clipboard,
+        id: `element-${Date.now()}`,
+        x: clipboard.x + 20,
+        y: clipboard.y + 20,
+      };
+      const newElements = [...elements, newEl];
       setElements(newElements);
       addToHistory(newElements);
+      setSelectedId(newEl.id);
+    }
+  }, [clipboard, elements]);
+
+  // Toggle lock for selected element
+  const toggleLockSelectedElement = useCallback(() => {
+    if (selectedId) {
+      const el = elements.find(e => e.id === selectedId);
+      if (el) {
+        updateElementWithHistory(selectedId, { locked: !el.locked });
+      }
+    }
+  }, [selectedId, elements]);
+
+  // Toggle lock by ID (for layer panel)
+  const toggleLockById = (id: string) => {
+    const el = elements.find(e => e.id === id);
+    if (el) {
+      updateElementWithHistory(id, { locked: !el.locked });
+    }
   };
+
+  // Toggle visibility by ID (for layer panel)
+  const toggleVisibilityById = (id: string) => {
+    const el = elements.find(e => e.id === id);
+    if (el) {
+      updateElementWithHistory(id, { visible: el.visible === false ? true : false });
+    }
+  };
+
+  // Duplicate element
+  const duplicateElement = useCallback(() => {
+    if (selectedId) {
+      const el = elements.find(e => e.id === selectedId);
+      if (el) {
+        const newEl: DesignElement = {
+          ...el,
+          id: `element-${Date.now()}`,
+          x: el.x + 20,
+          y: el.y + 20,
+        };
+        const newElements = [...elements, newEl];
+        setElements(newElements);
+        addToHistory(newElements);
+        setSelectedId(newEl.id);
+      }
+    }
+  }, [selectedId, elements]);
+
+  // Align elements
+  const alignElements = (alignment: string) => {
+    if (!selectedId) return;
+    const el = elements.find(e => e.id === selectedId);
+    if (!el) return;
+
+    let changes: Partial<DesignElement> = {};
+    const canvasCenterX = CANVAS_WIDTH / 2;
+    const canvasCenterY = CANVAS_HEIGHT / 2;
+
+    switch (alignment) {
+      case 'left': changes = { x: 0 }; break;
+      case 'center': changes = { x: canvasCenterX - el.width / 2 }; break;
+      case 'right': changes = { x: CANVAS_WIDTH - el.width }; break;
+      case 'top': changes = { y: 0 }; break;
+      case 'middle': changes = { y: canvasCenterY - el.height / 2 }; break;
+      case 'bottom': changes = { y: CANVAS_HEIGHT - el.height }; break;
+    }
+    updateElementWithHistory(selectedId, changes);
+  };
+
+  // Flip element
+  const flipElement = (direction: 'horizontal' | 'vertical') => {
+    if (!selectedId) return;
+    const el = elements.find(e => e.id === selectedId);
+    if (!el) return;
+
+    if (direction === 'horizontal') {
+      updateElementWithHistory(selectedId, { flipX: !el.flipX });
+    } else {
+      updateElementWithHistory(selectedId, { flipY: !el.flipY });
+    }
+  };
+
+  // Move layer up/down
+  const moveLayer = (id: string, direction: 'up' | 'down') => {
+    const index = elements.findIndex(el => el.id === id);
+    if (index === -1) return;
+
+    const newElements = [...elements];
+    if (direction === 'up' && index < elements.length - 1) {
+      [newElements[index], newElements[index + 1]] = [newElements[index + 1], newElements[index]];
+    } else if (direction === 'down' && index > 0) {
+      [newElements[index], newElements[index - 1]] = [newElements[index - 1], newElements[index]];
+    }
+    setElements(newElements);
+    addToHistory(newElements);
+  };
+
+  // Measure text dimensions
+  const measureText = (text: string, fontSize: number, fontFamily: string, options?: { fontWeight?: string; letterSpacing?: number; fontStyle?: string }) => {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    if (!context) return { width: 200, height: 50 };
+
+    context.font = `${options?.fontStyle || 'normal'} ${options?.fontWeight || 'normal'} ${fontSize}px ${fontFamily}`;
+    const metrics = context.measureText(text);
+    
+    const width = Math.ceil(metrics.width + (options?.letterSpacing || 0) * text.length);
+    const height = Math.ceil(fontSize * 1.5);
+    return { width, height };
+  };
+
+  // Update text element with auto-resize
+  const updateTextElementWithAutoResize = (id: string, changes: Partial<DesignElement>) => {
+    const elementToUpdate = elements.find(el => el.id === id);
+    if (!elementToUpdate || elementToUpdate.type !== 'text') return;
+
+    const newElement = { ...elementToUpdate, ...changes };
+    const newContent = newElement.content;
+    const newFontSize = newElement.fontSize || 32;
+    const newFontFamily = newElement.fontFamily || 'Sarabun';
+    const newFontWeight = newElement.fontWeight;
+    const newFontStyle = newElement.fontStyle;
+    const newLetterSpacing = newElement.letterSpacing;
+
+    const dims = measureText(newContent, newFontSize, newFontFamily, {
+      fontWeight: newFontWeight,
+      fontStyle: newFontStyle,
+      letterSpacing: newLetterSpacing,
+    });
+
+    const newWidth = Math.max(20, dims.width + 10);
+    const newHeight = Math.max(elementToUpdate.height, dims.height);
+
+    const deltaWidth = newWidth - elementToUpdate.width;
+    const deltaHeight = newHeight - elementToUpdate.height;
+
+    const updatedChanges = {
+      ...changes,
+      width: newWidth,
+      height: newHeight,
+      x: elementToUpdate.x - deltaWidth / 2,
+      y: elementToUpdate.y - deltaHeight / 2,
+    };
+    updateElementWithHistory(id, updatedChanges);
+  };
+
+  // Keyboard shortcuts (must be after useCallback definitions)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+
+      if (cmdOrCtrl && e.key === 'c') { e.preventDefault(); copyElement(); }
+      if (cmdOrCtrl && e.key === 'v') { e.preventDefault(); pasteElement(); }
+      if (cmdOrCtrl && e.key === 'd') { e.preventDefault(); duplicateElement(); }
+      if (cmdOrCtrl && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+      if (cmdOrCtrl && e.key === 'z' && e.shiftKey) { e.preventDefault(); redo(); }
+      if (cmdOrCtrl && e.key === 'l') { e.preventDefault(); toggleLockSelectedElement(); }
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) { e.preventDefault(); deleteElement(selectedId); }
+      if (e.key === 'Escape') { setSelectedId(null); setSelectedIds([]); }
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key) && selectedId) {
+        e.preventDefault();
+        const el = elements.find(el => el.id === selectedId);
+        if (el && !el.locked) {
+          const step = e.shiftKey ? 10 : 1;
+          let changes: Partial<DesignElement> = {};
+          if (e.key === 'ArrowUp') changes = { y: el.y - step };
+          if (e.key === 'ArrowDown') changes = { y: el.y + step };
+          if (e.key === 'ArrowLeft') changes = { x: el.x - step };
+          if (e.key === 'ArrowRight') changes = { x: el.x + step };
+          updateElement(selectedId, changes);
+        }
+      }
+      if (e.key === '?') { setShowKeyboardShortcuts(true); }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedId, elements, copyElement, pasteElement, duplicateElement, toggleLockSelectedElement]);
 
   const deleteElement = (id: string | null) => {
     if (!id) return;
@@ -698,27 +968,6 @@ export default function DesignerClient() {
       reader.onload = (event) => event.target?.result && addElement('image', event.target.result as string, { width: 200, height: 200 });
       reader.readAsDataURL(file);
     }
-  };
-
-  const duplicateElement = () => {
-    if (!selectedElement) return;
-    const newEl = { ...selectedElement, id: Date.now().toString(), x: selectedElement.x + 20, y: selectedElement.y + 20 };
-    setElements(prev => [...prev, newEl]);
-    setSelectedId(newEl.id);
-  };
-
-  const moveLayer = (direction: 'up' | 'down') => {
-    if (!selectedId) return;
-    const index = elements.findIndex(el => el.id === selectedId);
-    if (index === -1) return;
-    const newElements = [...elements];
-    if (direction === 'up' && index < elements.length - 1) {
-      [newElements[index], newElements[index + 1]] = [newElements[index + 1], newElements[index]];
-    } else if (direction === 'down' && index > 0) {
-      [newElements[index], newElements[index - 1]] = [newElements[index - 1], newElements[index]];
-    }
-    setElements(newElements);
-    addToHistory(newElements); // Add to history for layer moves
   };
 
   // Interaction Handlers
@@ -783,6 +1032,100 @@ export default function DesignerClient() {
   );
 
   const Divider = () => <div className="h-6 w-px bg-slate-200 mx-1"></div>;
+
+  // Export Functions
+  const exportAsPNG = async () => {
+    if (!canvasRef.current) return;
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      setSelectedId(null); // Hide selection handles
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const canvas = await html2canvas(canvasRef.current, {
+        backgroundColor: null,
+        scale: 2,
+      });
+      const link = document.createElement('a');
+      link.download = `design-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('ไม่สามารถส่งออกไฟล์ได้');
+    }
+  };
+
+  const exportAsJPG = async () => {
+    if (!canvasRef.current) return;
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      setSelectedId(null);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const canvas = await html2canvas(canvasRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+      });
+      const link = document.createElement('a');
+      link.download = `design-${Date.now()}.jpg`;
+      link.href = canvas.toDataURL('image/jpeg', 0.9);
+      link.click();
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('ไม่สามารถส่งออกไฟล์ได้');
+    }
+  };
+
+  const exportAsSVG = () => {
+    // SVG export - creates text representation
+    const svgElements = elements
+      .filter(el => el.side === viewSide && el.visible !== false)
+      .map(el => {
+        if (el.type === 'text') {
+          return `<text x="${el.x}" y="${el.y + (el.fontSize || 32)}" font-size="${el.fontSize}" font-family="${el.fontFamily}" fill="${el.color}" opacity="${el.opacity / 100}">${el.content}</text>`;
+        }
+        return '';
+      })
+      .join('\n');
+
+    const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${CANVAS_WIDTH}" height="${CANVAS_HEIGHT}" viewBox="0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}">
+${svgElements}
+</svg>`;
+
+    const blob = new Blob([svg], { type: 'image/svg+xml' });
+    const link = document.createElement('a');
+    link.download = `design-${Date.now()}.svg`;
+    link.href = URL.createObjectURL(blob);
+    link.click();
+  };
+
+  const exportAsPDF = async () => {
+    if (!canvasRef.current) return;
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+      
+      setSelectedId(null);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const canvas = await html2canvas(canvasRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+      });
+      
+      const imgData = canvas.toDataURL('image/jpeg', 0.9);
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height],
+      });
+      
+      pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`design-${Date.now()}.pdf`);
+    } catch (error) {
+      console.error('PDF export failed:', error);
+      alert('ไม่สามารถส่งออกไฟล์ PDF ได้');
+    }
+  };
 
   const handleSaveClick = () => {
     setShowReviewModal(true);
@@ -862,7 +1205,6 @@ export default function DesignerClient() {
           <SidebarItem icon={Shirt} label="สินค้า" id="product" isActive={activeTool === 'product'} onClick={setActiveTool} />
           <SidebarItem icon={Type} label="ข้อความ" id="text" isActive={activeTool === 'text'} onClick={setActiveTool} />
           <SidebarItem icon={UploadCloud} label="อัปโหลด" id="uploads" isActive={activeTool === 'uploads'} onClick={setActiveTool} />
-          <SidebarItem icon={Library} label="คลังของฉัน" id="library" isActive={activeTool === 'library'} onClick={setActiveTool} />
           <SidebarItem icon={Sparkles} label="AI Gen" id="ai" isActive={activeTool === 'ai'} onClick={setActiveTool} />
           <SidebarItem icon={Shapes} label="องค์ประกอบ" id="elements" isActive={activeTool === 'elements'} onClick={setActiveTool} />
           <SidebarItem icon={Layers} label="เลเยอร์" id="layers" isActive={activeTool === 'layers'} onClick={setActiveTool} />
@@ -876,7 +1218,6 @@ export default function DesignerClient() {
             {activeTool === 'product' ? 'สินค้า' : 
              activeTool === 'text' ? 'ข้อความ' : 
              activeTool === 'uploads' ? 'อัปโหลด' : 
-             activeTool === 'library' ? 'คลังของฉัน' : 
              activeTool === 'ai' ? 'สร้างภาพ AI' : 
              activeTool === 'text-effects' ? 'เอฟเฟกต์' :
              activeTool === 'elements' ? 'องค์ประกอบ' : 'เลเยอร์'}
@@ -1158,101 +1499,140 @@ export default function DesignerClient() {
             </div>
           )}
           {activeTool === 'product' && (
-            <div className="space-y-8 px-2">
-              {/* Product Summary Card */}
-              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                <div className="aspect-square w-full bg-white rounded-xl border border-slate-200 mb-3 p-4 flex items-center justify-center relative overflow-hidden">
+            <div className="space-y-5">
+              {/* Compact Product Card - Horizontal */}
+              <div className="flex gap-3 p-3 bg-gradient-to-r from-slate-50 to-white rounded-xl border border-slate-100">
+                <div className="w-16 h-16 bg-white rounded-lg border border-slate-200 p-1.5 flex-shrink-0">
                    <img src="https://www.pngall.com/wp-content/uploads/2016/04/T-Shirt-PNG-File.png" className="w-full h-full object-contain mix-blend-multiply" />
-                   <div className="absolute bottom-2 right-2 bg-ci-blue text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
-                     ฿{currentPrice}
-                   </div>
                 </div>
-                <h3 className="font-bold text-slate-800 text-sm mb-1">เสื้อยืด Cotton พรีเมียม</h3>
-                <p className="text-xs text-slate-500">ผ้าคอตตอน 100% คุณภาพสูง ใส่สบาย ระบายอากาศดี</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-bold text-slate-800 text-sm leading-tight">เสื้อยืด Cotton พรีเมียม</h3>
+                    <span className="bg-ci-blue text-white text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0">
+                      ฿{currentPrice}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2">ผ้าคอตตอน 100% คุณภาพสูง</p>
+                </div>
               </div>
 
-              {/* Customization Options */}
-              <div className="space-y-6">
-                {/* Technique Selector */}
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">เทคนิคการพิมพ์</label>
-                  <div className="p-1 bg-slate-100 rounded-xl flex gap-1">
-                     {[{ id: 'printing', label: 'สกรีน' }, { id: 'embroidery', label: 'ปัก' }].map((t) => (
-                       <button 
-                         key={t.id}
-                         onClick={() => setTechnique(t.id as any)}
-                         className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${technique === t.id ? 'bg-white text-ci-blue shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                       >
-                         {t.label}
-                       </button>
-                     ))}
-                  </div>
-                </div>
-
-                {/* Colors */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">สีเสื้อที่ต้องการ</label>
-                    <button onClick={() => setAvailableColors(availableColors.length === COLORS.length ? [shirtColor] : COLORS.map(c => c.value))} className="text-[10px] font-bold text-ci-blue hover:underline">
-                      {availableColors.length === COLORS.length ? 'ล้างค่า' : 'เลือกทั้งหมด'}
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-3">
-                    {COLORS.map((c) => {
-                      const isSelected = availableColors.includes(c.value);
-                      const isActive = shirtColor === c.value;
-                      
-                      return (
-                        <button 
-                          key={c.value} 
-                          onClick={() => toggleColorSelection(c.value)} 
-                          className={`w-8 h-8 rounded-full shadow-sm transition-all relative group ${isActive ? 'ring-2 ring-offset-2 ring-ci-blue scale-110 z-10' : 'ring-1 ring-slate-200 hover:scale-105 hover:shadow-md'}`}
-                          style={{ backgroundColor: c.value }}
-                          title={c.name}
-                        >
-                           {/* Selected Indicator (Checkmark) */}
-                           {isSelected && (
-                             <div className="absolute inset-0 flex items-center justify-center">
-                               <div className="bg-black/20 rounded-full p-0.5 backdrop-blur-[1px]">
-                                 <Check className="w-3 h-3 text-white stroke-[3]" />
-                               </div>
-                             </div>
-                           )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <p className="text-[10px] text-slate-400">
-                    * คลิกเพื่อเลือกสีเสื้อที่ต้องการสั่งทำ (สีปัจจุบัน: <span className="font-bold text-slate-600">{COLORS.find(c => c.value === shirtColor)?.name}</span>)
+              {/* Current Selection Summary */}
+              <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-100">
+                <div 
+                  className="w-6 h-6 rounded-full border-2 border-white shadow-sm flex-shrink-0" 
+                  style={{ backgroundColor: shirtColor }}
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-slate-700">
+                    {COLORS.find(c => c.value === shirtColor)?.name} • {shirtSize}
                   </p>
                 </div>
+                <span className="text-[10px] text-ci-blue font-medium">กำลังแสดง</span>
+              </div>
 
-                {/* Sizes */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">ไซส์ที่ต้องการ</label>
-                    <button onClick={() => setSelectedSizes(selectedSizes.length === SIZES.length ? [] : [...SIZES])} className="text-[10px] font-bold text-ci-blue hover:underline">
-                      {selectedSizes.length === SIZES.length ? 'ล้างค่า' : 'เลือกทั้งหมด'}
-                    </button>
+              {/* Section Divider */}
+              <div className="h-px bg-slate-100" />
+
+              {/* Technique Selector */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-1 h-4 bg-ci-blue rounded-full" />
+                  <label className="text-xs font-bold text-slate-700">เทคนิคการพิมพ์</label>
+                </div>
+                <div className="p-1 bg-slate-100 rounded-lg flex gap-1">
+                   {[{ id: 'printing', label: 'สกรีน', icon: '🎨' }, { id: 'embroidery', label: 'ปัก', icon: '🧵' }].map((t) => (
+                     <button 
+                       key={t.id}
+                       onClick={() => setTechnique(t.id as any)}
+                       className={`flex-1 py-2 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${technique === t.id ? 'bg-white text-ci-blue shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                     >
+                       <span>{t.icon}</span>
+                       {t.label}
+                     </button>
+                   ))}
+                </div>
+              </div>
+
+              {/* Section Divider */}
+              <div className="h-px bg-slate-100" />
+
+              {/* Colors */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1 h-4 bg-ci-blue rounded-full" />
+                    <label className="text-xs font-bold text-slate-700">สีเสื้อ</label>
+                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">{availableColors.length} สี</span>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {SIZES.map((s) => {
-                      const isSelected = selectedSizes.includes(s);
-                      return (
-                        <button 
-                          key={s} 
-                          onClick={() => {
-                             const newSizes = isSelected ? selectedSizes.filter(sz => sz !== s) : [...selectedSizes, s];
-                             setSelectedSizes(newSizes);
-                             if (!isSelected) setShirtSize(s); 
-                          }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${isSelected ? 'bg-ci-blue text-white border-ci-blue' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'}`}
-                        >
-                          {s}
-                        </button>
-                      );
-                    })}
+                  <button onClick={() => setAvailableColors(availableColors.length === COLORS.length ? [shirtColor] : COLORS.map(c => c.value))} className="text-[10px] font-bold text-ci-blue hover:underline">
+                    {availableColors.length === COLORS.length ? 'ล้างค่า' : 'เลือกทั้งหมด'}
+                  </button>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  {COLORS.map((c) => {
+                    const isSelected = availableColors.includes(c.value);
+                    const isActive = shirtColor === c.value;
+                    return (
+                      <button 
+                        key={c.value} 
+                        onClick={() => toggleColorSelection(c.value)} 
+                        className={`w-8 h-8 rounded-lg transition-all relative group ${isActive ? 'ring-2 ring-ci-blue scale-110 z-10' : 'ring-1 ring-slate-200 hover:scale-105'}`}
+                        style={{ backgroundColor: c.value }}
+                        title={c.name}
+                      >
+                         {isSelected && (
+                           <div className="absolute inset-0 flex items-center justify-center">
+                             <Check className={`w-3.5 h-3.5 ${c.value === '#ffffff' ? 'text-ci-blue' : 'text-white'} drop-shadow-sm`} strokeWidth={3} />
+                           </div>
+                         )}
+                         {isActive && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-ci-blue rounded-full" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Section Divider */}
+              <div className="h-px bg-slate-100" />
+
+              {/* Sizes */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1 h-4 bg-ci-blue rounded-full" />
+                    <label className="text-xs font-bold text-slate-700">ไซส์</label>
+                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">{selectedSizes.length} ไซส์</span>
                   </div>
+                  <button onClick={() => setSelectedSizes(selectedSizes.length === SIZES.length ? [] : [...SIZES])} className="text-[10px] font-bold text-ci-blue hover:underline">
+                    {selectedSizes.length === SIZES.length ? 'ล้างค่า' : 'เลือกทั้งหมด'}
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {SIZES.map((s) => {
+                    const isSelected = selectedSizes.includes(s);
+                    const isActive = shirtSize === s;
+                    return (
+                      <button 
+                        key={s} 
+                        onClick={() => {
+                           const newSizes = isSelected ? selectedSizes.filter(sz => sz !== s) : [...selectedSizes, s];
+                           setSelectedSizes(newSizes);
+                           if (!isSelected) setShirtSize(s); 
+                        }}
+                        className={`min-w-[42px] px-3 py-2 rounded-lg text-xs font-bold border transition-all relative ${
+                          isSelected 
+                            ? 'bg-ci-blue text-white border-ci-blue' 
+                            : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:text-slate-700'
+                        }`}
+                      >
+                        {s}
+                        {isActive && isSelected && (
+                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border border-white" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -1319,80 +1699,107 @@ export default function DesignerClient() {
 
               <div className="h-px w-full bg-slate-100" />
               
-              {/* Font List */}
-              <div>
-                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">All Fonts</h3>
+              {/* Font List - Thai Fonts */}
+              <div className="mb-6">
+                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">🇹🇭 ฟอนต์ไทย</h3>
                  <div className="space-y-1">
-                    {FONTS.filter(f => f.name.toLowerCase().includes(fontSearchQuery.toLowerCase())).map((f) => (
+                    {FONTS.filter(f => f.category === 'thai' && f.name.toLowerCase().includes(fontSearchQuery.toLowerCase())).map((f) => (
                       <button 
                         key={f.name} 
                         onClick={() => {
                           if (selectedId && selectedElement?.type === 'text') {
-                            updateElementWithHistory(selectedId, { fontFamily: f.name });
+                            updateTextElementWithAutoResize(selectedId, { fontFamily: f.name });
                           } else {
-                            addElement('text', 'ข้อความ', { fontFamily: f.name, fontSize: 32 });
+                            addElement('text', f.style === 'handwriting' ? 'สวัสดี' : 'ข้อความ', { fontFamily: f.name, fontSize: 32 });
                           }
                         }}
                         className={`w-full text-left px-4 py-3 rounded-xl hover:bg-slate-50 transition-all group flex items-center justify-between ${selectedElement?.fontFamily === f.name ? 'bg-blue-50 ring-1 ring-ci-blue' : 'bg-white border border-slate-100'}`}
                       >
-                        <span className={`text-base ${f.family} ${selectedElement?.fontFamily === f.name ? 'text-ci-blue' : 'text-slate-700'}`}>{f.name}</span>
+                        <span className="text-base text-slate-700" style={{ fontFamily: f.name }}>
+                          {f.style === 'handwriting' ? 'สวัสดี' : 'ข้อความ'} <span className="text-slate-400 text-xs ml-1">{f.name}</span>
+                        </span>
+                        {selectedElement?.fontFamily === f.name && <Check className="w-4 h-4 text-ci-blue" />}
+                      </button>
+                    ))}
+                 </div>
+              </div>
+
+              {/* Font List - English Fonts */}
+              <div>
+                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">🌍 English Fonts</h3>
+                 <div className="space-y-1">
+                    {FONTS.filter(f => f.category === 'english' && f.name.toLowerCase().includes(fontSearchQuery.toLowerCase())).map((f) => (
+                      <button 
+                        key={f.name} 
+                        onClick={() => {
+                          if (selectedId && selectedElement?.type === 'text') {
+                            updateTextElementWithAutoResize(selectedId, { fontFamily: f.name });
+                          } else {
+                            addElement('text', f.style === 'handwriting' ? 'Hello' : 'Design', { fontFamily: f.name, fontSize: 32 });
+                          }
+                        }}
+                        className={`w-full text-left px-4 py-3 rounded-xl hover:bg-slate-50 transition-all group flex items-center justify-between ${selectedElement?.fontFamily === f.name ? 'bg-blue-50 ring-1 ring-ci-blue' : 'bg-white border border-slate-100'}`}
+                      >
+                        <span className="text-base text-slate-700" style={{ fontFamily: f.name }}>
+                          {f.style === 'handwriting' ? 'Hello' : 'Design'} <span className="text-slate-400 text-xs ml-1">{f.name}</span>
+                        </span>
                         {selectedElement?.fontFamily === f.name && <Check className="w-4 h-4 text-ci-blue" />}
                       </button>
                     ))}
                  </div>
                  {FONTS.filter(f => f.name.toLowerCase().includes(fontSearchQuery.toLowerCase())).length === 0 && (
                     <div className="text-center py-8 text-slate-400 text-sm">
-                       No fonts found
+                       ไม่พบฟอนต์
                     </div>
                  )}
               </div>
             </div>
           )}
           {activeTool === 'uploads' && (
-            <div className="text-center">
-              <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
-              <button onClick={() => fileInputRef.current?.click()} className="w-full border-2 border-dashed border-ci-blue/30 bg-blue-50/30 rounded-2xl p-8 mb-6 hover:bg-blue-50/60 hover:border-ci-blue/50 transition-all group">
-                <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <UploadCloud className="w-8 h-8 text-ci-blue" />
-                </div>
-                <p className="text-sm font-bold text-slate-700 mb-1">คลิกเพื่ออัปโหลด</p>
-                <p className="text-xs text-slate-400">รองรับไฟล์ JPG, PNG</p>
-              </button>
-            </div>
-          )}
-          {activeTool === 'library' && (
             <div className="space-y-4">
-               <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold text-slate-800 text-base">รูปภาพของฉัน</h3>
-                  <Link href="/dashboard/library" className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-ci-blue transition-colors" title="จัดการคลังภาพ">
-                    <ExternalLink className="w-4 h-4" />
-                  </Link>
-               </div>
+              <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+              
+              {/* Upload Button - Compact */}
+              <button onClick={() => fileInputRef.current?.click()} className="w-full border-2 border-dashed border-ci-blue/30 bg-blue-50/30 rounded-xl p-4 hover:bg-blue-50/60 hover:border-ci-blue/50 transition-all group flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <UploadCloud className="w-5 h-5 text-ci-blue" />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-bold text-slate-700">อัปโหลดรูปภาพ</p>
+                  <p className="text-xs text-slate-400">JPG, PNG</p>
+                </div>
+              </button>
+
+              {/* Divider */}
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-px bg-slate-200" />
+                <span className="text-[10px] text-slate-400 font-medium">คลังของฉัน</span>
+                <div className="flex-1 h-px bg-slate-200" />
+              </div>
                
-               
-               <div className="grid grid-cols-2 gap-3">
-                 {/* Upload New Button */}
-                 <button onClick={() => fileInputRef.current?.click()} className="aspect-square border-2 border-dashed border-ci-blue/30 bg-blue-50/30 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-ci-blue/50 hover:bg-blue-50/50 transition-all group">
-                    <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform text-ci-blue">
-                      <Plus className="w-5 h-5" />
-                    </div>
-                    <span className="text-xs font-bold text-ci-blue">อัปโหลดใหม่</span>
-                 </button>
-                 
-                 {/* Assets */}
-                 {MY_LIBRARY_ASSETS.map((asset) => (
-                   <div key={asset.id} className="group relative aspect-square bg-slate-100 rounded-xl overflow-hidden cursor-pointer border border-slate-200 hover:border-ci-blue hover:shadow-md transition-all" onClick={() => addElement('image', asset.url)}>
-                      <img src={asset.url} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                      <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                        <p className="text-[10px] text-white font-bold truncate">{asset.name}</p>
-                      </div>
-                      <button className="absolute top-2 right-2 p-1 bg-white/90 rounded-full shadow-sm opacity-0 group-hover:opacity-100 hover:bg-white text-slate-600 hover:text-red-500 transition-all transform translate-y-2 group-hover:translate-y-0">
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                   </div>
-                 ))}
-               </div>
+              {/* Library Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {MY_LIBRARY_ASSETS.map((asset) => (
+                  <div key={asset.id} className="group relative aspect-square bg-slate-100 rounded-xl overflow-hidden cursor-pointer border border-slate-200 hover:border-ci-blue hover:shadow-md transition-all" onClick={() => addElement('image', asset.url)}>
+                     <img src={asset.url} className="w-full h-full object-cover" />
+                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                     <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                       <p className="text-[10px] text-white font-bold truncate">{asset.name}</p>
+                     </div>
+                     <button className="absolute top-2 right-2 p-1 bg-white/90 rounded-full shadow-sm opacity-0 group-hover:opacity-100 hover:bg-white text-slate-600 hover:text-red-500 transition-all transform translate-y-2 group-hover:translate-y-0">
+                       <Trash2 className="w-3 h-3" />
+                     </button>
+                  </div>
+                ))}
+
+                {/* Empty State if no assets */}
+                {MY_LIBRARY_ASSETS.length === 0 && (
+                  <div className="col-span-2 text-center py-8 text-slate-400">
+                    <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-xs">ยังไม่มีรูปภาพในคลัง</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
           {activeTool === 'ai' && (
@@ -1512,6 +1919,23 @@ export default function DesignerClient() {
           )}
           {activeTool === 'layers' && (
             <div className="space-y-2">
+              {/* Layer Summary */}
+              <div className="flex items-center justify-between px-2 py-1 mb-2">
+                <span className="text-xs text-slate-500">
+                  {elements.filter(el => el.side === viewSide).length} เลเยอร์
+                </span>
+                <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <Lock className="w-3 h-3" />
+                    {elements.filter(el => el.side === viewSide && el.locked).length}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <EyeOff className="w-3 h-3" />
+                    {elements.filter(el => el.side === viewSide && el.visible === false).length}
+                  </span>
+                </div>
+              </div>
+
               <div className="flex items-center gap-2 mb-4 p-1 bg-slate-100 rounded-lg">
                 <button 
                   onClick={() => setViewSide('front')}
@@ -1527,30 +1951,87 @@ export default function DesignerClient() {
                 </button>
               </div>
               
-              {elements.filter(el => el.side === viewSide).slice().reverse().map((el, i) => (
+              {elements.filter(el => el.side === viewSide).slice().reverse().map((el, i, arr) => (
                 <div key={el.id} 
-                  className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${selectedId === el.id ? 'border-ci-blue bg-blue-50/50' : 'border-slate-200 hover:border-slate-300 bg-white'}`}
+                  className={`flex items-center gap-2 p-3 rounded-xl border transition-all cursor-pointer ${selectedId === el.id ? 'border-ci-blue bg-blue-50/50' : 'border-slate-200 hover:border-slate-300 bg-white'} ${el.visible === false ? 'opacity-50' : ''}`}
                   onClick={() => setSelectedId(el.id)}
                 >
+                  {/* Layer Icon */}
                   <div className="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-500 flex-shrink-0">
                     {el.type === 'text' && <Type className="w-4 h-4" />}
                     {el.type === 'image' && <ImageIcon className="w-4 h-4" />}
                     {el.type === 'shape' && <Shapes className="w-4 h-4" />}
                     {el.type === 'sticker' && <Sticker className="w-4 h-4" />}
+                    {el.type === 'icon' && <Star className="w-4 h-4" />}
                   </div>
+                  
+                  {/* Layer Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold truncate text-slate-700">{el.content.startsWith('data:') ? 'Image' : el.content}</p>
-                    <p className="text-[10px] text-slate-400 capitalize">{el.type}</p>
+                    <p className="text-xs font-bold truncate text-slate-700">
+                      {el.content.startsWith('data:') ? 'Image' : el.content.substring(0, 15)}
+                      {el.content.length > 15 && '...'}
+                    </p>
+                    <p className="text-[10px] text-slate-400 capitalize flex items-center gap-1">
+                      {el.type}
+                      {el.locked && <Lock className="w-2.5 h-2.5" />}
+                    </p>
                   </div>
-                  <button onClick={(e) => { e.stopPropagation(); deleteElement(el.id); }} className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded transition-colors">
-                    <Trash2 className="w-4 h-4" />
+                  
+                  {/* Layer Controls */}
+                  <div className="flex items-center gap-0.5">
+                    {/* Visibility Toggle */}
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); toggleVisibilityById(el.id); }}
+                      className={`p-1 rounded transition-colors ${el.visible === false ? 'bg-slate-200 text-slate-500' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-600'}`}
+                      title={el.visible === false ? 'แสดง' : 'ซ่อน'}
+                    >
+                      {el.visible === false ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                    
+                    {/* Lock Toggle */}
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); toggleLockById(el.id); }}
+                      className={`p-1 rounded transition-colors ${el.locked ? 'bg-amber-100 text-amber-600' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-600'}`}
+                      title={el.locked ? 'ปลดล็อค' : 'ล็อค'}
+                    >
+                      {el.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                    </button>
+                    
+                    {/* Move Up */}
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); moveLayer(el.id, 'up'); }}
+                      className="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-600 rounded transition-colors disabled:opacity-30"
+                      disabled={i === 0}
+                      title="เลื่อนขึ้น"
+                    >
+                      <ChevronUp className="w-3.5 h-3.5" />
+                    </button>
+                    
+                    {/* Move Down */}
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); moveLayer(el.id, 'down'); }}
+                      className="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-600 rounded transition-colors disabled:opacity-30"
+                      disabled={i === arr.length - 1}
+                      title="เลื่อนลง"
+                    >
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </button>
+                    
+                    {/* Delete */}
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); deleteElement(el.id); }} 
+                      className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded transition-colors"
+                      title="ลบ"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
                   </button>
+                  </div>
                 </div>
               ))}
               {elements.filter(el => el.side === viewSide).length === 0 && (
                 <div className="text-center py-10 text-slate-400">
                   <Layers className="w-12 h-12 mx-auto mb-2 opacity-20" />
-                  <p className="text-sm">No layers on {viewSide}</p>
+                  <p className="text-sm">ไม่มีเลเยอร์ใน{viewSide === 'front' ? 'ด้านหน้า' : 'ด้านหลัง'}</p>
                 </div>
               )}
             </div>
@@ -1561,92 +2042,109 @@ export default function DesignerClient() {
       {/* 3. Main Workspace */}
       <div className={`flex-1 flex flex-col relative transition-all duration-300 ${activeTool ? 'pl-80' : ''}`}>
         
-        {/* Top Bar */}
-        <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10 shadow-sm relative">
-           {/* Left: Tools */}
-           <div className="flex items-center gap-4 z-20 relative">
-              <div className="flex bg-slate-100 rounded-lg p-1">
-                    <button onClick={undo} disabled={currentHistoryIndex <= 0} className={`p-1.5 rounded transition-colors ${currentHistoryIndex <= 0 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:bg-white hover:shadow-sm hover:text-ci-blue'}`}>
+        {/* Top Bar - Cleaner Design */}
+        <div className="h-12 bg-white border-b border-slate-200 flex items-center justify-between px-4 z-10 shadow-sm flex-shrink-0">
+           {/* Left: Undo/Redo + Stepper */}
+           <div className="flex items-center gap-3">
+              <div className="flex bg-slate-100 rounded-lg p-0.5">
+                    <button onClick={undo} disabled={currentHistoryIndex <= 0} className={`p-1.5 rounded transition-colors ${currentHistoryIndex <= 0 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:bg-white hover:shadow-sm hover:text-ci-blue'}`} title="ย้อนกลับ (Ctrl+Z)">
                       <Undo2 className="w-4 h-4" />
                     </button>
-                    <button onClick={redo} disabled={currentHistoryIndex >= history.length - 1} className={`p-1.5 rounded transition-colors ${currentHistoryIndex >= history.length - 1 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:bg-white hover:shadow-sm hover:text-ci-blue'}`}>
+                    <button onClick={redo} disabled={currentHistoryIndex >= history.length - 1} className={`p-1.5 rounded transition-colors ${currentHistoryIndex >= history.length - 1 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:bg-white hover:shadow-sm hover:text-ci-blue'}`} title="ทำซ้ำ (Ctrl+Shift+Z)">
                       <Redo2 className="w-4 h-4" />
                     </button>
               </div>
+              
+              {/* Inline Stepper - Compact */}
+              <div className="hidden md:flex items-center gap-0.5 text-xs">
+                 {STEPS.map((step, i) => (
+                   <div key={step.id} className="flex items-center">
+                     {i > 0 && <div className="w-3 h-px bg-slate-200 mx-1" />}
+                     <div className={`flex items-center gap-1 px-2 py-1 rounded-md ${step.status === 'completed' ? 'text-green-600' : step.status === 'current' ? 'text-ci-blue bg-blue-50' : 'text-slate-300'}`}>
+                       <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold ${step.status === 'completed' ? 'bg-green-100 text-green-600' : step.status === 'current' ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-400'}`}>
+                         {step.status === 'completed' ? <Check className="w-2.5 h-2.5" /> : step.id}
+                       </div>
+                       <span className="font-semibold hidden lg:inline">{step.label}</span>
+                     </div>
+                   </div>
+                 ))}
+              </div>
            </div>
 
-           {/* Center: Process Stepper */}
-           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 z-10 bg-white/90 backdrop-blur px-4 py-1 rounded-full border border-slate-100 shadow-sm">
-              {STEPS.map((step, i) => (
-                <div key={step.id} className="flex items-center gap-1">
-                  {i > 0 && <div className="w-4 h-px bg-slate-200" />}
-                  <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full transition-colors ${step.status === 'completed' ? 'text-green-600 bg-green-50' : step.status === 'current' ? 'text-ci-blue bg-blue-50' : 'text-slate-300'}`}>
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold border ${step.status === 'completed' ? 'bg-green-100 border-green-200' : step.status === 'current' ? 'bg-ci-blue text-white border-ci-blue' : 'bg-white border-slate-200'}`}>
-                      {step.status === 'completed' ? <Check className="w-2.5 h-2.5" /> : step.id}
-                    </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider">{step.label}</span>
-                  </div>
-                </div>
-              ))}
-           </div>
-
-           {/* Right: Actions */}
-           <div className="flex items-center gap-2 z-20 relative">
-              {/* Price Tag */}
-              <div className="flex flex-col items-end leading-none mr-4">
-                   <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">ราคารวม</span>
-                   <span className="text-xl font-black text-slate-900 tracking-tight">฿{currentPrice.toLocaleString()}</span>
+           {/* Right: Price + Actions */}
+           <div className="flex items-center gap-2">
+              {/* Compact Price */}
+              <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                   <span className="text-xs text-slate-500">ราคา</span>
+                   <span className="text-base font-bold text-slate-900">฿{currentPrice.toLocaleString()}</span>
               </div>
 
-              {/* Buttons */}
-              <button className="h-10 px-4 text-slate-500 font-bold text-sm hover:text-ci-blue hover:bg-blue-50 rounded-xl border border-transparent hover:border-blue-100 transition-all">
-                ดูตัวอย่าง
+              <Divider />
+              
+              {/* Tool Buttons */}
+              <button 
+                onClick={() => setShowKeyboardShortcuts(true)} 
+                className="p-2 text-slate-400 hover:text-ci-blue hover:bg-blue-50 rounded-lg transition-all" 
+                title="คีย์ลัด (?)"
+              >
+                <Info className="w-4 h-4" />
               </button>
-              <button onClick={handleSaveClick} className="h-10 px-6 bg-gradient-to-r from-ci-blue to-blue-600 text-white rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-ci-blue/30 hover:-translate-y-0.5 transition-all flex items-center gap-2 active:translate-y-0">
-                 <Save className="w-4 h-4" />
-                 <span>บันทึก</span>
+              <button 
+                onClick={() => setShowPreviewModal(true)} 
+                className="h-9 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium text-sm transition-all flex items-center gap-2"
+              >
+                <Eye className="w-4 h-4" />
+                <span>Preview</span>
+              </button>
+              
+              <Divider />
+              
+              <button onClick={handleSaveClick} className="h-9 px-5 bg-ci-blue hover:bg-blue-600 text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2">
+                 <span>ถัดไป</span>
+                 <ChevronRight className="w-4 h-4" />
               </button>
            </div>
         </div>
 
-        {/* Context Toolbar */}
-        {selectedElement && !editingId && (
-           <div className="absolute top-20 left-1/2 -translate-x-1/2 z-40 bg-white rounded-xl shadow-xl border border-slate-200 px-4 py-2 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-200">
+        {/* Context Toolbar - Fixed below header (always visible) */}
+        <div className="h-11 bg-white/95 backdrop-blur-sm border-b border-slate-100 flex items-center justify-center px-3 z-10 flex-shrink-0">
+           {selectedElement && !editingId ? (
+           <div className="flex items-center gap-2">
               {selectedElement.type === 'text' && (
                  <>
-                    <div className="relative group">
-                      <button onClick={() => setActiveTool(activeTool === 'text' ? null : 'text')} className="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-100 rounded-lg text-sm font-medium w-28 justify-center border border-slate-200 text-center">
+                    <div className="relative">
+                      <button onClick={() => setActiveTool(activeTool === 'text' ? null : 'text')} className="flex items-center gap-1 px-2 py-1 hover:bg-slate-100 rounded text-xs font-medium w-20 justify-center border border-slate-200">
                         <span className="truncate">{selectedElement.fontFamily}</span>
                       </button>
                     </div>
                     <Divider />
-                    <div className="flex items-center bg-slate-100 rounded-lg">
-                       <button onClick={() => updateElementWithHistory(selectedId, { fontSize: Math.max(12, (selectedElement.fontSize || 32) - 4) })} className="p-1.5 hover:bg-slate-200 rounded-l-lg text-slate-600"><Minus className="w-3 h-3" /></button>
-                       <span className="w-8 text-center text-xs font-bold">{Math.round(selectedElement.fontSize || 0)}</span>
-                       <button onClick={() => updateElementWithHistory(selectedId, { fontSize: Math.min(200, (selectedElement.fontSize || 32) + 4) })} className="p-1.5 hover:bg-slate-200 rounded-r-lg text-slate-600"><Plus className="w-3 h-3" /></button>
+                    <div className="flex items-center bg-slate-100 rounded">
+                       <button onClick={() => updateElementWithHistory(selectedId, { fontSize: Math.max(12, (selectedElement.fontSize || 32) - 4) })} className="p-1 hover:bg-slate-200 rounded-l text-slate-600"><Minus className="w-3 h-3" /></button>
+                       <span className="w-6 text-center text-[10px] font-bold">{Math.round(selectedElement.fontSize || 0)}</span>
+                       <button onClick={() => updateElementWithHistory(selectedId, { fontSize: Math.min(200, (selectedElement.fontSize || 32) + 4) })} className="p-1 hover:bg-slate-200 rounded-r text-slate-600"><Plus className="w-3 h-3" /></button>
                     </div>
                     <Divider />
-                    <div className="flex items-center gap-2 relative group">
-                       <div className="w-6 h-6 rounded border border-slate-300" style={{ backgroundColor: selectedElement.color }}></div>
+                    <div className="flex items-center relative">
+                       <div className="w-5 h-5 rounded border border-slate-300" style={{ backgroundColor: selectedElement.color }}></div>
                        <input type="color" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => updateElement(selectedId, { color: e.target.value })} onBlur={(e) => updateElementWithHistory(selectedId, { color: e.target.value })} />
                     </div>
                     <Divider />
-                    <div className="flex items-center gap-1">
-                       <button onClick={() => updateElementWithHistory(selectedId, { fontWeight: selectedElement.fontWeight === 'bold' ? 'normal' : 'bold' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.fontWeight === 'bold' ? 'bg-slate-200' : ''}`}><Bold className="w-4 h-4" /></button>
-                       <button onClick={() => updateElementWithHistory(selectedId, { fontStyle: selectedElement.fontStyle === 'italic' ? 'normal' : 'italic' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.fontStyle === 'italic' ? 'bg-slate-200' : ''}`}><Italic className="w-4 h-4" /></button>
-                       <button onClick={() => updateElementWithHistory(selectedId, { textDecoration: selectedElement.textDecoration === 'underline' ? 'none' : 'underline' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.textDecoration === 'underline' ? 'bg-slate-200' : ''}`}><Underline className="w-4 h-4" /></button>
+                    <div className="flex items-center">
+                       <button onClick={() => updateElementWithHistory(selectedId, { fontWeight: selectedElement.fontWeight === 'bold' ? 'normal' : 'bold' })} className={`p-1 rounded hover:bg-slate-100 ${selectedElement.fontWeight === 'bold' ? 'bg-slate-200' : ''}`}><Bold className="w-3.5 h-3.5" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { fontStyle: selectedElement.fontStyle === 'italic' ? 'normal' : 'italic' })} className={`p-1 rounded hover:bg-slate-100 ${selectedElement.fontStyle === 'italic' ? 'bg-slate-200' : ''}`}><Italic className="w-3.5 h-3.5" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { textDecoration: selectedElement.textDecoration === 'underline' ? 'none' : 'underline' })} className={`p-1 rounded hover:bg-slate-100 ${selectedElement.textDecoration === 'underline' ? 'bg-slate-200' : ''}`}><Underline className="w-3.5 h-3.5" /></button>
                     </div>
                     <Divider />
-                    <div className="flex items-center gap-1">
-                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'left' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.textAlign === 'left' ? 'bg-slate-200' : ''}`}><AlignLeft className="w-4 h-4" /></button>
-                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'center' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.textAlign === 'center' || !selectedElement.textAlign ? 'bg-slate-200' : ''}`}><AlignCenter className="w-4 h-4" /></button>
-                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'right' })} className={`p-1.5 rounded hover:bg-slate-100 ${selectedElement.textAlign === 'right' ? 'bg-slate-200' : ''}`}><AlignRight className="w-4 h-4" /></button>
+                    <div className="flex items-center">
+                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'left' })} className={`p-1 rounded hover:bg-slate-100 ${selectedElement.textAlign === 'left' ? 'bg-slate-200' : ''}`}><AlignLeft className="w-3.5 h-3.5" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'center' })} className={`p-1 rounded hover:bg-slate-100 ${selectedElement.textAlign === 'center' || !selectedElement.textAlign ? 'bg-slate-200' : ''}`}><AlignCenter className="w-3.5 h-3.5" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'right' })} className={`p-1 rounded hover:bg-slate-100 ${selectedElement.textAlign === 'right' ? 'bg-slate-200' : ''}`}><AlignRight className="w-3.5 h-3.5" /></button>
                     </div>
                     <Divider />
                     {/* Effects Button */}
                     <button 
                       onClick={() => setActiveTool('text-effects')} 
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTool === 'text-effects' ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-ci-blue'}`}
+                      className={`px-2 py-1 rounded text-[10px] font-bold transition-all ${activeTool === 'text-effects' ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
                     >
                       เอฟเฟกต์
                     </button>
@@ -1723,13 +2221,47 @@ export default function DesignerClient() {
                  </button>
               </div>
               <Divider />
-              <div className="flex items-center gap-1"><button onClick={duplicateElement} className="p-1.5 hover:bg-slate-100 rounded text-slate-500"><Copy className="w-4 h-4" /></button><button onClick={() => deleteElement(selectedId)} className="p-1.5 hover:bg-red-50 rounded text-red-500"><Trash2 className="w-4 h-4" /></button></div>
+              <div className="flex items-center gap-1"><button onClick={duplicateElement} className="p-1.5 hover:bg-slate-100 rounded text-slate-500" title="สำเนา"><Copy className="w-4 h-4" /></button><button onClick={() => deleteElement(selectedId)} className="p-1.5 hover:bg-red-50 rounded text-red-500" title="ลบ"><Trash2 className="w-4 h-4" /></button></div>
            </div>
-        )}
+           ) : (
+              <div className="flex items-center gap-3">
+                 <span className="text-xs text-slate-400 mr-2">เพิ่ม:</span>
+                 <button 
+                   onClick={() => setActiveTool('text')} 
+                   className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTool === 'text' ? 'text-ci-blue bg-blue-50' : 'text-slate-600 hover:text-ci-blue hover:bg-blue-50'}`}
+                 >
+                   <Type className="w-3.5 h-3.5" />
+                   <span>ข้อความ</span>
+                 </button>
+                 <button 
+                   onClick={() => setActiveTool('uploads')}
+                   className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTool === 'uploads' ? 'text-ci-blue bg-blue-50' : 'text-slate-600 hover:text-ci-blue hover:bg-blue-50'}`}
+                 >
+                   <ImageIcon className="w-3.5 h-3.5" />
+                   <span>รูปภาพ</span>
+                 </button>
+                 <button 
+                   onClick={() => setActiveTool('elements')}
+                   className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTool === 'elements' ? 'text-ci-blue bg-blue-50' : 'text-slate-600 hover:text-ci-blue hover:bg-blue-50'}`}
+                 >
+                   <Shapes className="w-3.5 h-3.5" />
+                   <span>รูปทรง</span>
+                 </button>
+                 <div className="w-px h-5 bg-slate-200 mx-1" />
+                 <div className="flex items-center gap-1 text-xs text-slate-400">
+                    <span>Zoom:</span>
+                    <button onClick={() => setZoom(Math.max(25, zoom - 25))} className="p-1 hover:bg-slate-100 rounded"><Minus className="w-3 h-3" /></button>
+                    <span className="w-10 text-center font-medium text-slate-600">{zoom}%</span>
+                    <button onClick={() => setZoom(Math.min(200, zoom + 25))} className="p-1 hover:bg-slate-100 rounded"><Plus className="w-3 h-3" /></button>
+                 </div>
+              </div>
+           )}
+        </div>
 
-        {/* Canvas */}
-        <div className="flex-1 overflow-hidden flex items-center justify-center bg-slate-100 relative" onClick={() => { setSelectedId(null); setShowFilters(false); }}>
-           <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+        {/* Canvas - Centered in available space */}
+        <div className="flex-1 overflow-hidden flex items-center justify-center bg-slate-100/80 relative" onClick={() => { setSelectedId(null); setShowFilters(false); }}>
+           {/* Dot pattern background */}
+           <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#64748b 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
            
            {/* Front/Back Toggle */}
            <div className="absolute bottom-6 left-6 bg-white rounded-lg shadow-md border border-slate-200 flex p-1 gap-1 z-30">
@@ -1757,7 +2289,7 @@ export default function DesignerClient() {
                 draggable={false} 
               />
 
-              {/* Print Area */}
+              {/* Print Area - Always show subtle boundary for better UX */}
               <div 
                 className="absolute transition-all z-10 overflow-visible group/area"
                 style={{
@@ -1766,7 +2298,7 @@ export default function DesignerClient() {
                   top: '20%', // Fixed top offset approx
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  border: showRulers ? '1px dashed rgba(59, 130, 246, 0.5)' : 'none' // Only show border when rulers active or hovering
+                  border: showRulers ? '1px dashed rgba(59, 130, 246, 0.5)' : '1px dashed rgba(148, 163, 184, 0.3)' // Always show subtle border for print area
                 }}
               >
                  
@@ -1793,6 +2325,19 @@ export default function DesignerClient() {
                    </>
                  )}
 
+                 {/* Print Area Label - Show when no elements */}
+                 {elements.filter(el => el.side === viewSide).length === 0 && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                       <div className="flex flex-col items-center text-slate-300/60">
+                          <div className="w-12 h-12 rounded-full border-2 border-dashed border-slate-200 flex items-center justify-center mb-2">
+                             <Plus className="w-6 h-6" />
+                          </div>
+                          <span className="text-xs font-medium">พื้นที่ออกแบบ</span>
+                          <span className="text-[10px]">{PRINT_AREA_WIDTH_CM} × {PRINT_AREA_HEIGHT_CM} ซม.</span>
+                       </div>
+                    </div>
+                 )}
+                 
                  {/* Snap Guides */}
                  {snapX !== null && (
                     <div className="absolute top-0 bottom-0 w-px bg-ci-blue z-50 pointer-events-none" style={{ left: snapX }}></div>
@@ -2031,30 +2576,30 @@ export default function DesignerClient() {
                             </div>
                          )}
                          
-                         {/* Bounding Box Lines (Blue) */}
-                         <div className="absolute -top-[1px] -left-[1px] -right-[1px] -bottom-[1px] border border-ci-blue pointer-events-none"></div>
+                         {/* Bounding Box Lines (Blue - More visible) */}
+                         <div className="absolute -top-[1px] -left-[1px] -right-[1px] -bottom-[1px] border-2 border-ci-blue pointer-events-none"></div>
 
-                         {/* Corner Handles */}
+                         {/* Corner Handles - Larger and more visible */}
                          <div 
-                           className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border border-ci-blue rounded-full cursor-nw-resize z-50 shadow-sm hover:scale-125 transition-transform pointer-events-auto"
+                           className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-nw-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
                            onMouseDown={(e) => handleResizeStart(e, selectedElement, 'nw')} 
                          ></div>
                          <div 
-                           className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border border-ci-blue rounded-full cursor-ne-resize z-50 shadow-sm hover:scale-125 transition-transform pointer-events-auto"
+                           className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-ne-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
                            onMouseDown={(e) => handleResizeStart(e, selectedElement, 'ne')}
                          ></div>
                          <div 
-                           className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border border-ci-blue rounded-full cursor-sw-resize z-50 shadow-sm hover:scale-125 transition-transform pointer-events-auto"
+                           className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-sw-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
                            onMouseDown={(e) => handleResizeStart(e, selectedElement, 'sw')}
                          ></div>
                          <div 
-                           className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border border-ci-blue rounded-full cursor-se-resize z-50 shadow-sm hover:scale-125 transition-transform pointer-events-auto"
+                           className="absolute -bottom-2 -right-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-se-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
                            onMouseDown={(e) => handleResizeStart(e, selectedElement, 'se')}
                          ></div>
 
-                         {/* Side Handles */}
-                         <div className="absolute top-1/2 -left-[5px] -translate-y-1/2 w-2.5 h-5 bg-white border border-ci-blue rounded-full cursor-w-resize z-50 shadow-sm hover:scale-y-125 transition-transform pointer-events-auto" onMouseDown={(e) => handleResizeStart(e, selectedElement, 'w')}></div>
-                         <div className="absolute top-1/2 -right-[5px] -translate-y-1/2 w-2.5 h-5 bg-white border border-ci-blue rounded-full cursor-e-resize z-50 shadow-sm hover:scale-y-125 transition-transform pointer-events-auto" onMouseDown={(e) => handleResizeStart(e, selectedElement, 'e')}></div>
+                         {/* Side Handles - More visible */}
+                         <div className="absolute top-1/2 -left-[6px] -translate-y-1/2 w-3 h-6 bg-white border-2 border-ci-blue rounded cursor-w-resize z-50 shadow-md hover:bg-blue-50 transition-all pointer-events-auto" onMouseDown={(e) => handleResizeStart(e, selectedElement, 'w')}></div>
+                         <div className="absolute top-1/2 -right-[6px] -translate-y-1/2 w-3 h-6 bg-white border-2 border-ci-blue rounded cursor-e-resize z-50 shadow-md hover:bg-blue-50 transition-all pointer-events-auto" onMouseDown={(e) => handleResizeStart(e, selectedElement, 'e')}></div>
                          
                          {selectedElement.type !== 'text' && (
                            <>
@@ -2344,6 +2889,263 @@ export default function DesignerClient() {
         </div>
       )}
 
+      {/* Keyboard Shortcuts Modal */}
+      {showKeyboardShortcuts && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowKeyboardShortcuts(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-slate-100 rounded-lg">
+                  <Info className="w-5 h-5 text-slate-600" />
+                </div>
+                <h3 className="font-bold text-lg text-slate-800">คีย์ลัด</h3>
+              </div>
+              <button onClick={() => setShowKeyboardShortcuts(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-3 max-h-[60vh] overflow-y-auto">
+              <ShortcutRow keys={['Ctrl', 'C']} desc="คัดลอก" />
+              <ShortcutRow keys={['Ctrl', 'V']} desc="วาง" />
+              <ShortcutRow keys={['Ctrl', 'D']} desc="สำเนา" />
+              <ShortcutRow keys={['Ctrl', 'Z']} desc="ย้อนกลับ" />
+              <ShortcutRow keys={['Ctrl', 'Shift', 'Z']} desc="ทำซ้ำ" />
+              <ShortcutRow keys={['Ctrl', 'L']} desc="ล็อค/ปลดล็อค" />
+              <ShortcutRow keys={['Delete']} desc="ลบ" />
+              <ShortcutRow keys={['Escape']} desc="ยกเลิกการเลือก" />
+              <ShortcutRow keys={['↑', '↓', '←', '→']} desc="เลื่อนตำแหน่ง 1px" />
+              <ShortcutRow keys={['Shift', '↑↓←→']} desc="เลื่อนตำแหน่ง 10px" />
+              <ShortcutRow keys={['?']} desc="แสดงคีย์ลัด" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Export Modal */}
+      {/* Preview Modal */}
+      {showPreviewModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowPreviewModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-ci-blue/10 rounded-lg">
+                  <Eye className="w-5 h-5 text-ci-blue" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-slate-800">Preview</h3>
+                  <p className="text-xs text-slate-400">ดูตัวอย่างงานออกแบบ</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                {/* 2D/3D Toggle */}
+                <div className="flex bg-slate-100 rounded-lg p-1">
+                  <button 
+                    onClick={() => setPreviewMode('2d')}
+                    className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${previewMode === '2d' ? 'bg-white text-ci-blue shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  >
+                    2D
+                  </button>
+                  <button 
+                    onClick={() => setPreviewMode('3d')}
+                    className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${previewMode === '3d' ? 'bg-white text-ci-blue shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  >
+                    3D
+                  </button>
+                </div>
+                <button onClick={() => setShowPreviewModal(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            
+            {/* Preview Content */}
+            <div className="p-8 bg-gradient-to-br from-slate-50 to-slate-100">
+              <div className="flex justify-center">
+                {previewMode === '2d' ? (
+                  /* 2D Preview - Front & Back */
+                  <div className="flex gap-8">
+                    <div className="text-center">
+                      <div className="w-72 h-80 bg-white rounded-2xl shadow-lg flex items-center justify-center relative overflow-hidden border border-slate-200">
+                        <img 
+                          src={MOCKUP_IMAGES.front}
+                          className="w-full h-full object-contain"
+                          style={{ 
+                            filter: shirtColor === '#000000' ? 'brightness(0.2)' : 'none', 
+                            backgroundColor: shirtColor === '#ffffff' ? 'transparent' : shirtColor, 
+                            maskImage: `url(${MOCKUP_IMAGES.front})`, 
+                            maskSize: 'contain', 
+                            maskRepeat: 'no-repeat',
+                            maskPosition: 'center',
+                            WebkitMaskImage: `url(${MOCKUP_IMAGES.front})`,
+                            WebkitMaskSize: 'contain',
+                            WebkitMaskRepeat: 'no-repeat',
+                            WebkitMaskPosition: 'center'
+                          }}
+                        />
+                        {/* Design overlay for front */}
+                        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-32 h-40 flex items-center justify-center">
+                          {elements.filter(el => el.side === 'front' && el.visible !== false).slice(0, 3).map((el, i) => (
+                            <div key={el.id} className="absolute text-xs" style={{ transform: `scale(0.3)` }}>
+                              {el.type === 'text' && <span style={{ color: el.color, fontFamily: el.fontFamily }}>{el.content}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-sm font-bold text-slate-600 mt-3">ด้านหน้า</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-72 h-80 bg-white rounded-2xl shadow-lg flex items-center justify-center relative overflow-hidden border border-slate-200">
+                        <img 
+                          src={MOCKUP_IMAGES.back}
+                          className="w-full h-full object-contain"
+                          style={{ 
+                            filter: shirtColor === '#000000' ? 'brightness(0.2)' : 'none', 
+                            backgroundColor: shirtColor === '#ffffff' ? 'transparent' : shirtColor, 
+                            maskImage: `url(${MOCKUP_IMAGES.back})`, 
+                            maskSize: 'contain', 
+                            maskRepeat: 'no-repeat',
+                            maskPosition: 'center',
+                            WebkitMaskImage: `url(${MOCKUP_IMAGES.back})`,
+                            WebkitMaskSize: 'contain',
+                            WebkitMaskRepeat: 'no-repeat',
+                            WebkitMaskPosition: 'center'
+                          }}
+                        />
+                      </div>
+                      <p className="text-sm font-bold text-slate-600 mt-3">ด้านหลัง</p>
+                    </div>
+                  </div>
+                ) : (
+                  /* 3D Preview - Placeholder */
+                  <div className="w-full max-w-lg">
+                    <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl shadow-lg flex flex-col items-center justify-center border border-slate-200">
+                      <div className="w-20 h-20 bg-slate-300 rounded-full flex items-center justify-center mb-4">
+                        <Box className="w-10 h-10 text-slate-500" />
+                      </div>
+                      <p className="text-lg font-bold text-slate-600">3D Preview</p>
+                      <p className="text-sm text-slate-400 mt-1">หมุนดูได้ 360°</p>
+                      <p className="text-xs text-slate-400 mt-4 px-8 text-center">
+                        ฟีเจอร์ 3D Preview กำลังพัฒนา<br/>จะพร้อมใช้งานเร็วๆ นี้
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-white">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full border-2 border-white shadow" style={{ backgroundColor: shirtColor }} />
+                  <span className="text-sm text-slate-600">{COLORS.find(c => c.value === shirtColor)?.name}</span>
+                </div>
+                <span className="text-slate-300">•</span>
+                <span className="text-sm text-slate-600">{shirtSize}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => { setShowPreviewModal(false); setShowExportModal(true); }} 
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium text-sm transition-all flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>ดาวน์โหลด</span>
+                </button>
+                <button onClick={() => setShowPreviewModal(false)} className="px-6 py-2 bg-ci-blue text-white rounded-lg font-bold text-sm hover:bg-blue-600 transition-all">
+                  ปิด
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showExportModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowExportModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-slate-100 rounded-lg">
+                  <Download className="w-5 h-5 text-slate-600" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-slate-800">ส่งออกไฟล์</h3>
+                  <p className="text-xs text-slate-400">เลือกรูปแบบที่ต้องการ</p>
+                </div>
+              </div>
+              <button onClick={() => setShowExportModal(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-3">
+              <button onClick={() => { exportAsPNG(); setShowExportModal(false); }} className="w-full flex items-center gap-4 p-4 border-2 border-slate-200 rounded-xl hover:border-ci-blue hover:bg-blue-50 transition-all group">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-green-500/30">
+                  PNG
+                </div>
+                <div className="flex-1 text-left">
+                  <h4 className="font-bold text-slate-800 group-hover:text-ci-blue">PNG (แนะนำ)</h4>
+                  <p className="text-xs text-slate-400">รูปภาพคุณภาพสูง พื้นหลังโปร่งใส</p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-ci-blue" />
+              </button>
+
+              <button onClick={() => { exportAsJPG(); setShowExportModal(false); }} className="w-full flex items-center gap-4 p-4 border-2 border-slate-200 rounded-xl hover:border-ci-blue hover:bg-blue-50 transition-all group">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-orange-500/30">
+                  JPG
+                </div>
+                <div className="flex-1 text-left">
+                  <h4 className="font-bold text-slate-800 group-hover:text-ci-blue">JPG</h4>
+                  <p className="text-xs text-slate-400">ไฟล์เล็กกว่า เหมาะสำหรับแชร์</p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-ci-blue" />
+              </button>
+
+              <button onClick={() => { exportAsSVG(); setShowExportModal(false); }} className="w-full flex items-center gap-4 p-4 border-2 border-slate-200 rounded-xl hover:border-ci-blue hover:bg-blue-50 transition-all group">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-violet-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-purple-500/30">
+                  SVG
+                </div>
+                <div className="flex-1 text-left">
+                  <h4 className="font-bold text-slate-800 group-hover:text-ci-blue">SVG</h4>
+                  <p className="text-xs text-slate-400">Vector สำหรับงานพิมพ์คุณภาพสูง</p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-ci-blue" />
+              </button>
+
+              <button onClick={() => { exportAsPDF(); setShowExportModal(false); }} className="w-full flex items-center gap-4 p-4 border-2 border-slate-200 rounded-xl hover:border-ci-blue hover:bg-blue-50 transition-all group">
+                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-rose-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-red-500/30">
+                  PDF
+                </div>
+                <div className="flex-1 text-left">
+                  <h4 className="font-bold text-slate-800 group-hover:text-ci-blue">PDF</h4>
+                  <p className="text-xs text-slate-400">เอกสารสำหรับส่งโรงพิมพ์</p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-ci-blue" />
+              </button>
+              </div>
+           </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+// Helper component for keyboard shortcuts
+function ShortcutRow({ keys, desc }: { keys: string[]; desc: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-slate-600">{desc}</span>
+      <div className="flex items-center gap-1">
+        {keys.map((key, i) => (
+          <span key={i}>
+            <kbd className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-xs font-mono text-slate-700 shadow-sm">
+              {key === 'Ctrl' ? (typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl') : key}
+            </kbd>
+            {i < keys.length - 1 && <span className="text-slate-300 mx-0.5">+</span>}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
