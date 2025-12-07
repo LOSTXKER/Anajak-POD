@@ -3450,25 +3450,6 @@ ${svgElements}
                                 </div>
                                 <p className="text-[10px] text-slate-400 mt-1">ราคาต่อชิ้น • ยังไม่รวมค่าจัดส่ง</p>
                              </div>
-                             
-                             {/* Bulk Estimate */}
-                             <div className="pt-3 border-t border-slate-100">
-                                <p className="text-xs text-slate-500 mb-2">ประมาณการจำนวนมาก</p>
-                                <div className="flex gap-2 text-center">
-                                   <div className="flex-1 py-2 bg-slate-50 rounded-lg">
-                                      <p className="text-xs text-slate-500">10 ตัว</p>
-                                      <p className="font-bold text-slate-700">฿{(currentPrice * 10).toLocaleString()}</p>
-                                   </div>
-                                   <div className="flex-1 py-2 bg-slate-50 rounded-lg">
-                                      <p className="text-xs text-slate-500">50 ตัว</p>
-                                      <p className="font-bold text-slate-700">฿{(currentPrice * 50).toLocaleString()}</p>
-                                   </div>
-                                   <div className="flex-1 py-2 bg-slate-50 rounded-lg">
-                                      <p className="text-xs text-slate-500">100 ตัว</p>
-                                      <p className="font-bold text-slate-700">฿{(currentPrice * 100).toLocaleString()}</p>
-                                   </div>
-                                </div>
-                             </div>
                           </div>
                        </div>
 
