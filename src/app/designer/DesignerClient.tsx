@@ -3061,16 +3061,62 @@ ${svgElements}
                   <div className="h-px w-full bg-slate-100" />
 
               {/* Price Details */}
-              <div className="space-y-1.5">
-                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">สรุปราคา</span>
-                 <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-500">เสื้อ ({shirtSize})</span>
-                    <span className="font-medium text-slate-900">฿{BASE_PRICE + sizeSurcharge}</span>
-                 </div>
-                 <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-500">ค่าสกรีน</span>
-                    <span className="font-medium text-slate-900">+{printingPrice}</span>
-                 </div>
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">สรุปราคา</span>
+                
+                {/* Shirt Price */}
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-500">เสื้อ ({shirtSize})</span>
+                  <span className="font-medium text-slate-900">฿{BASE_PRICE + sizeSurcharge}</span>
+                </div>
+
+                {/* Printing Price Breakdown */}
+                {allClusters.length > 0 ? (
+                  <div className="space-y-1.5">
+                    <div className="text-[10px] font-bold text-slate-600 flex items-center gap-1">
+                      <div className="w-0.5 h-3 bg-ci-blue rounded-full" />
+                      ค่าสกรีน ({technique.toUpperCase()})
+                    </div>
+                    {clusterPrices.map((cp, idx) => (
+                      <div 
+                        key={idx} 
+                        className={`flex items-center justify-between py-1.5 px-2 rounded-md text-[10px] ${
+                          cp.isFirstPoint 
+                            ? 'bg-pink-50 border border-pink-200' 
+                            : 'bg-slate-50 border border-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <div className={`w-4 h-4 text-white rounded-full flex items-center justify-center text-[8px] font-bold ${
+                            cp.isFirstPoint ? 'bg-pink-500' : 'bg-slate-400'
+                          }`}>
+                            {idx + 1}
+                          </div>
+                          <span className="font-medium text-slate-700">
+                            {cp.bbox.widthInch}×{cp.bbox.heightInch}" ({cp.tier.label.split(' ')[0]})
+                          </span>
+                        </div>
+                        <span className="font-bold text-slate-800">฿{cp.totalPrice}</span>
+                      </div>
+                    ))}
+                    <div className="flex justify-between items-center text-xs pt-1 border-t border-slate-200">
+                      <span className="text-slate-600 font-medium">รวมค่าพิมพ์</span>
+                      <span className="font-bold text-ci-blue">฿{printingPrice}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-500">ค่าสกรีน</span>
+                    <span className="font-medium text-slate-400">฿0</span>
+                  </div>
+                )}
+
+                {/* Total Price */}
+                <div className="h-px w-full bg-slate-200" />
+                <div className="flex justify-between items-center text-sm pt-1">
+                  <span className="font-bold text-slate-700">ราคารวม</span>
+                  <span className="font-bold text-ci-blue text-base">฿{currentPrice}</span>
+                </div>
               </div>
               <div className="h-px w-full bg-slate-100" />
 
