@@ -215,12 +215,12 @@ export default function DesignerClient() {
   const [availableColors, setAvailableColors] = useState<string[]>(['#ffffff']); // Selected colors for the product
   const [shirtSize, setShirtSize] = useState('M'); // Preview size
   const [selectedSizes, setSelectedSizes] = useState<string[]>(['S', 'M', 'L', 'XL']);
-  const [technique, setTechnique] = useState<'printing' | 'embroidery'>('printing');
-  const [printingType, setPrintingType] = useState<'dtg' | 'dtflex'>('dtg');
+  const [technique, setTechnique] = useState<'dtf' | 'dtg'>('dtf');
   const [showFilters, setShowFilters] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [showRulers, setShowRulers] = useState(false);
+  const [showMeasurementGuides, setShowMeasurementGuides] = useState(false);
   const [unit, setUnit] = useState<'cm' | 'in'>('cm');
   const [viewSide, setViewSide] = useState<'front' | 'back'>('front');
   const [showControls, setShowControls] = useState(false); // Default collapsed for more canvas space
@@ -308,22 +308,22 @@ export default function DesignerClient() {
   const SIZE_SURCHARGES: Record<string, number> = {
     '2XL': 40, '3XL': 60, '4XL': 80, '5XL': 100
   };
-  const TECHNIQUE_COSTS = {
-    'printing': 0,
-    'embroidery': 150
-  };
-  const PRINT_TYPE_COSTS = {
-    'dtg': 0,
-    'dtflex': 50
-  };
-
-  // Price Calculation
-  const sizeSurcharge = SIZE_SURCHARGES[shirtSize] || 0;
-  const techniqueCost = TECHNIQUE_COSTS[technique];
-  const printTypeCost = technique === 'printing' ? PRINT_TYPE_COSTS[printingType] : 0;
-  const shirtBasePrice = BASE_PRICE + sizeSurcharge;
-  const printingPrice = techniqueCost + printTypeCost;
-  const currentPrice = shirtBasePrice + printingPrice;
+  
+  // DTF/DTG Print Pricing (based on dimensions in inches)
+  // จุดแรก = cluster ที่ใหญ่ที่สุด, จุดถัดไป = clusters ที่เหลือ
+  const DTF_TIERS = [
+    { maxW: 2, maxH: 2, firstPrice: 30, nextPrice: 5, label: 'LOGO (2×2")' },
+    { maxW: 3, maxH: 4, firstPrice: 80, nextPrice: 25, label: 'A7 (3×4")' },
+    { maxW: 4, maxH: 6, firstPrice: 90, nextPrice: 30, label: 'A6 (4×6")' },
+    { maxW: 6, maxH: 8, firstPrice: 110, nextPrice: 35, label: 'A5 (6×8")' },
+    { maxW: 8, maxH: 12, firstPrice: 130, nextPrice: 45, label: 'A4 (8×12")' },
+    { maxW: 12, maxH: 16, firstPrice: 150, nextPrice: 75, label: 'A3 (12×16")' },
+    { maxW: 16, maxH: 21, firstPrice: 200, nextPrice: 95, label: 'A2 (16×21")' },
+    { maxW: 21, maxH: 28, firstPrice: 250, nextPrice: 145, label: 'A1 (21×28")' },
+  ];
+  
+  // DTG แพงกว่า DTF ฿50 ต่อจุด
+  const DTG_EXTRA_PER_POINT = 50;
 
   // Real-world dimensions for scaling (Approximate for T-shirt print area)
   const PRINT_AREA_WIDTH_CM = 30; // Standard print width
@@ -375,6 +375,177 @@ export default function DesignerClient() {
   // Get selected element(s)
   const selectedElement = elements.find(el => el.id === selectedId);
   const selectedElements = elements.filter(el => selectedIds.includes(el.id));
+  
+  // Clustering Algorithm - Group elements that overlap or are close together
+  const clusterElements = (elements: DesignElement[], side: 'front' | 'back') => {
+    const sideElements = elements.filter(el => el.side === side && el.visible !== false);
+    if (sideElements.length === 0) return [];
+
+    const CLUSTER_MARGIN = 5; // pixels - only group if overlapping or touching
+    
+    // Helper: Check if two bounding boxes overlap or are close
+    const boxesOverlap = (el1: DesignElement, el2: DesignElement) => {
+      const box1 = {
+        left: el1.x - CLUSTER_MARGIN,
+        right: el1.x + (el1.width || 100) + CLUSTER_MARGIN,
+        top: el1.y - CLUSTER_MARGIN,
+        bottom: el1.y + (el1.height || 50) + CLUSTER_MARGIN
+      };
+      const box2 = {
+        left: el2.x,
+        right: el2.x + (el2.width || 100),
+        top: el2.y,
+        bottom: el2.y + (el2.height || 50)
+      };
+      
+      // Check if boxes intersect
+      return !(box1.right < box2.left || 
+               box1.left > box2.right || 
+               box1.bottom < box2.top || 
+               box1.top > box2.bottom);
+    };
+    
+    // Build clusters using Union-Find approach
+    const parent: number[] = sideElements.map((_, i) => i);
+    
+    const find = (i: number): number => {
+      if (parent[i] !== i) parent[i] = find(parent[i]);
+      return parent[i];
+    };
+    
+    const union = (i: number, j: number) => {
+      const pi = find(i);
+      const pj = find(j);
+      if (pi !== pj) parent[pi] = pj;
+    };
+    
+    // Check all pairs and union if they overlap
+    for (let i = 0; i < sideElements.length; i++) {
+      for (let j = i + 1; j < sideElements.length; j++) {
+        if (boxesOverlap(sideElements[i], sideElements[j])) {
+          union(i, j);
+        }
+      }
+    }
+    
+    // Group elements by their root parent
+    const clusterMap = new Map<number, DesignElement[]>();
+    sideElements.forEach((el, i) => {
+      const root = find(i);
+      if (!clusterMap.has(root)) clusterMap.set(root, []);
+      clusterMap.get(root)!.push(el);
+    });
+    
+    return Array.from(clusterMap.values());
+  };
+
+  // Calculate cluster metrics and dimensions in inches
+  const getClusterBoundingBox = (cluster: DesignElement[]) => {
+    if (cluster.length === 0) return { 
+      x: 0, y: 0, width: 0, height: 0, 
+      widthInch: 0, heightInch: 0,
+      widthCm: 0, heightCm: 0
+    };
+
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+    // Convert pixels to inches (based on print area scale)
+    // Print area: ~12 inches wide = ~295px, so 1px ≈ 0.04 inch
+    const PIXELS_TO_INCH = 12 / 295; // ~0.04
+    
+    cluster.forEach(el => {
+      let elWidth = el.width || 100;
+      let elHeight = el.height || 50;
+      
+      // สำหรับ Text (โดยเฉพาะ Curved Text) - คำนวณจากขนาดจริงของตัวอักษร
+      if (el.type === 'text') {
+        const fontSize = el.fontSize || 32;
+        const textContent = el.content || '';
+        
+        // ประมาณความกว้างจาก text length × font size × 0.6 (average char width ratio)
+        const estimatedTextWidth = textContent.length * fontSize * 0.6;
+        const estimatedTextHeight = fontSize * 1.2; // line height
+        
+        // ใช้ค่าที่เล็กกว่าระหว่าง bounding box กับ estimated size
+        // เพื่อให้ยุติธรรมกับ curved text ที่มี bounding box ใหญ่
+        if (el.curveType && el.curveType !== 'none') {
+          // Curved text: ใช้ขนาด text จริง
+          elWidth = Math.min(elWidth, estimatedTextWidth);
+          elHeight = Math.min(elHeight, estimatedTextHeight * 2); // curved อาจสูงกว่าปกติ
+        }
+      }
+      
+      minX = Math.min(minX, el.x);
+      minY = Math.min(minY, el.y);
+      maxX = Math.max(maxX, el.x + elWidth);
+      maxY = Math.max(maxY, el.y + elHeight);
+    });
+
+    const width = maxX - minX;
+    const height = maxY - minY;
+
+    // แปลงเป็นนิ้ว (ปัดขึ้น)
+    const widthInch = Math.ceil(width * PIXELS_TO_INCH);
+    const heightInch = Math.ceil(height * PIXELS_TO_INCH);
+    
+    // แปลงเป็น cm ด้วย (1 inch = 2.54 cm)
+    const widthCm = Math.ceil(widthInch * 2.54);
+    const heightCm = Math.ceil(heightInch * 2.54);
+
+    return { 
+      x: minX, y: minY, width, height, 
+      widthInch, heightInch,
+      widthCm, heightCm
+    };
+  };
+
+  // Get price tier for a cluster (based on dimensions in inches)
+  const getPriceTier = (widthInch: number, heightInch: number) => {
+    // Find the smallest tier that fits the dimensions
+    return DTF_TIERS.find(tier => 
+      widthInch <= tier.maxW && heightInch <= tier.maxH
+    ) || DTF_TIERS[DTF_TIERS.length - 1];
+  };
+
+  // Calculate clusters and pricing
+  const frontClusters = clusterElements(elements, 'front');
+  const backClusters = clusterElements(elements, 'back');
+  const allClusters = [...frontClusters, ...backClusters];
+
+  // คำนวณราคาแต่ละ cluster พร้อม tier
+  const clusterPricesRaw = allClusters.map(cluster => {
+    const bbox = getClusterBoundingBox(cluster);
+    const tier = getPriceTier(bbox.widthInch, bbox.heightInch);
+    return { cluster, bbox, tier };
+  });
+  
+  // เรียงลำดับตามราคาจุดแรก (ใหญ่สุดก่อน) เพื่อหาจุดแรก
+  const sortedClusters = [...clusterPricesRaw].sort((a, b) => 
+    b.tier.firstPrice - a.tier.firstPrice
+  );
+  
+  // คำนวณราคาแต่ละ cluster (จุดแรก vs จุดถัดไป)
+  const clusterPrices = clusterPricesRaw.map((cp, idx) => {
+    const isFirstPoint = sortedClusters[0] === cp; // cluster นี้คือจุดแรก?
+    const basePrice = isFirstPoint ? cp.tier.firstPrice : cp.tier.nextPrice;
+    const dtgExtra = technique === 'dtg' ? DTG_EXTRA_PER_POINT : 0;
+    
+    return {
+      ...cp,
+      isFirstPoint,
+      basePrice,
+      dtgExtra,
+      totalPrice: basePrice + dtgExtra
+    };
+  });
+
+  // Price Calculation
+  const sizeSurcharge = SIZE_SURCHARGES[shirtSize] || 0;
+  
+  // รวมราคาทุก cluster (จุดแรก + จุดถัดไป + DTG extra ถ้ามี)
+  const printingPrice = clusterPrices.reduce((sum, cp) => sum + cp.totalPrice, 0);
+
+  const currentPrice = BASE_PRICE + sizeSurcharge + printingPrice;
   
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -708,9 +879,14 @@ export default function DesignerClient() {
       height = dims.height;
     }
 
-    if (type === 'image' || type === 'shape' || type === 'sticker' || type === 'icon') {
+    if (type === 'image' || type === 'shape' || type === 'sticker') {
       width = 100;
       height = 100;
+    }
+    
+    if (type === 'icon') {
+      width = 80;
+      height = 80;
     }
 
       // Position at center of print area
@@ -915,6 +1091,70 @@ export default function DesignerClient() {
       y: elementToUpdate.y - deltaHeight / 2,
     };
     updateElementWithHistory(id, updatedChanges);
+  };
+
+  // Handle curveType change with proper dimension recalculation
+  const handleCurveTypeChange = (id: string | null, newCurveType: 'none' | 'arc' | 'circle' | 'wave') => {
+    if (!id) return;
+    const elementToUpdate = elements.find(el => el.id === id);
+    if (!elementToUpdate || elementToUpdate.type !== 'text') return;
+
+    const content = elementToUpdate.content;
+    const fontSize = elementToUpdate.fontSize || 32;
+    const fontFamily = elementToUpdate.fontFamily || 'Sarabun';
+    const fontWeight = elementToUpdate.fontWeight;
+    const fontStyle = elementToUpdate.fontStyle;
+    const letterSpacing = elementToUpdate.letterSpacing;
+
+    // Measure actual text dimensions
+    const textDims = measureText(content, fontSize, fontFamily, {
+      fontWeight,
+      fontStyle,
+      letterSpacing,
+    });
+
+    let newWidth: number;
+    let newHeight: number;
+
+    if (newCurveType === 'none') {
+      // Normal text: fit to actual text size
+      newWidth = Math.max(20, textDims.width + 10);
+      newHeight = textDims.height;
+    } else if (newCurveType === 'circle') {
+      // Circle: need square bounding box, min size based on text length
+      const minSize = Math.max(150, textDims.width * 0.8, fontSize * 4);
+      newWidth = minSize;
+      newHeight = minSize;
+    } else if (newCurveType === 'arc') {
+      // Arc: need wider box for the curve
+      const minWidth = Math.max(200, textDims.width * 1.2);
+      const minHeight = Math.max(80, fontSize * 2.5);
+      newWidth = minWidth;
+      newHeight = minHeight;
+    } else if (newCurveType === 'wave') {
+      // Wave: similar to arc but shorter height
+      const minWidth = Math.max(200, textDims.width * 1.2);
+      const minHeight = Math.max(60, fontSize * 2);
+      newWidth = minWidth;
+      newHeight = minHeight;
+    } else {
+      newWidth = elementToUpdate.width;
+      newHeight = elementToUpdate.height;
+    }
+
+    // Calculate position adjustment to keep element centered
+    const deltaWidth = newWidth - elementToUpdate.width;
+    const deltaHeight = newHeight - elementToUpdate.height;
+
+    const changes: Partial<DesignElement> = {
+      curveType: newCurveType,
+      width: newWidth,
+      height: newHeight,
+      x: elementToUpdate.x - deltaWidth / 2,
+      y: elementToUpdate.y - deltaHeight / 2,
+    };
+
+    updateElementWithHistory(id, changes);
   };
 
   // Keyboard shortcuts (must be after useCallback definitions)
@@ -1423,21 +1663,21 @@ ${svgElements}
                   <h3 className="font-bold text-slate-800 text-sm mb-4">การดัดโค้ง</h3>
                   <div className="bg-slate-50 rounded-2xl p-1.5 flex gap-1 border border-slate-100">
                      <button
-                        onClick={() => updateElementWithHistory(selectedId, { curveType: 'none' })}
+                        onClick={() => handleCurveTypeChange(selectedId, 'none')}
                         className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1 ${!selectedElement?.curveType || selectedElement?.curveType === 'none' ? 'bg-white shadow-sm text-ci-blue ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/50'}`}
                      >
                         <Type className="w-4 h-4" />
                         <span>ปกติ</span>
                      </button>
                      <button
-                        onClick={() => updateElementWithHistory(selectedId, { curveType: 'arc', width: selectedElement?.width && selectedElement.width < 200 ? 250 : selectedElement?.width })}
+                        onClick={() => handleCurveTypeChange(selectedId, 'arc')}
                         className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1 ${selectedElement?.curveType === 'arc' ? 'bg-white shadow-sm text-ci-blue ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/50'}`}
                      >
                         <div className="w-4 h-4 border-t-2 border-current rounded-t-full mt-1" />
                         <span>โค้ง</span>
                      </button>
                      <button
-                        onClick={() => updateElementWithHistory(selectedId, { curveType: 'circle', width: selectedElement?.width && selectedElement.width < 200 ? 250 : selectedElement?.width })}
+                        onClick={() => handleCurveTypeChange(selectedId, 'circle')}
                         className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1 ${selectedElement?.curveType === 'circle' ? 'bg-white shadow-sm text-ci-blue ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/50'}`}
                      >
                         <div className="w-4 h-4 border-2 border-current rounded-full" />
@@ -1540,14 +1780,22 @@ ${svgElements}
                   <label className="text-xs font-bold text-slate-700">เทคนิคการพิมพ์</label>
                 </div>
                 <div className="p-1 bg-slate-100 rounded-lg flex gap-1">
-                   {[{ id: 'printing', label: 'สกรีน', icon: '🎨' }, { id: 'embroidery', label: 'ปัก', icon: '🧵' }].map((t) => (
+                   {[
+                     { id: 'dtf', label: 'DTF', desc: 'คิดตามจุด', icon: '🎨' }, 
+                     { id: 'dtg', label: 'DTG', desc: 'ราคาเหมา', icon: '🖨️' }
+                   ].map((t) => (
                      <button 
                        key={t.id}
                        onClick={() => setTechnique(t.id as any)}
-                       className={`flex-1 py-2 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${technique === t.id ? 'bg-white text-ci-blue shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                       className={`flex-1 py-2 rounded-md text-xs font-bold transition-all ${technique === t.id ? 'bg-white text-ci-blue shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                      >
-                       <span>{t.icon}</span>
-                       {t.label}
+                       <div className="flex flex-col items-center gap-0.5">
+                         <div className="flex items-center gap-1">
+                           <span>{t.icon}</span>
+                           <span>{t.label}</span>
+                         </div>
+                         <span className="text-[9px] opacity-70">{t.desc}</span>
+                       </div>
                      </button>
                    ))}
                 </div>
@@ -1635,6 +1883,94 @@ ${svgElements}
                   })}
                 </div>
               </div>
+
+              {/* Print Size & Price Breakdown */}
+              {allClusters.length > 0 && (
+                <>
+                  {/* Section Divider */}
+                  <div className="h-px bg-slate-100" />
+
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-1 h-4 bg-ci-blue rounded-full" />
+                      <label className="text-xs font-bold text-slate-700">
+                        ค่าสกรีน ({technique.toUpperCase()})
+                      </label>
+                    </div>
+
+                    {/* Cluster breakdown - same for DTF and DTG */}
+                    <div className="space-y-2">
+                      {clusterPrices.map((cp, idx) => (
+                        <div 
+                          key={idx} 
+                          className={`flex items-center justify-between p-2.5 rounded-lg ${
+                            cp.isFirstPoint 
+                              ? 'bg-pink-50 border-2 border-pink-200' 
+                              : 'bg-slate-50 border border-slate-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className={`w-6 h-6 text-white rounded-full flex items-center justify-center text-[10px] font-bold ${
+                              cp.isFirstPoint ? 'bg-pink-500' : 'bg-slate-400'
+                            }`}>
+                              {idx + 1}
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-slate-700">
+                                {cp.bbox.widthInch}×{cp.bbox.heightInch}" ({cp.tier.label.split(' ')[0]})
+                              </p>
+                              <p className="text-[10px] text-slate-500">
+                                {cp.isFirstPoint ? 'จุดแรก (ใหญ่สุด)' : 'จุดถัดไป'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xs font-bold text-pink-600">฿{cp.basePrice}</div>
+                            {cp.dtgExtra > 0 && (
+                              <div className="text-[10px] text-blue-500">+฿{cp.dtgExtra} (DTG)</div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {/* Total */}
+                      <div className="flex items-center justify-between p-2.5 bg-slate-100 rounded-lg border-2 border-slate-200">
+                        <span className="text-xs font-bold text-slate-700">
+                          รวม {clusterPrices.length} จุดสกรีน
+                        </span>
+                        <span className="text-sm font-bold text-ci-blue">
+                          ฿{printingPrice}
+                        </span>
+                      </div>
+                      
+                      {technique === 'dtg' && clusterPrices.length > 0 && (
+                        <p className="text-[10px] text-blue-600 text-center">
+                          🖨️ DTG แพงกว่า DTF ฿{DTG_EXTRA_PER_POINT}/จุด
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Price Summary */}
+                    <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+                      <div className="space-y-1.5 text-xs">
+                        <div className="flex justify-between text-slate-600">
+                          <span>ราคาเสื้อ ({shirtSize})</span>
+                          <span>฿{BASE_PRICE + (SIZE_SURCHARGES[shirtSize] || 0)}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-600">
+                          <span>ค่าพิมพ์ ({technique.toUpperCase()})</span>
+                          <span>฿{printingPrice}</span>
+                        </div>
+                        <div className="h-px bg-slate-200" />
+                        <div className="flex justify-between font-bold text-slate-800 text-sm">
+                          <span>ราคารวม</span>
+                          <span className="text-ci-blue">฿{currentPrice}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
           {activeTool === 'text' && (
@@ -2119,9 +2455,9 @@ ${svgElements}
                     </div>
                     <Divider />
                     <div className="flex items-center bg-slate-100 rounded">
-                       <button onClick={() => updateElementWithHistory(selectedId, { fontSize: Math.max(12, (selectedElement.fontSize || 32) - 4) })} className="p-1 hover:bg-slate-200 rounded-l text-slate-600"><Minus className="w-3 h-3" /></button>
+                       <button onClick={() => updateTextElementWithAutoResize(selectedId, { fontSize: Math.max(12, (selectedElement.fontSize || 32) - 4) })} className="p-1 hover:bg-slate-200 rounded-l text-slate-600"><Minus className="w-3 h-3" /></button>
                        <span className="w-6 text-center text-[10px] font-bold">{Math.round(selectedElement.fontSize || 0)}</span>
-                       <button onClick={() => updateElementWithHistory(selectedId, { fontSize: Math.min(200, (selectedElement.fontSize || 32) + 4) })} className="p-1 hover:bg-slate-200 rounded-r text-slate-600"><Plus className="w-3 h-3" /></button>
+                       <button onClick={() => updateTextElementWithAutoResize(selectedId, { fontSize: Math.min(200, (selectedElement.fontSize || 32) + 4) })} className="p-1 hover:bg-slate-200 rounded-r text-slate-600"><Plus className="w-3 h-3" /></button>
                     </div>
                     <Divider />
                     <div className="flex items-center relative">
@@ -2338,6 +2674,92 @@ ${svgElements}
                     </div>
                  )}
                  
+                 {/* Measurement Guide Overlays - A7 to A2 */}
+                 {showMeasurementGuides && (
+                   <>
+                     {[
+                       { label: 'A7', width: 74, height: 105, color: 'emerald' },
+                       { label: 'A6', width: 105, height: 148, color: 'blue' },
+                       { label: 'A5', width: 148, height: 210, color: 'purple' },
+                       { label: 'A4', width: 210, height: 297, color: 'orange' },
+                     ].map((guide) => {
+                       // Convert mm to pixels (rough scale)
+                       const scale = 0.5; // adjust based on canvas scale
+                       const w = guide.width * scale;
+                       const h = guide.height * scale;
+                       return (
+                         <div
+                           key={guide.label}
+                           className={`absolute border border-dashed border-${guide.color}-400/40 pointer-events-none`}
+                           style={{
+                             left: '50%',
+                             top: '50%',
+                             transform: 'translate(-50%, -50%)',
+                             width: w,
+                             height: h
+                           }}
+                         >
+                           <div className={`absolute -top-4 left-0 bg-${guide.color}-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm`}>
+                             {guide.label} ({guide.width}×{guide.height}mm)
+                           </div>
+                         </div>
+                       );
+                     })}
+                   </>
+                 )}
+
+                 {/* Cluster Bounding Boxes - Show for DTF/DTG */}
+                 {(viewSide === 'front' ? frontClusters : backClusters).map((cluster, idx) => {
+                   // ตรวจสอบว่า cluster มี curved text หรือไม่
+                   const hasCurvedText = cluster.some(el => 
+                     el.type === 'text' && el.curveType && el.curveType !== 'none'
+                   );
+                   
+                   const bbox = getClusterBoundingBox(cluster);
+                   const tier = getPriceTier(bbox.widthInch, bbox.heightInch);
+                   const clusterInfo = clusterPrices.find(cp => cp.cluster === cluster);
+                   const isFirst = clusterInfo?.isFirstPoint;
+                   const labelBg = isFirst ? 'bg-pink-500' : 'bg-slate-500';
+                   
+                   // สำหรับ curved text - แสดงแค่ label ไม่แสดงกรอบ
+                   if (hasCurvedText) {
+                     return (
+                       <div
+                         key={`cluster-${idx}`}
+                         className="absolute pointer-events-none z-[5]"
+                         style={{
+                           left: bbox.x,
+                           top: bbox.y - 25
+                         }}
+                       >
+                         <div className={`${labelBg} text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm whitespace-nowrap`}>
+                           {isFirst ? 'จุดแรก' : 'จุดถัดไป'}: {bbox.widthInch}×{bbox.heightInch}" ({tier.label.split(' ')[0]})
+                         </div>
+                       </div>
+                     );
+                   }
+                   
+                   const borderColor = isFirst ? 'border-pink-400/70' : 'border-slate-400/50';
+                   const bgColor = isFirst ? 'bg-pink-50/10' : 'bg-slate-50/10';
+                   
+                   return (
+                     <div
+                       key={`cluster-${idx}`}
+                       className={`absolute border-2 border-dashed ${borderColor} ${bgColor} pointer-events-none z-[5] rounded-lg transition-opacity`}
+                       style={{
+                         left: bbox.x - 5,
+                         top: bbox.y - 5,
+                         width: bbox.width + 10,
+                         height: bbox.height + 10
+                       }}
+                     >
+                       <div className={`absolute -top-6 left-0 ${labelBg} text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm whitespace-nowrap pointer-events-auto`}>
+                         {isFirst ? 'จุดแรก' : 'จุดถัดไป'}: {bbox.widthInch}×{bbox.heightInch}" ({tier.label.split(' ')[0]})
+                       </div>
+                     </div>
+                   );
+                 })}
+                 
                  {/* Snap Guides */}
                  {snapX !== null && (
                     <div className="absolute top-0 bottom-0 w-px bg-ci-blue z-50 pointer-events-none" style={{ left: snapX }}></div>
@@ -2546,10 +2968,10 @@ ${svgElements}
                            <div style={{ fontSize: el.fontSize, opacity: el.opacity / 100, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{el.content}</div>
                         )}
                         {el.type === 'icon' && AVAILABLE_ICONS[el.content] && (
-                           <div style={{ color: el.color, opacity: el.opacity / 100, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                           <div style={{ color: el.color, opacity: el.opacity / 100, width: '100%', height: '100%', overflow: 'hidden' }}>
                               {(() => {
                                 const Icon = AVAILABLE_ICONS[el.content];
-                                return <Icon className="w-full h-full" strokeWidth={1.5} />;
+                                return <Icon style={{ width: '115%', height: '115%', marginLeft: '-7.5%', marginTop: '-7.5%' }} strokeWidth={1.5} />;
                               })()}
                            </div>
                         )}
@@ -2577,36 +2999,28 @@ ${svgElements}
                          )}
                          
                          {/* Bounding Box Lines (Blue - More visible) */}
-                         <div className="absolute -top-[1px] -left-[1px] -right-[1px] -bottom-[1px] border-2 border-ci-blue pointer-events-none"></div>
-
-                         {/* Corner Handles - Larger and more visible */}
+                         {/* Selection Border - ซ่อนสำหรับ Curved Text */}
+                         {!(selectedElement.type === 'text' && selectedElement.curveType && selectedElement.curveType !== 'none') && (
+                           <div className="absolute -top-[1px] -left-[1px] -right-[1px] -bottom-[1px] border-2 border-ci-blue pointer-events-none rounded-sm"></div>
+                         )}
+                         
+                         {/* Corner Resize Handles (4 corners only - proportional resize) */}
                          <div 
-                           className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-nw-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
+                           className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-nwse-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
                            onMouseDown={(e) => handleResizeStart(e, selectedElement, 'nw')} 
                          ></div>
                          <div 
-                           className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-ne-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
+                           className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-nesw-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
                            onMouseDown={(e) => handleResizeStart(e, selectedElement, 'ne')}
                          ></div>
                          <div 
-                           className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-sw-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
+                           className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-nesw-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
                            onMouseDown={(e) => handleResizeStart(e, selectedElement, 'sw')}
                          ></div>
                          <div 
-                           className="absolute -bottom-2 -right-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-se-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
+                           className="absolute -bottom-2 -right-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-nwse-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
                            onMouseDown={(e) => handleResizeStart(e, selectedElement, 'se')}
                          ></div>
-
-                         {/* Side Handles - More visible */}
-                         <div className="absolute top-1/2 -left-[6px] -translate-y-1/2 w-3 h-6 bg-white border-2 border-ci-blue rounded cursor-w-resize z-50 shadow-md hover:bg-blue-50 transition-all pointer-events-auto" onMouseDown={(e) => handleResizeStart(e, selectedElement, 'w')}></div>
-                         <div className="absolute top-1/2 -right-[6px] -translate-y-1/2 w-3 h-6 bg-white border-2 border-ci-blue rounded cursor-e-resize z-50 shadow-md hover:bg-blue-50 transition-all pointer-events-auto" onMouseDown={(e) => handleResizeStart(e, selectedElement, 'e')}></div>
-                         
-                         {selectedElement.type !== 'text' && (
-                           <>
-                             <div className="absolute -top-[5px] left-1/2 -translate-x-1/2 w-5 h-2.5 bg-white border border-ci-blue rounded-full cursor-n-resize z-50 shadow-sm hover:scale-x-125 transition-transform pointer-events-auto" onMouseDown={(e) => handleResizeStart(e, selectedElement, 'n')}></div>
-                             <div className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-5 h-2.5 bg-white border border-ci-blue rounded-full cursor-s-resize z-50 shadow-sm hover:scale-x-125 transition-transform pointer-events-auto" onMouseDown={(e) => handleResizeStart(e, selectedElement, 's')}></div>
-                          </>
-                        )}
                          
                          {/* Rotate Handle */}
                          <div 
@@ -2651,7 +3065,7 @@ ${svgElements}
                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">สรุปราคา</span>
                  <div className="flex justify-between items-center text-xs">
                         <span className="text-slate-500">เสื้อ ({shirtSize})</span>
-                    <span className="font-medium text-slate-900">฿{shirtBasePrice}</span>
+                    <span className="font-medium text-slate-900">฿{BASE_PRICE + sizeSurcharge}</span>
                  </div>
                  <div className="flex justify-between items-center text-xs">
                         <span className="text-slate-500">ค่าสกรีน</span>
@@ -2721,6 +3135,17 @@ ${svgElements}
                    </button>
                 </div>
               )}
+              
+              {/* Measurement Guides Toggle */}
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">กรอบวัด (A7-A4)</span>
+                <button 
+                  onClick={() => setShowMeasurementGuides(!showMeasurementGuides)} 
+                  className={`w-8 h-5 rounded-full transition-colors relative ${showMeasurementGuides ? 'bg-ci-blue' : 'bg-slate-200'}`}
+                >
+                   <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform shadow-sm ${showMeasurementGuides ? 'left-4' : 'left-1'}`} />
+                </button>
+              </div>
               </div>
            </div>
         </div>
