@@ -3045,14 +3045,14 @@ ${svgElements}
            <div className={`absolute top-6 right-6 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col z-50 transition-all duration-200 ${showControls ? 'w-[220px] p-3' : 'w-10 h-10 p-0 items-center justify-center overflow-hidden'}`}>
               
               {!showControls && (
-                  <button onClick={() => setShowControls(true)} className="w-full h-full flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-xl" title="Show View Options">
+                  <button onClick={() => setShowControls(true)} className="w-full h-full flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-xl" title="แสดงสรุปรายการ">
                      <SlidersHorizontal className="w-5 h-5" />
                   </button>
               )}
 
               <div className={`space-y-2 ${showControls ? 'opacity-100' : 'opacity-0 hidden'}`}>
                   <div className="flex items-center justify-between">
-                       <span className="text-xs font-bold text-slate-800">ตัวเลือกมุมมอง</span>
+                       <span className="text-xs font-bold text-slate-800">สรุปรายการ</span>
                        <button onClick={() => setShowControls(false)} className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600">
                           <ChevronUp className="w-4 h-4" />
                        </button>
