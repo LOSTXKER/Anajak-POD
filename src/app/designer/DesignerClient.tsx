@@ -3259,20 +3259,38 @@ ${svgElements}
                     <div className="space-y-4">
                        {/* Mockup Card */}
                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                          {/* Toggle Front/Back */}
-                          <div className="flex border-b border-slate-100">
-                             <button 
-                                onClick={() => setViewSide('front')} 
-                                className={`flex-1 py-3 text-sm font-semibold transition-all ${viewSide === 'front' ? 'text-ci-blue border-b-2 border-ci-blue bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}
-                             >
-                                ด้านหน้า
-                             </button>
-                             <button 
-                                onClick={() => setViewSide('back')} 
-                                className={`flex-1 py-3 text-sm font-semibold transition-all ${viewSide === 'back' ? 'text-ci-blue border-b-2 border-ci-blue bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}
-                             >
-                                ด้านหลัง
-                             </button>
+                          {/* View Controls Header */}
+                          <div className="flex items-center border-b border-slate-100">
+                             {/* Front/Back Toggle */}
+                             <div className="flex flex-1">
+                                <button 
+                                   onClick={() => setViewSide('front')} 
+                                   className={`flex-1 py-3 text-sm font-semibold transition-all ${viewSide === 'front' ? 'text-ci-blue border-b-2 border-ci-blue bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                   ด้านหน้า
+                                </button>
+                                <button 
+                                   onClick={() => setViewSide('back')} 
+                                   className={`flex-1 py-3 text-sm font-semibold transition-all ${viewSide === 'back' ? 'text-ci-blue border-b-2 border-ci-blue bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                   ด้านหลัง
+                                </button>
+                             </div>
+                             {/* 2D/3D Toggle */}
+                             <div className="flex border-l border-slate-100">
+                                <button 
+                                   onClick={() => setMockupStyle('2d')} 
+                                   className={`px-4 py-3 text-sm font-semibold transition-all ${mockupStyle === '2d' ? 'text-ci-blue border-b-2 border-ci-blue bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                   2D
+                                </button>
+                                <button 
+                                   onClick={() => setMockupStyle('3d')} 
+                                   className={`px-4 py-3 text-sm font-semibold transition-all ${mockupStyle === '3d' ? 'text-ci-blue border-b-2 border-ci-blue bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                   3D
+                                </button>
+                             </div>
                           </div>
                           
                           {/* Mockup Image */}
@@ -3281,24 +3299,40 @@ ${svgElements}
                                 <img 
                                    src={viewSide === 'front' ? MOCKUP_IMAGES.front : MOCKUP_IMAGES.back} 
                                    alt="Preview" 
-                                   className="max-w-full max-h-full object-contain drop-shadow-lg" 
+                                   className="max-w-full max-h-full object-contain drop-shadow-lg transition-all duration-300" 
                                 />
                              </div>
                           </div>
                           
-                          {/* Color Swatches */}
-                          <div className="px-4 py-3 bg-slate-50 border-t border-slate-100">
+                          {/* Color & Size Quick Selector */}
+                          <div className="px-4 py-3 bg-slate-50 border-t border-slate-100 space-y-3">
+                             {/* Color Swatches */}
                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-xs font-medium text-slate-500">สี:</span>
+                                <span className="text-xs font-medium text-slate-500 w-8">สี:</span>
                                 {availableColors.map(c => (
                                    <button
                                       key={c}
                                       onClick={() => setShirtColor(c)}
-                                      className={`w-7 h-7 rounded-full border-2 transition-all ${shirtColor === c ? 'border-ci-blue scale-110 ring-2 ring-ci-blue/30' : 'border-slate-200 hover:scale-105'}`}
+                                      className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-110 ${shirtColor === c ? 'border-ci-blue scale-110 ring-2 ring-ci-blue/30' : 'border-slate-200'}`}
                                       style={{ backgroundColor: c }}
                                       title={COLORS.find(col => col.value === c)?.name}
                                    />
                                 ))}
+                             </div>
+                             {/* Size Quick Selector */}
+                             <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium text-slate-500 w-8">ไซส์:</span>
+                                <div className="flex gap-1.5">
+                                   {SIZES.map(s => (
+                                      <button
+                                         key={s.name}
+                                         onClick={() => setShirtSize(s.name)}
+                                         className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${shirtSize === s.name ? 'bg-ci-blue text-white shadow-md scale-105' : 'bg-white border border-slate-200 text-slate-600 hover:border-ci-blue hover:scale-105'}`}
+                                      >
+                                         {s.name}
+                                      </button>
+                                   ))}
+                                </div>
                              </div>
                           </div>
                        </div>
@@ -3350,7 +3384,7 @@ ${svgElements}
                           </div>
                           
                           <div className="p-4 space-y-4">
-                             {/* Sizes */}
+                             {/* Sizes - Clickable */}
                              <div>
                                 <div className="flex items-center justify-between mb-2">
                                    <span className="text-sm font-medium text-slate-600">ไซส์ที่เลือก</span>
@@ -3358,14 +3392,18 @@ ${svgElements}
                                 </div>
                                 <div className="flex flex-wrap gap-1.5">
                                    {selectedSizes.map(size => (
-                                      <span key={size} className="px-3 py-1.5 bg-slate-100 rounded-lg text-sm font-semibold text-slate-700">
+                                      <button 
+                                         key={size}
+                                         onClick={() => setShirtSize(size)}
+                                         className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${shirtSize === size ? 'bg-ci-blue text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                                      >
                                          {size}
-                                      </span>
+                                      </button>
                                    ))}
                                 </div>
                              </div>
                              
-                             {/* Colors */}
+                             {/* Colors - Clickable */}
                              <div>
                                 <div className="flex items-center justify-between mb-2">
                                    <span className="text-sm font-medium text-slate-600">สีที่เลือก</span>
@@ -3374,11 +3412,16 @@ ${svgElements}
                                 <div className="flex flex-wrap gap-2">
                                    {availableColors.map(c => {
                                       const colorName = COLORS.find(col => col.value === c)?.name;
+                                      const isActive = shirtColor === c;
                                       return (
-                                         <div key={c} className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-lg">
-                                            <div className="w-4 h-4 rounded-full border border-slate-200" style={{ backgroundColor: c }} />
-                                            <span className="text-xs text-slate-600">{colorName}</span>
-                                         </div>
+                                         <button 
+                                            key={c} 
+                                            onClick={() => setShirtColor(c)}
+                                            className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-all hover:scale-105 ${isActive ? 'bg-ci-blue shadow-md' : 'bg-slate-50 hover:bg-slate-100'}`}
+                                         >
+                                            <div className={`w-5 h-5 rounded-full border-2 ${isActive ? 'border-white' : 'border-slate-200'}`} style={{ backgroundColor: c }} />
+                                            <span className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-slate-600'}`}>{colorName}</span>
+                                         </button>
                                       );
                                    })}
                                 </div>
