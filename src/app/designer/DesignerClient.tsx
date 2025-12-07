@@ -223,7 +223,7 @@ export default function DesignerClient() {
   const [showMeasurementGuides, setShowMeasurementGuides] = useState(false);
   const [unit, setUnit] = useState<'cm' | 'in'>('cm');
   const [viewSide, setViewSide] = useState<'front' | 'back'>('front');
-  const [showControls, setShowControls] = useState(false); // Default collapsed for more canvas space
+  const [showControls, setShowControls] = useState(true); // Default expanded to show summary
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   const [fontSearchQuery, setFontSearchQuery] = useState('');
