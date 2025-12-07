@@ -3456,7 +3456,7 @@ ${svgElements}
                        <div className="space-y-3">
                           <button 
                              onClick={() => handleFinalSave('cart')} 
-                             className="w-full h-12 bg-ci-blue text-white rounded-xl font-bold text-sm hover:shadow-2xl hover:-translate-y-1 transition-all flex items-center justify-center gap-2 shadow-lg shadow-ci-blue/30"
+                             className="w-full h-12 bg-ci-blue text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-ci-blue/30"
                           >
                              <ShoppingCart className="w-5 h-5" />
                              ใส่ตะกร้าสั่งผลิต
