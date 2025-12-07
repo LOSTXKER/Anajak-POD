@@ -3218,35 +3218,35 @@ ${svgElements}
            </div>
         </div>
       </div>
-      {/* Review Modal (Modern Full Screen Overlay) */}
+      {/* Review Modal (Redesigned 2024) */}
       {showReviewModal && (
         <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col animate-in slide-in-from-bottom-10 duration-300">
            {/* Header */}
-           <div className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-10">
-              <div className="flex items-center gap-4">
-                 <button onClick={() => setShowReviewModal(false)} className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-all">
-                    <ChevronLeft className="w-6 h-6" />
+           <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm">
+              <div className="flex items-center gap-3">
+                 <button onClick={() => setShowReviewModal(false)} className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-all">
+                    <ChevronLeft className="w-5 h-5" />
                  </button>
                  <div>
-                    <h2 className="text-xl font-bold text-slate-900">ตรวจสอบรายละเอียด</h2>
-                    <p className="text-sm text-slate-500">ขั้นตอนสุดท้ายก่อนบันทึก</p>
+                    <h2 className="text-lg font-bold text-slate-900">ตรวจสอบรายละเอียด</h2>
+                    <p className="text-xs text-slate-500">ก่อนบันทึกหรือสั่งผลิต</p>
                  </div>
               </div>
 
-              {/* Center: Process Stepper */}
-              <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-1 z-10 bg-slate-50/50 backdrop-blur px-4 py-1.5 rounded-full border border-slate-200/50 shadow-sm">
+              {/* Process Stepper */}
+              <div className="hidden md:flex items-center gap-2">
                  {[
-                   { id: 1, label: 'เลือกสินค้า', status: 'completed' },
+                   { id: 1, label: 'สินค้า', status: 'completed' },
                    { id: 2, label: 'ออกแบบ', status: 'completed' },
                    { id: 3, label: 'ตรวจสอบ', status: 'current' },
                  ].map((step, i) => (
-                   <div key={step.id} className="flex items-center gap-1">
-                     {i > 0 && <div className="w-4 h-px bg-slate-200" />}
-                     <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full transition-colors ${step.status === 'completed' ? 'text-green-600 bg-green-50' : step.status === 'current' ? 'text-ci-blue bg-blue-50' : 'text-slate-300'}`}>
-                       <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold border ${step.status === 'completed' ? 'bg-green-100 border-green-200' : step.status === 'current' ? 'bg-ci-blue text-white border-ci-blue' : 'bg-white border-slate-200'}`}>
-                         {step.status === 'completed' ? <Check className="w-2.5 h-2.5" /> : step.id}
+                   <div key={step.id} className="flex items-center gap-2">
+                     {i > 0 && <ChevronRight className="w-3 h-3 text-slate-300" />}
+                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${step.status === 'completed' ? 'bg-green-50 text-green-700' : step.status === 'current' ? 'bg-blue-50 text-ci-blue' : 'bg-slate-50 text-slate-400'}`}>
+                       <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${step.status === 'completed' ? 'bg-green-100' : step.status === 'current' ? 'bg-ci-blue text-white' : 'bg-slate-200'}`}>
+                         {step.status === 'completed' ? <Check className="w-3 h-3" /> : step.id}
                        </div>
-                       <span className="text-[10px] font-bold uppercase tracking-wider">{step.label}</span>
+                       <span className="text-xs font-bold">{step.label}</span>
                      </div>
                    </div>
                  ))}
@@ -3255,124 +3255,189 @@ ${svgElements}
 
            {/* Content */}
            <div className="flex-1 overflow-y-auto">
-              <div className="max-w-6xl mx-auto p-4 md:p-8">
-                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                    
-                    {/* Left: Product Preview Gallery */}
-                    <div className="lg:col-span-7 space-y-6">
-                       <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm relative overflow-hidden group">
-                          <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] opacity-20"></div>
-                          
-                          <div className="relative z-10 flex flex-col items-center">
-                             <div className="w-full flex justify-between items-center mb-8">
-                                <span className="px-4 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-full uppercase tracking-wider shadow-lg shadow-slate-900/20">
-                                   {viewSide === 'front' ? 'ด้านหน้า (Front)' : 'ด้านหลัง (Back)'}
+              <div className="max-w-7xl mx-auto p-6">
+                 {/* Product Info Banner */}
+                 <div className="bg-gradient-to-r from-slate-900 to-slate-700 rounded-2xl p-6 mb-6 shadow-xl">
+                    <div className="flex items-center gap-6">
+                       <div className="w-20 h-20 bg-white rounded-xl p-2 flex-shrink-0">
+                          <img 
+                             src={selectedProduct.imageUrl || 'https://www.pngall.com/wp-content/uploads/2016/04/T-Shirt-PNG-File.png'} 
+                             className="w-full h-full object-cover rounded-lg" 
+                             alt={selectedProduct.title}
+                          />
+                       </div>
+                       <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                             <h3 className="text-xl font-bold text-white">{selectedProduct.title}</h3>
+                             {selectedProduct.badge && (
+                                <span className="px-2 py-0.5 bg-white/20 text-white text-xs font-bold rounded-md">
+                                   {selectedProduct.badge}
                                 </span>
-                                <div className="flex bg-slate-100 rounded-full p-1 border border-slate-200">
-                                   <button onClick={() => setViewSide('front')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${viewSide === 'front' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>Front</button>
-                                   <button onClick={() => setViewSide('back')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${viewSide === 'back' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>Back</button>
-                                </div>
-                             </div>
-                             
-                             <div className="relative w-full max-w-[500px] aspect-square transition-transform duration-500 group-hover:scale-105">
-                                <img 
-                                   src={viewSide === 'front' ? MOCKUP_IMAGES.front : MOCKUP_IMAGES.back} 
-                                   alt="Product Preview" 
-                                   className="w-full h-full object-contain drop-shadow-2xl" 
-                                />
-                             </div>
+                             )}
+                          </div>
+                          <p className="text-sm text-slate-300">{selectedProduct.description}</p>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-slate-400">
+                             <span>• {selectedProduct.fabricGrade}</span>
+                             <span>• {selectedProduct.fiberType}</span>
+                             {selectedProduct.thickness && <span>• {selectedProduct.thickness}</span>}
                           </div>
                        </div>
-                       
-                       {/* Mini Specs Row */}
-                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <div className="bg-white p-4 rounded-2xl border border-slate-100 text-center">
-                             <p className="text-xs text-slate-400 font-bold uppercase mb-1">สีที่เลือก ({availableColors.length})</p>
-                             <div className="flex items-center justify-center -space-x-2">
-                                {availableColors.slice(0, 4).map((c, i) => (
-                                  <div key={i} className="w-6 h-6 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: c }} />
-                                ))}
-                                {availableColors.length > 4 && (
-                                  <div className="w-6 h-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[8px] font-bold text-slate-500">
-                                    +{availableColors.length - 4}
-                                  </div>
-                                )}
+                       <div className="text-right">
+                          <p className="text-xs text-slate-400 mb-1">ราคาสินค้า</p>
+                          <p className="text-2xl font-bold text-white">฿{selectedProduct.price}</p>
+                       </div>
+                    </div>
+                 </div>
+
+                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    
+                    {/* Left Column */}
+                    <div className="space-y-6">
+                       {/* Design Preview */}
+                       <div className="bg-white rounded-2xl p-6 border border-slate-200">
+                          <div className="flex items-center justify-between mb-4">
+                             <h4 className="font-bold text-slate-900">ตัวอย่างดีไซน์</h4>
+                             <div className="flex bg-slate-100 rounded-lg p-1">
+                                <button onClick={() => setViewSide('front')} className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${viewSide === 'front' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>หน้า</button>
+                                <button onClick={() => setViewSide('back')} className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${viewSide === 'back' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>หลัง</button>
                              </div>
                           </div>
-                          <div className="bg-white p-4 rounded-2xl border border-slate-100 text-center">
-                             <p className="text-xs text-slate-400 font-bold uppercase mb-1">ไซส์ที่เลือก ({selectedSizes.length})</p>
-                             <span className="font-black text-slate-800 text-lg">{selectedSizes.length > 2 ? 'Multiple' : selectedSizes.join(', ')}</span>
+                          <div className="relative bg-slate-50 rounded-xl p-8 aspect-square flex items-center justify-center">
+                             <img 
+                                src={viewSide === 'front' ? MOCKUP_IMAGES.front : MOCKUP_IMAGES.back} 
+                                alt="Preview" 
+                                className="max-w-full max-h-full object-contain drop-shadow-xl" 
+                             />
                           </div>
-                          <div className="bg-white p-4 rounded-2xl border border-slate-100 text-center">
-                             <p className="text-xs text-slate-400 font-bold uppercase mb-1">เทคนิค</p>
-                             <span className="font-bold text-slate-700 text-sm">{technique === 'printing' ? 'DTG' : 'Embroidery'}</span>
-                          </div>
-                          <div className="bg-white p-4 rounded-2xl border border-slate-100 text-center">
-                             <p className="text-xs text-slate-400 font-bold uppercase mb-1">เลเยอร์</p>
-                             <span className="font-bold text-slate-700 text-sm">{elements.length} ชิ้น</span>
+                       </div>
+
+                       {/* Design Specs */}
+                       <div className="bg-white rounded-2xl p-6 border border-slate-200">
+                          <h4 className="font-bold text-slate-900 mb-4">รายละเอียดการออกแบบ</h4>
+                          <div className="space-y-3">
+                             <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="text-sm text-slate-600">จำนวน Element</span>
+                                <span className="font-bold text-slate-900">{elements.length} ชิ้น</span>
+                             </div>
+                             <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="text-sm text-slate-600">เทคนิคการพิมพ์</span>
+                                <span className="font-bold text-slate-900">{technique.toUpperCase()}</span>
+                             </div>
+                             {allClusters.length > 0 && (
+                                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                   <span className="text-sm text-slate-600">จำนวนจุดสกรีน</span>
+                                   <span className="font-bold text-slate-900">{allClusters.length} จุด</span>
+                                </div>
+                             )}
                           </div>
                        </div>
                     </div>
 
-                    {/* Right: Actions & Pricing */}
-                    <div className="lg:col-span-5 space-y-6 sticky top-24">
-                       <div className="bg-white rounded-[2rem] p-6 md:p-8 border border-slate-100 shadow-xl shadow-slate-200/50">
-                          <div className="mb-8">
-                             <h3 className="text-2xl font-black text-slate-900 mb-2">สรุปรายการสั่งทำ</h3>
-                             <p className="text-slate-500 leading-relaxed">
-                                ตรวจสอบความถูกต้องของดีไซน์ก่อนบันทึก หรือสั่งผลิต หากต้องการแก้ไขสามารถกดปุ่มย้อนกลับได้
-                             </p>
-                          </div>
+                    {/* Right Column */}
+                    <div className="space-y-6">
+                       {/* Colors & Sizes */}
+                       <div className="bg-white rounded-2xl p-6 border border-slate-200">
+                          <h4 className="font-bold text-slate-900 mb-4">สีและไซส์ที่เลือก</h4>
+                          
+                          <div className="space-y-4">
+                             {/* Colors */}
+                             <div>
+                                <div className="flex items-center justify-between mb-2">
+                                   <span className="text-sm text-slate-600 font-medium">สี</span>
+                                   <span className="text-xs text-slate-400">{availableColors.length} สี</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                   {availableColors.map(c => {
+                                      const colorName = COLORS.find(col => col.value === c)?.name;
+                                      return (
+                                         <div key={c} className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200">
+                                            <div className="w-5 h-5 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: c }} />
+                                            <span className="text-xs font-medium text-slate-700">{colorName}</span>
+                                         </div>
+                                      );
+                                   })}
+                                </div>
+                             </div>
 
-                          <div className="space-y-4 mb-8">
-                             <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3">
-                                <div className="flex items-center justify-between">
-                                   <span className="text-sm font-bold text-slate-600">สีที่เลือก:</span>
-                                   <div className="flex flex-wrap justify-end gap-1 max-w-[60%]">
-                                      {availableColors.map(c => (
-                                         <div key={c} className="w-4 h-4 rounded-full border border-slate-200 shadow-sm" style={{ backgroundColor: c }} title={COLORS.find(col => col.value === c)?.name} />
-                                      ))}
+                             {/* Sizes */}
+                             <div className="pt-3 border-t border-slate-100">
+                                <div className="flex items-center justify-between mb-2">
+                                   <span className="text-sm text-slate-600 font-medium">ไซส์</span>
+                                   <span className="text-xs text-slate-400">{selectedSizes.length} ไซส์</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                   {selectedSizes.map(size => (
+                                      <div key={size} className="px-3 py-2 bg-slate-50 rounded-lg border border-slate-200">
+                                         <span className="text-sm font-bold text-slate-700">{size}</span>
+                                      </div>
+                                   ))}
+                                </div>
+                             </div>
+                          </div>
+                       </div>
+
+                       {/* Printing Cost Breakdown */}
+                       {allClusters.length > 0 && (
+                          <div className="bg-white rounded-2xl p-6 border border-slate-200">
+                             <h4 className="font-bold text-slate-900 mb-4">รายละเอียดค่าสกรีน</h4>
+                             <div className="space-y-2">
+                                {clusterPrices.map((cp, idx) => (
+                                   <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                      <div className="flex items-center gap-2">
+                                         <div className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-pink-500' : 'bg-slate-400'}`} />
+                                         <div>
+                                            <p className="text-sm font-medium text-slate-700">
+                                               {idx === 0 ? 'จุดแรก' : 'จุดถัดไป'} ({cp.tier.size})
+                                            </p>
+                                            <p className="text-xs text-slate-500">{cp.elementsTotalAreaCm2.toFixed(1)} cm²</p>
+                                         </div>
+                                      </div>
+                                      <span className="font-bold text-slate-900">฿{cp.totalPrice}</span>
                                    </div>
+                                ))}
+                                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border-t-2 border-blue-200 mt-2">
+                                   <span className="font-bold text-blue-900">รวมค่าสกรีน</span>
+                                   <span className="font-bold text-blue-900 text-lg">฿{printingPrice}</span>
                                 </div>
-                                <div className="flex items-center justify-between border-t border-slate-200/50 pt-3">
-                                   <span className="text-sm font-bold text-slate-600">ไซส์ที่เลือก:</span>
-                                   <span className="text-sm font-bold text-slate-900">{selectedSizes.join(', ')}</span>
-                                </div>
-                             </div>
-
-                             <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                <span className="font-bold text-slate-600">ราคาต่อชิ้น</span>
-                                <span className="font-bold text-slate-900 text-lg">฿{currentPrice.toLocaleString()}</span>
-                             </div>
-                             {/* Profit Estimation (Optional display) */}
-                             <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
-                                <div className="flex flex-col">
-                                   <span className="font-bold text-emerald-800">กำไรโดยประมาณ</span>
-                                   <span className="text-[10px] text-emerald-600 uppercase font-bold tracking-wide">หากนำไปขายต่อ</span>
-                                </div>
-                                <span className="font-bold text-emerald-600 text-lg">+฿{Math.round(currentPrice * 0.4).toLocaleString()}</span>
                              </div>
                           </div>
+                       )}
 
-                          <div className="space-y-3">
-                             <button onClick={() => handleFinalSave('cart')} className="w-full h-14 bg-gradient-to-r from-ci-blue to-blue-600 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-ci-blue/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 group">
-                                <div className="bg-white/20 p-1.5 rounded-lg group-hover:rotate-12 transition-transform">
-                                   <ShoppingCart className="w-5 h-5" />
+                       {/* Price Summary */}
+                       <div className="bg-gradient-to-br from-ci-blue to-blue-600 rounded-2xl p-6 text-white shadow-xl">
+                          <h4 className="font-bold mb-4">สรุปราคา</h4>
+                          <div className="space-y-2 mb-4">
+                             <div className="flex items-center justify-between text-sm">
+                                <span className="text-blue-100">ราคาสินค้า</span>
+                                <span className="font-medium">฿{selectedProduct.price + sizeSurcharge}</span>
+                             </div>
+                             {printingPrice > 0 && (
+                                <div className="flex items-center justify-between text-sm">
+                                   <span className="text-blue-100">ค่าสกรีน</span>
+                                   <span className="font-medium">฿{printingPrice}</span>
                                 </div>
+                             )}
+                             <div className="flex items-center justify-between pt-3 border-t border-white/20">
+                                <span className="font-bold text-lg">ราคาต่อชิ้น</span>
+                                <span className="font-bold text-2xl">฿{currentPrice}</span>
+                             </div>
+                          </div>
+                          
+                          {/* Actions */}
+                          <div className="space-y-2 pt-4 border-t border-white/20">
+                             <button onClick={() => handleFinalSave('cart')} className="w-full h-12 bg-white text-ci-blue rounded-xl font-bold hover:bg-blue-50 transition-all flex items-center justify-center gap-2 group">
+                                <ShoppingCart className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                                 ใส่ตะกร้าสั่งผลิต
                              </button>
-                             
-                             <button onClick={() => handleFinalSave('template')} className="w-full h-14 bg-white border-2 border-slate-100 text-slate-700 rounded-xl font-bold text-lg hover:bg-slate-50 hover:border-slate-200 transition-all flex items-center justify-center gap-3">
-                                <Save className="w-5 h-5 text-slate-400" />
+                             <button onClick={() => handleFinalSave('template')} className="w-full h-12 bg-white/10 backdrop-blur text-white border border-white/20 rounded-xl font-medium hover:bg-white/20 transition-all flex items-center justify-center gap-2">
+                                <Save className="w-4 h-4" />
                                 บันทึกเป็นเทมเพลต
                              </button>
                           </div>
                           
-                          <div className="mt-6 text-center">
-                             <p className="text-xs text-slate-400">
-                                *ราคานี้รวมค่าสกรีนและค่าเสื้อแล้ว (ยังไม่รวมค่าส่ง)
-                             </p>
-                          </div>
+                          <p className="text-xs text-blue-100 text-center mt-4">
+                             *ราคายังไม่รวมค่าจัดส่ง
+                          </p>
                        </div>
                     </div>
 
