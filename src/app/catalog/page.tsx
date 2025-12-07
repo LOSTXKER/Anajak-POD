@@ -1,22 +1,10 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import { Search, SlidersHorizontal, Heart, ArrowRight, ChevronDown, ChevronRight, Star } from 'lucide-react';
-import prisma from '@/lib/prisma';
+import { getProducts } from '@/lib/mockData';
 import Link from 'next/link';
 
-// Force dynamic rendering to ensure fresh data after seeding
-export const dynamic = 'auto';
-
-// Function to fetch products directly from DB (Server Side)
-async function getProducts() {
-  const products = await prisma.product.findMany({
-    where: { isPublished: true },
-    orderBy: { createdAt: 'asc' }
-  });
-  return products;
-}
-
-export default async function CatalogPage() {
-  const products = await getProducts();
+export default function CatalogPage() {
+  const products = getProducts();
 
   return (
     <DashboardLayout title="สินค้าทั้งหมด" showCreateButton={false}>

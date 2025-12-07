@@ -10,6 +10,8 @@
 - ✅ **Order Management** - ระบบจัดการคำสั่งซื้อ
 - ✅ **Product Designer** - เครื่องมือออกแบบสินค้า
 - ✅ **Integrations** - เชื่อมต่อแพลตฟอร์มขายออนไลน์
+- ✅ **Wallet & Transactions** - ระบบกระเป๋าเงินและธุรกรรม
+- ✅ **Reports** - รายงานยอดขาย
 
 ## 📁 Project Structure
 
@@ -18,14 +20,26 @@
 │   ├── app/                    # Next.js App Router
 │   │   ├── dashboard/          # หน้า Dashboard
 │   │   ├── catalog/            # หน้า Product Catalog
+│   │   ├── orders/             # หน้า Order Management
+│   │   ├── wallet/             # หน้า Wallet & Transactions
+│   │   ├── integrations/       # หน้า Integrations
 │   │   ├── storefront/         # หน้า Storefront Management
+│   │   ├── designer/           # หน้า Product Designer
+│   │   ├── templates/          # หน้า My Designs
+│   │   ├── reports/            # หน้า Reports
+│   │   ├── affiliate/          # หน้า Affiliate Program
+│   │   ├── cart/               # หน้า Shopping Cart
+│   │   ├── checkout/           # หน้า Checkout
 │   │   ├── layout.tsx          # Root Layout
 │   │   ├── page.tsx            # Home page (redirect to dashboard)
 │   │   └── globals.css         # Global styles
-│   └── components/             # Reusable components
-│       ├── Sidebar.tsx         # Navigation sidebar
-│       ├── Header.tsx          # Page header
-│       └── DashboardLayout.tsx # Dashboard layout wrapper
+│   ├── components/             # Reusable components
+│   │   ├── Sidebar.tsx         # Navigation sidebar
+│   │   ├── Header.tsx          # Page header
+│   │   ├── DashboardLayout.tsx # Dashboard layout wrapper
+│   │   └── StepIndicator.tsx   # Step indicator component
+│   └── lib/
+│       └── mockData.ts         # Mock data for development
 ├── public/                     # Static assets
 ├── package.json
 ├── tsconfig.json
@@ -40,6 +54,7 @@
 - **Styling**: Tailwind CSS
 - **Icons**: Lucide React
 - **Font**: Inter & Sarabun (Google Fonts)
+- **Date Formatting**: date-fns
 
 ## 📦 Installation
 
@@ -53,32 +68,53 @@
 1. **Clone or navigate to the project directory**
 
 ```bash
-cd "c:\Users\LOSTXKER\OneDrive\Desktop\Desktop\Anajak\Anajak T-Shirt\เว็บ\POD"
+cd POD
 ```
 
 2. **Install dependencies**
 
 ```bash
 npm install
-# or
-yarn install
-# or
-pnpm install
 ```
 
 3. **Run the development server**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
 4. **Open your browser**
 
 Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 📊 Mock Data
+
+โปรเจคนี้ใช้ Mock Data สำหรับการพัฒนาและทดสอบ ไม่ต้องเชื่อมต่อ Database
+
+### ข้อมูลที่มี
+
+| ประเภท | จำนวน | ไฟล์ |
+|--------|-------|------|
+| Products | 7 รายการ | `src/lib/mockData.ts` |
+| Orders | 8 รายการ | `src/lib/mockData.ts` |
+| Transactions | 7 รายการ | `src/lib/mockData.ts` |
+| Integrations | 3 รายการ | `src/lib/mockData.ts` |
+| Wallet | ยอดเงิน ฿4,500 | `src/lib/mockData.ts` |
+
+### การใช้งาน Mock Data
+
+```typescript
+import { getProducts, getOrders, getWallet } from '@/lib/mockData';
+
+// ดึงข้อมูลสินค้า
+const products = getProducts();
+
+// ดึงข้อมูล Orders
+const orders = getOrders();
+
+// ดึงข้อมูล Wallet
+const wallet = getWallet();
+```
 
 ## 🎨 Color Scheme
 
@@ -109,70 +145,39 @@ colors: {
 - รายละเอียดสินค้า (ขนาด, สี, วิธีพิมพ์, เวลาจัดส่ง)
 - ราคาสมาชิกและราคาทั่วไป
 
-### 3. Storefront Management (`/storefront`)
+### 3. Orders (`/orders`)
+- รายการคำสั่งซื้อทั้งหมด
+- สถานะการผลิตและจัดส่ง
+- Filter ตามสถานะ
+
+### 4. Wallet (`/wallet`)
+- ยอดเงินคงเหลือ
+- ประวัติธุรกรรม
+- เติมเงิน/ถอนเงิน
+
+### 5. Storefront Management (`/storefront`)
 - ตั้งค่า URL ร้านค้า
 - ปรับแต่งธีมและสี
 - จัดการสินค้าในหน้าร้าน
 - ตั้งค่าการจัดส่งและ Tracking Pixels
-- จัดการหน้าเพจต่างๆ
 
-### 4. Orders Management (`/orders`)
-- รายการคำสั่งซื้อทั้งหมด
-- สถานะการผลิตและจัดส่ง
-- ประวัติธุรกรรม
-
-### 5. Product Designer (`/designer`)
+### 6. Product Designer (`/designer`)
 - เครื่องมือออกแบบสินค้า
 - อัพโหลดภาพและเพิ่มข้อความ
 - AI Image Generator
 - Preview แบบ Real-time
 
-## 🔧 Configuration Files
+### 7. Integrations (`/integrations`)
+- เชื่อมต่อ Shopee, Lazada, TikTok Shop
+- API Keys สำหรับนักพัฒนา
 
-### `next.config.js`
-```javascript
-module.exports = {
-  images: {
-    domains: ['placehold.co'], // เพิ่ม domain สำหรับ next/image
-  },
-}
-```
+### 8. Reports (`/reports`)
+- รายงานยอดขาย
+- กราฟและสถิติ
 
-### `tailwind.config.ts`
-กำหนด custom colors, fonts และ theme extensions
-
-## 📝 Component Usage
-
-### DashboardLayout
-
-```tsx
-import DashboardLayout from '@/components/DashboardLayout';
-
-export default function MyPage() {
-  return (
-    <DashboardLayout 
-      title="Page Title" 
-      subtitle="Optional subtitle"
-      showCreateButton={true}
-    >
-      {/* Your page content */}
-    </DashboardLayout>
-  );
-}
-```
-
-## 🚧 Development
-
-### Adding a New Page
-
-1. สร้างโฟลเดอร์ใน `src/app/[page-name]/`
-2. สร้างไฟล์ `page.tsx`
-3. เพิ่ม route ใน Sidebar (`src/components/Sidebar.tsx`)
-
-### Adding a New Component
-
-1. สร้างไฟล์ใน `src/components/[ComponentName].tsx`
-2. Export และ import ในที่ต้องการใช้งาน
+### 9. Affiliate (`/affiliate`)
+- โปรแกรมแนะนำเพื่อน
+- ติดตามรายได้จากการแนะนำ
 
 ## 📱 Responsive Design
 
@@ -183,9 +188,9 @@ export default function MyPage() {
 
 ## 🎯 Next Steps
 
-- [ ] เชื่อมต่อ Backend API
+- [ ] เชื่อมต่อ Backend API จริง
 - [ ] เพิ่ม Authentication
-- [ ] ทำระบบ Database
+- [ ] เชื่อมต่อ Database (PostgreSQL/MySQL)
 - [ ] Deploy to Production
 - [ ] เพิ่ม Payment Gateway
 - [ ] ทำระบบแจ้งเตือน Real-time
@@ -194,10 +199,6 @@ export default function MyPage() {
 
 © 2024 Anajak T-Shirt. All rights reserved.
 
-## 👨‍💻 Development Team
-
-Converted to Next.js by AI Assistant
-
 ---
 
-**Note**: โปรเจคนี้แปลงมาจาก HTML/CSS/JavaScript แบบ Static เป็น Next.js Application พร้อม TypeScript และ Modern React Patterns
+**Note**: โปรเจคนี้ใช้ Mock Data สำหรับการพัฒนา สามารถเชื่อมต่อ Database จริงได้ในภายหลัง

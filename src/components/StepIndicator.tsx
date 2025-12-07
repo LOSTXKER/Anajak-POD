@@ -55,3 +55,4 @@ export default function StepIndicator({ currentStep, steps }: StepIndicatorProps
   );
 }
 
+

@@ -1,32 +1,19 @@
-import prisma from '@/lib/prisma';
+import { getWallet, getTransactions } from '@/lib/mockData';
 import WalletClient from './WalletClient';
 
-export default async function WalletPage() {
-  // Fetch wallet for the demo user
-  const user = await prisma.user.findFirst({
-    where: { email: 'demo@anajak.com' },
-    include: { wallet: true }
-  });
+export default function WalletPage() {
+  const wallet = getWallet();
+  const transactions = getTransactions();
 
-  if (!user || !user.wallet) {
-    return <div>Wallet not found</div>;
-  }
-
-  const transactions = await prisma.transaction.findMany({
-    where: { walletId: user.wallet.id },
-    orderBy: { createdAt: 'desc' }
-  });
-
-  // Serialize Decimal to Number
   const serializedWallet = {
-    balance: Number(user.wallet.balance)
+    balance: wallet.balance,
   };
 
-  const serializedTransactions = transactions.map(t => ({
+  const serializedTransactions = transactions.map((t) => ({
     id: t.id,
-    amount: Number(t.amount),
+    amount: t.amount,
     type: t.type,
-    createdAt: t.createdAt
+    createdAt: t.createdAt,
   }));
 
   return <WalletClient wallet={serializedWallet} transactions={serializedTransactions} />;
