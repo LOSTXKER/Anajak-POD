@@ -3304,38 +3304,6 @@ ${svgElements}
                                 />
                              </div>
                           </div>
-                          
-                          {/* Color & Size Quick Selector */}
-                          <div className="px-4 py-3 bg-slate-50 border-t border-slate-100 space-y-3">
-                             {/* Color Swatches */}
-                             <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-xs font-medium text-slate-500 w-8">สี:</span>
-                                {availableColors.map(c => (
-                                   <button
-                                      key={c}
-                                      onClick={() => setShirtColor(c)}
-                                      className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-110 ${shirtColor === c ? 'border-ci-blue scale-110 ring-2 ring-ci-blue/30' : 'border-slate-200'}`}
-                                      style={{ backgroundColor: c }}
-                                      title={COLORS.find(col => col.value === c)?.name}
-                                   />
-                                ))}
-                             </div>
-                             {/* Size Quick Selector */}
-                             <div className="flex items-center gap-2">
-                                <span className="text-xs font-medium text-slate-500 w-8">ไซส์:</span>
-                                <div className="flex gap-1.5">
-                                   {SIZES.map(s => (
-                                      <button
-                                         key={s.name}
-                                         onClick={() => setShirtSize(s.name)}
-                                         className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${shirtSize === s.name ? 'bg-ci-blue text-white shadow-md scale-105' : 'bg-white border border-slate-200 text-slate-600 hover:border-ci-blue hover:scale-105'}`}
-                                      >
-                                         {s.name}
-                                      </button>
-                                   ))}
-                                </div>
-                             </div>
-                          </div>
                        </div>
                        
                        {/* Product Info Card */}
