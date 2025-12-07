@@ -171,7 +171,7 @@ export default function CheckoutClient() {
               ติดตามคำสั่งซื้อ
             </Link>
             <Link 
-              href="/designer" 
+              href="/catalog" 
               className="py-4 px-6 bg-ci-blue text-white font-bold rounded-2xl hover:shadow-2xl hover:-translate-y-1 transition-all shadow-lg shadow-blue-200 text-center flex items-center justify-center gap-2"
             >
               สั่งทำเพิ่ม

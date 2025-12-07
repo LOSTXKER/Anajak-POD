@@ -99,7 +99,7 @@ export default function CartClient() {
           <h2 className="text-3xl font-bold text-slate-800 mb-3">ตะกร้าว่างเปล่า</h2>
           <p className="text-slate-500 mb-10 text-lg">คุณยังไม่มีสินค้าในตะกร้า</p>
           <Link 
-            href="/designer" 
+            href="/catalog" 
             className="px-10 py-4 bg-ci-blue text-white font-bold rounded-2xl hover:shadow-2xl hover:-translate-y-1 transition-all shadow-lg shadow-blue-200 flex items-center gap-2"
           >
             เริ่มออกแบบสินค้า
@@ -235,7 +235,7 @@ export default function CartClient() {
             {/* Continue Shopping */}
             <div className="mt-6 text-center">
               <Link 
-                href="/designer" 
+                href="/catalog" 
                 className="inline-flex items-center gap-2 text-ci-blue font-medium hover:underline"
               >
                 <Plus className="w-4 h-4" />
