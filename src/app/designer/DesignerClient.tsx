@@ -227,7 +227,6 @@ export default function DesignerClient() {
   const [showMeasurementGuides, setShowMeasurementGuides] = useState(false);
   const [unit, setUnit] = useState<'cm' | 'in'>('cm');
   const [viewSide, setViewSide] = useState<'front' | 'back'>('front');
-  const [mockupStyle, setMockupStyle] = useState<'2d' | '3d'>('2d');
   const [showControls, setShowControls] = useState(true); // Default expanded to show summary
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
@@ -1269,7 +1268,7 @@ export default function DesignerClient() {
 
   // Components
   const SidebarItem = ({ icon: Icon, label, id, isActive, onClick }: any) => (
-    <button onClick={() => onClick(id)} className={`w-full aspect-square flex flex-col items-center justify-center gap-1 transition-all duration-200 relative group ${isActive ? 'text-ci-blue bg-blue-50/80' : 'text-slate-500 hover:shadow-md hover:-translate-y-0.5 hover:text-slate-800'}`}>
+    <button onClick={() => onClick(id)} className={`w-full aspect-square flex flex-col items-center justify-center gap-1 transition-all duration-200 relative group ${isActive ? 'text-ci-blue bg-blue-50/80' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}>
       <Icon className={`w-6 h-6 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
       <span className="text-[10px] font-bold">{label}</span>
       {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-ci-blue rounded-r-full" />}
@@ -1467,7 +1466,7 @@ ${svgElements}
              activeTool === 'text-effects' ? 'เอฟเฟกต์' :
              activeTool === 'elements' ? 'องค์ประกอบ' : 'เลเยอร์'}
           </h2>
-          <button onClick={() => setActiveTool(null)} className="p-2 hover:shadow-md hover:-translate-y-0.5 rounded-full"><ChevronLeft className="w-5 h-5 text-slate-400" /></button>
+          <button onClick={() => setActiveTool(null)} className="p-2 hover:bg-slate-100 rounded-full"><ChevronLeft className="w-5 h-5 text-slate-400" /></button>
         </div>
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
           {/* Removed font-selector panel as per request to integrate into text panel */}
@@ -1508,7 +1507,7 @@ ${svgElements}
                             effectDirection: 45,
                             backgroundColor: effect.id === 'background' ? '#fcd34d' : 'transparent'
                          })}
-                         className={`flex items-center gap-3 p-3 rounded-xl border transition-all group text-left relative overflow-hidden ${selectedElement?.effectType === effect.id || (!selectedElement?.effectType && effect.id === 'none') ? 'border-ci-blue bg-blue-50/50 ring-1 ring-ci-blue' : 'border-slate-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5'}`}
+                         className={`flex items-center gap-3 p-3 rounded-xl border transition-all group text-left relative overflow-hidden ${selectedElement?.effectType === effect.id || (!selectedElement?.effectType && effect.id === 'none') ? 'border-ci-blue bg-blue-50/50 ring-1 ring-ci-blue' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}
                        >
                           <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl font-bold ${effect.id === 'background' ? 'text-slate-800' : 'text-slate-700'}`} style={effect.style}>
                              {effect.preview}
@@ -1771,7 +1770,7 @@ ${svgElements}
                   <p className="text-[10px] text-slate-500 mb-2 line-clamp-1">{selectedProduct.description}</p>
                   <button
                     onClick={() => setShowProductModal(true)}
-                    className="w-full py-1.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:shadow-md hover:-translate-y-0.5 hover:border-ci-blue hover:text-ci-blue transition-all flex items-center justify-center gap-1.5"
+                    className="w-full py-1.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-ci-blue hover:text-ci-blue transition-all flex items-center justify-center gap-1.5"
                   >
                     <Shirt className="w-3.5 h-3.5" />
                     เปลี่ยนสินค้า
@@ -2050,7 +2049,7 @@ ${svgElements}
                     <h3 className="font-bold text-slate-800 text-sm">My fonts</h3>
                     <span className="bg-blue-100 text-blue-600 text-[10px] px-1.5 py-0.5 rounded font-bold">New</span>
                  </div>
-                 <button className="w-full py-2.5 border border-slate-300 rounded-xl flex items-center justify-center gap-2 hover:border-ci-blue hover:text-ci-blue hover:shadow-md hover:-translate-y-0.5 transition-all text-slate-600 font-bold text-sm bg-white">
+                 <button className="w-full py-2.5 border border-slate-300 rounded-xl flex items-center justify-center gap-2 hover:border-ci-blue hover:text-ci-blue hover:bg-blue-50 transition-all text-slate-600 font-bold text-sm bg-white">
                     <Upload className="w-4 h-4" />
                     Upload font
                  </button>
@@ -2072,7 +2071,7 @@ ${svgElements}
                             addElement('text', f.style === 'handwriting' ? 'สวัสดี' : 'ข้อความ', { fontFamily: f.name, fontSize: 32 });
                           }
                         }}
-                        className={`w-full text-left px-4 py-3 rounded-xl hover:shadow-md hover:-translate-y-0.5 transition-all group flex items-center justify-between ${selectedElement?.fontFamily === f.name ? 'bg-blue-50 ring-1 ring-ci-blue' : 'bg-white border border-slate-100'}`}
+                        className={`w-full text-left px-4 py-3 rounded-xl hover:bg-slate-50 transition-all group flex items-center justify-between ${selectedElement?.fontFamily === f.name ? 'bg-blue-50 ring-1 ring-ci-blue' : 'bg-white border border-slate-100'}`}
                       >
                         <span className="text-base text-slate-700" style={{ fontFamily: f.name }}>
                           {f.style === 'handwriting' ? 'สวัสดี' : 'ข้อความ'} <span className="text-slate-400 text-xs ml-1">{f.name}</span>
@@ -2097,7 +2096,7 @@ ${svgElements}
                             addElement('text', f.style === 'handwriting' ? 'Hello' : 'Design', { fontFamily: f.name, fontSize: 32 });
                           }
                         }}
-                        className={`w-full text-left px-4 py-3 rounded-xl hover:shadow-md hover:-translate-y-0.5 transition-all group flex items-center justify-between ${selectedElement?.fontFamily === f.name ? 'bg-blue-50 ring-1 ring-ci-blue' : 'bg-white border border-slate-100'}`}
+                        className={`w-full text-left px-4 py-3 rounded-xl hover:bg-slate-50 transition-all group flex items-center justify-between ${selectedElement?.fontFamily === f.name ? 'bg-blue-50 ring-1 ring-ci-blue' : 'bg-white border border-slate-100'}`}
                       >
                         <span className="text-base text-slate-700" style={{ fontFamily: f.name }}>
                           {f.style === 'handwriting' ? 'Hello' : 'Design'} <span className="text-slate-400 text-xs ml-1">{f.name}</span>
@@ -2119,7 +2118,7 @@ ${svgElements}
               <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
               
               {/* Upload Button - Compact */}
-              <button onClick={() => fileInputRef.current?.click()} className="w-full border-2 border-dashed border-ci-blue/30 bg-blue-50/30 rounded-xl p-4 hover:shadow-md hover:-translate-y-0.5/60 hover:border-ci-blue/50 transition-all group flex items-center gap-3">
+              <button onClick={() => fileInputRef.current?.click()} className="w-full border-2 border-dashed border-ci-blue/30 bg-blue-50/30 rounded-xl p-4 hover:bg-blue-50/60 hover:border-ci-blue/50 transition-all group flex items-center gap-3">
                 <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
                   <UploadCloud className="w-5 h-5 text-ci-blue" />
                 </div>
@@ -2176,7 +2175,7 @@ ${svgElements}
                     href={tool.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-ci-blue hover:shadow-md hover:-translate-y-0.5/50 transition-all group"
+                    className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-ci-blue hover:bg-blue-50/50 transition-all group"
                   >
                     <div className="text-2xl bg-white w-10 h-10 rounded-lg border border-slate-100 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                       {tool.icon}
@@ -2213,7 +2212,7 @@ ${svgElements}
                   <button 
                     key={cat.id}
                     onClick={() => setActiveCategory(cat.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${activeCategory === cat.id ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-500 hover:shadow-md hover:-translate-y-0.5 hover:text-ci-blue'}`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${activeCategory === cat.id ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-ci-blue'}`}
                   >
                     {cat.label}
                   </button>
@@ -2260,7 +2259,7 @@ ${svgElements}
                 <div className="space-y-3 pt-4 border-t border-slate-100">
                   <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Stickers & Emojis</h3>
               <div className="grid grid-cols-5 gap-2">
-                    {STICKERS.map((s, i) => <button key={i} onClick={() => addElement('sticker', s, { fontSize: 64 })} className="text-2xl hover:scale-125 transition-transform p-2 hover:shadow-md hover:-translate-y-0.5 rounded-xl">{s}</button>)}
+                    {STICKERS.map((s, i) => <button key={i} onClick={() => addElement('sticker', s, { fontSize: 64 })} className="text-2xl hover:scale-125 transition-transform p-2 hover:bg-slate-50 rounded-xl">{s}</button>)}
               </div>
                 </div>
               )}
@@ -2341,7 +2340,7 @@ ${svgElements}
                     {/* Visibility Toggle */}
                     <button 
                       onClick={(e) => { e.stopPropagation(); toggleVisibilityById(el.id); }}
-                      className={`p-1 rounded transition-colors ${el.visible === false ? 'bg-slate-200 text-slate-500' : 'hover:shadow-md hover:-translate-y-0.5 text-slate-400 hover:text-slate-600'}`}
+                      className={`p-1 rounded transition-colors ${el.visible === false ? 'bg-slate-200 text-slate-500' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-600'}`}
                       title={el.visible === false ? 'แสดง' : 'ซ่อน'}
                     >
                       {el.visible === false ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -2350,7 +2349,7 @@ ${svgElements}
                     {/* Lock Toggle */}
                     <button 
                       onClick={(e) => { e.stopPropagation(); toggleLockById(el.id); }}
-                      className={`p-1 rounded transition-colors ${el.locked ? 'bg-amber-100 text-amber-600' : 'hover:shadow-md hover:-translate-y-0.5 text-slate-400 hover:text-slate-600'}`}
+                      className={`p-1 rounded transition-colors ${el.locked ? 'bg-amber-100 text-amber-600' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-600'}`}
                       title={el.locked ? 'ปลดล็อค' : 'ล็อค'}
                     >
                       {el.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
@@ -2359,7 +2358,7 @@ ${svgElements}
                     {/* Move Up */}
                     <button 
                       onClick={(e) => { e.stopPropagation(); moveLayer(el.id, 'up'); }}
-                      className="p-1 hover:shadow-md hover:-translate-y-0.5 text-slate-400 hover:text-slate-600 rounded transition-colors disabled:opacity-30"
+                      className="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-600 rounded transition-colors disabled:opacity-30"
                       disabled={i === 0}
                       title="เลื่อนขึ้น"
                     >
@@ -2369,7 +2368,7 @@ ${svgElements}
                     {/* Move Down */}
                     <button 
                       onClick={(e) => { e.stopPropagation(); moveLayer(el.id, 'down'); }}
-                      className="p-1 hover:shadow-md hover:-translate-y-0.5 text-slate-400 hover:text-slate-600 rounded transition-colors disabled:opacity-30"
+                      className="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-600 rounded transition-colors disabled:opacity-30"
                       disabled={i === arr.length - 1}
                       title="เลื่อนลง"
                     >
@@ -2414,18 +2413,18 @@ ${svgElements}
                     </button>
            </div>
 
-              {/* Inline Stepper - Consistent Style */}
+              {/* Inline Stepper - Compact */}
               <div className="hidden md:flex items-center gap-0.5 text-xs">
               {STEPS.map((step, i) => (
                    <div key={step.id} className="flex items-center">
-                     {i > 0 && <div className="w-4 h-px bg-slate-200 mx-1" />}
-                     <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${step.status === 'completed' ? 'text-green-600' : step.status === 'current' ? 'text-ci-blue bg-blue-50' : 'text-slate-300'}`}>
-                       <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step.status === 'completed' ? 'bg-green-500 text-white' : step.status === 'current' ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-400'}`}>
-                         {step.status === 'completed' ? <Check className="w-3 h-3" /> : step.id}
-                       </div>
+                     {i > 0 && <div className="w-3 h-px bg-slate-200 mx-1" />}
+                     <div className={`flex items-center gap-1 px-2 py-1 rounded-md ${step.status === 'completed' ? 'text-green-600' : step.status === 'current' ? 'text-ci-blue bg-blue-50' : 'text-slate-300'}`}>
+                       <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold ${step.status === 'completed' ? 'bg-green-100 text-green-600' : step.status === 'current' ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-400'}`}>
+                      {step.status === 'completed' ? <Check className="w-2.5 h-2.5" /> : step.id}
+                    </div>
                        <span className="font-semibold hidden lg:inline">{step.label}</span>
-                     </div>
-                   </div>
+                  </div>
+                </div>
               ))}
               </div>
            </div>
@@ -2443,14 +2442,14 @@ ${svgElements}
               {/* Tool Buttons */}
               <button 
                 onClick={() => setShowKeyboardShortcuts(true)} 
-                className="p-2 text-slate-400 hover:text-ci-blue hover:shadow-md hover:-translate-y-0.5 rounded-lg transition-all" 
+                className="p-2 text-slate-400 hover:text-ci-blue hover:bg-blue-50 rounded-lg transition-all" 
                 title="คีย์ลัด (?)"
               >
                 <Info className="w-4 h-4" />
               </button>
               <button 
                 onClick={() => setShowPreviewModal(true)} 
-                className="h-9 px-4 bg-slate-100 hover:shadow-md hover:-translate-y-0.5 text-slate-700 rounded-lg font-medium text-sm transition-all flex items-center gap-2"
+                className="h-9 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium text-sm transition-all flex items-center gap-2"
               >
                 <Eye className="w-4 h-4" />
                 <span>Preview</span>
@@ -2472,15 +2471,15 @@ ${svgElements}
               {selectedElement.type === 'text' && (
                  <>
                     <div className="relative">
-                      <button onClick={() => setActiveTool(activeTool === 'text' ? null : 'text')} className="flex items-center gap-1 px-2 py-1 hover:shadow-md hover:-translate-y-0.5 rounded text-xs font-medium w-20 justify-center border border-slate-200">
+                      <button onClick={() => setActiveTool(activeTool === 'text' ? null : 'text')} className="flex items-center gap-1 px-2 py-1 hover:bg-slate-100 rounded text-xs font-medium w-20 justify-center border border-slate-200">
                         <span className="truncate">{selectedElement.fontFamily}</span>
                       </button>
                     </div>
                     <Divider />
                     <div className="flex items-center bg-slate-100 rounded">
-                       <button onClick={() => updateTextElementWithAutoResize(selectedId, { fontSize: Math.max(12, (selectedElement.fontSize || 32) - 4) })} className="p-1 hover:shadow-md hover:-translate-y-0.5 rounded-l text-slate-600"><Minus className="w-3 h-3" /></button>
+                       <button onClick={() => updateTextElementWithAutoResize(selectedId, { fontSize: Math.max(12, (selectedElement.fontSize || 32) - 4) })} className="p-1 hover:bg-slate-200 rounded-l text-slate-600"><Minus className="w-3 h-3" /></button>
                        <span className="w-6 text-center text-[10px] font-bold">{Math.round(selectedElement.fontSize || 0)}</span>
-                       <button onClick={() => updateTextElementWithAutoResize(selectedId, { fontSize: Math.min(200, (selectedElement.fontSize || 32) + 4) })} className="p-1 hover:shadow-md hover:-translate-y-0.5 rounded-r text-slate-600"><Plus className="w-3 h-3" /></button>
+                       <button onClick={() => updateTextElementWithAutoResize(selectedId, { fontSize: Math.min(200, (selectedElement.fontSize || 32) + 4) })} className="p-1 hover:bg-slate-200 rounded-r text-slate-600"><Plus className="w-3 h-3" /></button>
                     </div>
                     <Divider />
                     <div className="flex items-center relative">
@@ -2489,21 +2488,21 @@ ${svgElements}
                     </div>
                     <Divider />
                     <div className="flex items-center">
-                       <button onClick={() => updateElementWithHistory(selectedId, { fontWeight: selectedElement.fontWeight === 'bold' ? 'normal' : 'bold' })} className={`p-1 rounded hover:shadow-md hover:-translate-y-0.5 ${selectedElement.fontWeight === 'bold' ? 'bg-slate-200' : ''}`}><Bold className="w-3.5 h-3.5" /></button>
-                       <button onClick={() => updateElementWithHistory(selectedId, { fontStyle: selectedElement.fontStyle === 'italic' ? 'normal' : 'italic' })} className={`p-1 rounded hover:shadow-md hover:-translate-y-0.5 ${selectedElement.fontStyle === 'italic' ? 'bg-slate-200' : ''}`}><Italic className="w-3.5 h-3.5" /></button>
-                       <button onClick={() => updateElementWithHistory(selectedId, { textDecoration: selectedElement.textDecoration === 'underline' ? 'none' : 'underline' })} className={`p-1 rounded hover:shadow-md hover:-translate-y-0.5 ${selectedElement.textDecoration === 'underline' ? 'bg-slate-200' : ''}`}><Underline className="w-3.5 h-3.5" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { fontWeight: selectedElement.fontWeight === 'bold' ? 'normal' : 'bold' })} className={`p-1 rounded hover:bg-slate-100 ${selectedElement.fontWeight === 'bold' ? 'bg-slate-200' : ''}`}><Bold className="w-3.5 h-3.5" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { fontStyle: selectedElement.fontStyle === 'italic' ? 'normal' : 'italic' })} className={`p-1 rounded hover:bg-slate-100 ${selectedElement.fontStyle === 'italic' ? 'bg-slate-200' : ''}`}><Italic className="w-3.5 h-3.5" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { textDecoration: selectedElement.textDecoration === 'underline' ? 'none' : 'underline' })} className={`p-1 rounded hover:bg-slate-100 ${selectedElement.textDecoration === 'underline' ? 'bg-slate-200' : ''}`}><Underline className="w-3.5 h-3.5" /></button>
                     </div>
                     <Divider />
                     <div className="flex items-center">
-                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'left' })} className={`p-1 rounded hover:shadow-md hover:-translate-y-0.5 ${selectedElement.textAlign === 'left' ? 'bg-slate-200' : ''}`}><AlignLeft className="w-3.5 h-3.5" /></button>
-                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'center' })} className={`p-1 rounded hover:shadow-md hover:-translate-y-0.5 ${selectedElement.textAlign === 'center' || !selectedElement.textAlign ? 'bg-slate-200' : ''}`}><AlignCenter className="w-3.5 h-3.5" /></button>
-                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'right' })} className={`p-1 rounded hover:shadow-md hover:-translate-y-0.5 ${selectedElement.textAlign === 'right' ? 'bg-slate-200' : ''}`}><AlignRight className="w-3.5 h-3.5" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'left' })} className={`p-1 rounded hover:bg-slate-100 ${selectedElement.textAlign === 'left' ? 'bg-slate-200' : ''}`}><AlignLeft className="w-3.5 h-3.5" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'center' })} className={`p-1 rounded hover:bg-slate-100 ${selectedElement.textAlign === 'center' || !selectedElement.textAlign ? 'bg-slate-200' : ''}`}><AlignCenter className="w-3.5 h-3.5" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { textAlign: 'right' })} className={`p-1 rounded hover:bg-slate-100 ${selectedElement.textAlign === 'right' ? 'bg-slate-200' : ''}`}><AlignRight className="w-3.5 h-3.5" /></button>
                     </div>
                     <Divider />
                     {/* Effects Button */}
                     <button 
                       onClick={() => setActiveTool('text-effects')} 
-                      className={`px-2 py-1 rounded text-[10px] font-bold transition-all ${activeTool === 'text-effects' ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-600 hover:shadow-md hover:-translate-y-0.5'}`}
+                      className={`px-2 py-1 rounded text-[10px] font-bold transition-all ${activeTool === 'text-effects' ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
                     >
                       เอฟเฟกต์
                     </button>
@@ -2514,9 +2513,9 @@ ${svgElements}
                     <div className="flex items-center gap-2 text-slate-500"><Sticker className="w-4 h-4" /><span className="text-xs font-bold uppercase">Sticker</span></div>
                     <Divider />
                     <div className="flex items-center bg-slate-100 rounded-lg">
-                       <button onClick={() => updateElementWithHistory(selectedId, { fontSize: Math.max(24, (selectedElement.fontSize || 64) - 8) })} className="p-1.5 hover:shadow-md hover:-translate-y-0.5 rounded-l-lg text-slate-600"><Minus className="w-3 h-3" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { fontSize: Math.max(24, (selectedElement.fontSize || 64) - 8) })} className="p-1.5 hover:bg-slate-200 rounded-l-lg text-slate-600"><Minus className="w-3 h-3" /></button>
                        <span className="w-8 text-center text-xs font-bold">{Math.round(selectedElement.fontSize || 0)}</span>
-                       <button onClick={() => updateElementWithHistory(selectedId, { fontSize: Math.min(300, (selectedElement.fontSize || 64) + 8) })} className="p-1.5 hover:shadow-md hover:-translate-y-0.5 rounded-r-lg text-slate-600"><Plus className="w-3 h-3" /></button>
+                       <button onClick={() => updateElementWithHistory(selectedId, { fontSize: Math.min(300, (selectedElement.fontSize || 64) + 8) })} className="p-1.5 hover:bg-slate-200 rounded-r-lg text-slate-600"><Plus className="w-3 h-3" /></button>
                     </div>
                     <Divider />
                     <div className="flex items-center gap-3 px-2">
@@ -2558,7 +2557,7 @@ ${svgElements}
                       </div>
                     )}
                     {selectedElement.type === 'image' && (
-                      <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${showFilters ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-600 hover:shadow-md hover:-translate-y-0.5'}`}><SlidersHorizontal className="w-4 h-4" /> Filters</button>
+                      <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${showFilters ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}><SlidersHorizontal className="w-4 h-4" /> Filters</button>
                     )}
                     {showFilters && selectedElement.type === 'image' && (
                        <div className="absolute top-full left-0 mt-2 p-4 bg-white rounded-xl shadow-xl border border-slate-200 w-64 z-50 space-y-3">
@@ -2572,36 +2571,36 @@ ${svgElements}
               )}
               <Divider />
               <div className="flex items-center gap-1">
-                 <button onClick={() => moveLayer('up')} className="p-1.5 hover:shadow-md hover:-translate-y-0.5 rounded text-slate-500" title="เลื่อนขึ้น">
+                 <button onClick={() => moveLayer('up')} className="p-1.5 hover:bg-slate-100 rounded text-slate-500" title="เลื่อนขึ้น">
                     <ArrowUp className="w-4 h-4" />
                  </button>
-                 <button onClick={() => moveLayer('down')} className="p-1.5 hover:shadow-md hover:-translate-y-0.5 rounded text-slate-500" title="เลื่อนลง">
+                 <button onClick={() => moveLayer('down')} className="p-1.5 hover:bg-slate-100 rounded text-slate-500" title="เลื่อนลง">
                     <ArrowDown className="w-4 h-4" />
                  </button>
               </div>
               <Divider />
-              <div className="flex items-center gap-1"><button onClick={duplicateElement} className="p-1.5 hover:shadow-md hover:-translate-y-0.5 rounded text-slate-500" title="สำเนา"><Copy className="w-4 h-4" /></button><button onClick={() => deleteElement(selectedId)} className="p-1.5 hover:bg-red-50 rounded text-red-500" title="ลบ"><Trash2 className="w-4 h-4" /></button></div>
+              <div className="flex items-center gap-1"><button onClick={duplicateElement} className="p-1.5 hover:bg-slate-100 rounded text-slate-500" title="สำเนา"><Copy className="w-4 h-4" /></button><button onClick={() => deleteElement(selectedId)} className="p-1.5 hover:bg-red-50 rounded text-red-500" title="ลบ"><Trash2 className="w-4 h-4" /></button></div>
            </div>
            ) : (
               <div className="flex items-center gap-3">
                  <span className="text-xs text-slate-400 mr-2">เพิ่ม:</span>
                  <button 
                    onClick={() => setActiveTool('text')} 
-                   className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTool === 'text' ? 'text-ci-blue bg-blue-50' : 'text-slate-600 hover:text-ci-blue hover:shadow-md hover:-translate-y-0.5'}`}
+                   className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTool === 'text' ? 'text-ci-blue bg-blue-50' : 'text-slate-600 hover:text-ci-blue hover:bg-blue-50'}`}
                  >
                    <Type className="w-3.5 h-3.5" />
                    <span>ข้อความ</span>
                  </button>
                  <button 
                    onClick={() => setActiveTool('uploads')}
-                   className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTool === 'uploads' ? 'text-ci-blue bg-blue-50' : 'text-slate-600 hover:text-ci-blue hover:shadow-md hover:-translate-y-0.5'}`}
+                   className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTool === 'uploads' ? 'text-ci-blue bg-blue-50' : 'text-slate-600 hover:text-ci-blue hover:bg-blue-50'}`}
                  >
                    <ImageIcon className="w-3.5 h-3.5" />
                    <span>รูปภาพ</span>
                  </button>
                  <button 
                    onClick={() => setActiveTool('elements')}
-                   className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTool === 'elements' ? 'text-ci-blue bg-blue-50' : 'text-slate-600 hover:text-ci-blue hover:shadow-md hover:-translate-y-0.5'}`}
+                   className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTool === 'elements' ? 'text-ci-blue bg-blue-50' : 'text-slate-600 hover:text-ci-blue hover:bg-blue-50'}`}
                  >
                    <Shapes className="w-3.5 h-3.5" />
                    <span>รูปทรง</span>
@@ -2609,9 +2608,9 @@ ${svgElements}
                  <div className="w-px h-5 bg-slate-200 mx-1" />
                  <div className="flex items-center gap-1 text-xs text-slate-400">
                     <span>Zoom:</span>
-                    <button onClick={() => setZoom(Math.max(25, zoom - 25))} className="p-1 hover:shadow-md hover:-translate-y-0.5 rounded"><Minus className="w-3 h-3" /></button>
+                    <button onClick={() => setZoom(Math.max(25, zoom - 25))} className="p-1 hover:bg-slate-100 rounded"><Minus className="w-3 h-3" /></button>
                     <span className="w-10 text-center font-medium text-slate-600">{zoom}%</span>
-                    <button onClick={() => setZoom(Math.min(200, zoom + 25))} className="p-1 hover:shadow-md hover:-translate-y-0.5 rounded"><Plus className="w-3 h-3" /></button>
+                    <button onClick={() => setZoom(Math.min(200, zoom + 25))} className="p-1 hover:bg-slate-100 rounded"><Plus className="w-3 h-3" /></button>
                  </div>
            </div>
         )}
@@ -2624,8 +2623,8 @@ ${svgElements}
            
            {/* Front/Back Toggle */}
            <div className="absolute bottom-6 left-6 bg-white rounded-lg shadow-md border border-slate-200 flex p-1 gap-1 z-30">
-              <button onClick={() => setViewSide('front')} className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${viewSide === 'front' ? 'bg-ci-blue text-white' : 'text-slate-500 hover:shadow-md hover:-translate-y-0.5'}`}>ด้านหน้า</button>
-              <button onClick={() => setViewSide('back')} className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${viewSide === 'back' ? 'bg-ci-blue text-white' : 'text-slate-500 hover:shadow-md hover:-translate-y-0.5'}`}>ด้านหลัง</button>
+              <button onClick={() => setViewSide('front')} className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${viewSide === 'front' ? 'bg-ci-blue text-white' : 'text-slate-500 hover:bg-slate-50'}`}>ด้านหน้า</button>
+              <button onClick={() => setViewSide('back')} className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${viewSide === 'back' ? 'bg-ci-blue text-white' : 'text-slate-500 hover:bg-slate-50'}`}>ด้านหลัง</button>
            </div>
 
            <div ref={containerRef} className="relative w-[500px] h-[600px] transition-transform duration-200" style={{ transform: `scale(${zoom / 100})` }}>
@@ -3029,25 +3028,25 @@ ${svgElements}
                          
                          {/* Corner Resize Handles (4 corners only - proportional resize) */}
                          <div 
-                           className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-nwse-resize z-50 shadow-md hover:scale-110 hover:shadow-md hover:-translate-y-0.5 transition-all pointer-events-auto"
+                           className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-nwse-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
                            onMouseDown={(e) => handleResizeStart(e, selectedElement, 'nw')} 
                          ></div>
                          <div 
-                           className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-nesw-resize z-50 shadow-md hover:scale-110 hover:shadow-md hover:-translate-y-0.5 transition-all pointer-events-auto"
+                           className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-nesw-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
                            onMouseDown={(e) => handleResizeStart(e, selectedElement, 'ne')}
                          ></div>
                          <div 
-                           className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-nesw-resize z-50 shadow-md hover:scale-110 hover:shadow-md hover:-translate-y-0.5 transition-all pointer-events-auto"
+                           className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-nesw-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
                            onMouseDown={(e) => handleResizeStart(e, selectedElement, 'sw')}
                          ></div>
                          <div 
-                           className="absolute -bottom-2 -right-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-nwse-resize z-50 shadow-md hover:scale-110 hover:shadow-md hover:-translate-y-0.5 transition-all pointer-events-auto"
+                           className="absolute -bottom-2 -right-2 w-4 h-4 bg-white border-2 border-ci-blue rounded-sm cursor-nwse-resize z-50 shadow-md hover:scale-110 hover:bg-blue-50 transition-all pointer-events-auto"
                            onMouseDown={(e) => handleResizeStart(e, selectedElement, 'se')}
                          ></div>
                          
                          {/* Rotate Handle */}
                          <div 
-                             className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-6 h-6 bg-white border border-slate-300 rounded-full flex items-center justify-center cursor-move shadow-sm hover:shadow-md hover:-translate-y-0.5 z-50 pointer-events-auto"
+                             className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-6 h-6 bg-white border border-slate-300 rounded-full flex items-center justify-center cursor-move shadow-sm hover:bg-slate-50 z-50 pointer-events-auto"
                              onMouseDown={(e) => handleDragStart(e, selectedElement)}
                          >
                             <Move className="w-3 h-3 text-slate-500" />
@@ -3059,16 +3058,16 @@ ${svgElements}
 
            {/* Zoom Control */}
            <div className="absolute bottom-6 right-6 bg-white rounded-lg shadow-md border border-slate-200 flex items-center p-1 gap-2 z-50">
-              <button onClick={() => setZoom(z => Math.max(50, z - 10))} className="p-1 hover:shadow-md hover:-translate-y-0.5 rounded text-slate-500 hover:text-ci-blue"><ZoomOut className="w-4 h-4" /></button>
+              <button onClick={() => setZoom(z => Math.max(50, z - 10))} className="p-1 hover:bg-slate-100 rounded text-slate-500 hover:text-ci-blue"><ZoomOut className="w-4 h-4" /></button>
               <span className="text-xs font-bold w-8 text-center text-slate-700">{zoom}%</span>
-              <button onClick={() => setZoom(z => Math.min(150, z + 10))} className="p-1 hover:shadow-md hover:-translate-y-0.5 rounded text-slate-500 hover:text-ci-blue"><ZoomIn className="w-4 h-4" /></button>
+              <button onClick={() => setZoom(z => Math.min(150, z + 10))} className="p-1 hover:bg-slate-100 rounded text-slate-500 hover:text-ci-blue"><ZoomIn className="w-4 h-4" /></button>
            </div>
 
            {/* View Controls (Top Right) */}
            <div className={`absolute top-6 right-6 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col z-50 transition-all duration-200 ${showControls ? 'w-[220px] p-3' : 'w-10 h-10 p-0 items-center justify-center overflow-hidden'}`}>
               
               {!showControls && (
-                  <button onClick={() => setShowControls(true)} className="w-full h-full flex items-center justify-center text-slate-500 hover:text-slate-800 hover:shadow-md hover:-translate-y-0.5 rounded-xl" title="แสดงสรุปรายการ">
+                  <button onClick={() => setShowControls(true)} className="w-full h-full flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-xl" title="แสดงสรุปรายการ">
                      <SlidersHorizontal className="w-5 h-5" />
                   </button>
               )}
@@ -3076,7 +3075,7 @@ ${svgElements}
               <div className={`space-y-2 ${showControls ? 'opacity-100' : 'opacity-0 hidden'}`}>
                   <div className="flex items-center justify-between">
                        <span className="text-xs font-bold text-slate-800">สรุปรายการ</span>
-                       <button onClick={() => setShowControls(false)} className="p-1 hover:shadow-md hover:-translate-y-0.5 rounded text-slate-400 hover:text-slate-600">
+                       <button onClick={() => setShowControls(false)} className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600">
                           <ChevronUp className="w-4 h-4" />
                        </button>
                   </div>
@@ -3174,7 +3173,7 @@ ${svgElements}
                     <button 
                       key={s}
                       onClick={() => setShirtSize(s)}
-                          className={`h-7 min-w-[2rem] px-1 flex items-center justify-center rounded-md text-[10px] font-bold transition-all ${shirtSize === s ? 'bg-ci-blue text-white shadow-sm' : 'bg-slate-100 text-slate-400 hover:shadow-md hover:-translate-y-0.5 hover:text-ci-blue'}`}
+                          className={`h-7 min-w-[2rem] px-1 flex items-center justify-center rounded-md text-[10px] font-bold transition-all ${shirtSize === s ? 'bg-ci-blue text-white shadow-sm' : 'bg-slate-100 text-slate-400 hover:bg-blue-50 hover:text-ci-blue'}`}
                     >
                       {s}
                     </button>
@@ -3199,7 +3198,7 @@ ${svgElements}
               {showRulers && (
                 <div className="flex items-center justify-between gap-2 animate-in slide-in-from-top-1 fade-in duration-200">
                        <span className="text-[10px] font-bold text-slate-400 uppercase">หน่วย</span>
-                   <button onClick={() => setUnit(u => u === 'cm' ? 'in' : 'cm')} className="px-2 py-1 rounded bg-slate-100 text-[10px] font-bold text-slate-600 hover:shadow-md hover:-translate-y-0.5 min-w-[2rem]">
+                   <button onClick={() => setUnit(u => u === 'cm' ? 'in' : 'cm')} className="px-2 py-1 rounded bg-slate-100 text-[10px] font-bold text-slate-600 hover:bg-slate-200 min-w-[2rem]">
                           {unit === 'cm' ? 'ซม.' : 'นิ้ว'}
                    </button>
                 </div>
@@ -3226,28 +3225,20 @@ ${svgElements}
            <div className="h-14 bg-white border-b border-slate-200 flex items-center px-4 gap-3">
               <button 
                 onClick={() => setShowReviewModal(false)} 
-                className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-all"
               >
                  <ChevronLeft className="w-5 h-5" />
               </button>
               <h2 className="text-lg font-bold text-slate-900 flex-1">ตรวจสอบรายการ</h2>
-              {/* Stepper - Same style as main header */}
-              <div className="flex items-center gap-0.5 text-xs">
-                 {[
-                   { id: 1, label: 'เลือกสินค้า', status: 'completed' },
-                   { id: 2, label: 'ออกแบบ', status: 'completed' },
-                   { id: 3, label: 'ตรวจสอบ', status: 'current' },
-                 ].map((step, i) => (
-                   <div key={step.id} className="flex items-center">
-                     {i > 0 && <div className="w-4 h-px bg-slate-200 mx-1" />}
-                     <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${step.status === 'completed' ? 'text-green-600' : step.status === 'current' ? 'text-ci-blue bg-blue-50' : 'text-slate-300'}`}>
-                       <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step.status === 'completed' ? 'bg-green-500 text-white' : step.status === 'current' ? 'bg-ci-blue text-white' : 'bg-slate-100 text-slate-400'}`}>
-                         {step.status === 'completed' ? <Check className="w-3 h-3" /> : step.id}
-                       </div>
-                       <span className="font-semibold hidden sm:inline">{step.label}</span>
-                     </div>
-                   </div>
-                 ))}
+              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                 <span className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+                 <span className="hidden sm:inline">สินค้า</span>
+                 <div className="w-4 h-px bg-slate-300" />
+                 <span className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+                 <span className="hidden sm:inline">ออกแบบ</span>
+                 <div className="w-4 h-px bg-slate-300" />
+                 <span className="w-6 h-6 rounded-full bg-ci-blue text-white flex items-center justify-center text-[10px] font-bold">3</span>
+                 <span className="hidden sm:inline font-medium text-ci-blue">ตรวจสอบ</span>
               </div>
            </div>
 
@@ -3260,38 +3251,20 @@ ${svgElements}
                     <div className="space-y-4">
                        {/* Mockup Card */}
                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                          {/* View Controls Header */}
-                          <div className="flex items-center border-b border-slate-100">
-                             {/* Front/Back Toggle */}
-                             <div className="flex flex-1">
-                                <button 
-                                   onClick={() => setViewSide('front')} 
-                                   className={`flex-1 py-3 text-sm font-semibold transition-all ${viewSide === 'front' ? 'text-ci-blue border-b-2 border-ci-blue bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}
-                                >
-                                   ด้านหน้า
-                                </button>
-                                <button 
-                                   onClick={() => setViewSide('back')} 
-                                   className={`flex-1 py-3 text-sm font-semibold transition-all ${viewSide === 'back' ? 'text-ci-blue border-b-2 border-ci-blue bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}
-                                >
-                                   ด้านหลัง
-                                </button>
-                             </div>
-                             {/* 2D/3D Toggle */}
-                             <div className="flex border-l border-slate-100">
-                                <button 
-                                   onClick={() => setMockupStyle('2d')} 
-                                   className={`px-4 py-3 text-sm font-semibold transition-all ${mockupStyle === '2d' ? 'text-ci-blue border-b-2 border-ci-blue bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}
-                                >
-                                   2D
-                                </button>
-                                <button 
-                                   onClick={() => setMockupStyle('3d')} 
-                                   className={`px-4 py-3 text-sm font-semibold transition-all ${mockupStyle === '3d' ? 'text-ci-blue border-b-2 border-ci-blue bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}
-                                >
-                                   3D
-                                </button>
-                             </div>
+                          {/* Toggle Front/Back */}
+                          <div className="flex border-b border-slate-100">
+                             <button 
+                                onClick={() => setViewSide('front')} 
+                                className={`flex-1 py-3 text-sm font-semibold transition-all ${viewSide === 'front' ? 'text-ci-blue border-b-2 border-ci-blue bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}
+                             >
+                                ด้านหน้า
+                             </button>
+                             <button 
+                                onClick={() => setViewSide('back')} 
+                                className={`flex-1 py-3 text-sm font-semibold transition-all ${viewSide === 'back' ? 'text-ci-blue border-b-2 border-ci-blue bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}
+                             >
+                                ด้านหลัง
+                             </button>
                           </div>
                           
                           {/* Mockup Image */}
@@ -3300,8 +3273,24 @@ ${svgElements}
                                 <img 
                                    src={viewSide === 'front' ? MOCKUP_IMAGES.front : MOCKUP_IMAGES.back} 
                                    alt="Preview" 
-                                   className="max-w-full max-h-full object-contain drop-shadow-lg transition-all duration-300" 
+                                   className="max-w-full max-h-full object-contain drop-shadow-lg" 
                                 />
+                             </div>
+                          </div>
+                          
+                          {/* Color Swatches */}
+                          <div className="px-4 py-3 bg-slate-50 border-t border-slate-100">
+                             <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs font-medium text-slate-500">สี:</span>
+                                {availableColors.map(c => (
+                                   <button
+                                      key={c}
+                                      onClick={() => setShirtColor(c)}
+                                      className={`w-7 h-7 rounded-full border-2 transition-all ${shirtColor === c ? 'border-ci-blue scale-110 ring-2 ring-ci-blue/30' : 'border-slate-200 hover:scale-105'}`}
+                                      style={{ backgroundColor: c }}
+                                      title={COLORS.find(col => col.value === c)?.name}
+                                   />
+                                ))}
                              </div>
                           </div>
                        </div>
@@ -3353,7 +3342,7 @@ ${svgElements}
                           </div>
                           
                           <div className="p-4 space-y-4">
-                             {/* Sizes - Clickable */}
+                             {/* Sizes */}
                              <div>
                                 <div className="flex items-center justify-between mb-2">
                                    <span className="text-sm font-medium text-slate-600">ไซส์ที่เลือก</span>
@@ -3361,18 +3350,14 @@ ${svgElements}
                                 </div>
                                 <div className="flex flex-wrap gap-1.5">
                                    {selectedSizes.map(size => (
-                                      <button 
-                                         key={size}
-                                         onClick={() => setShirtSize(size)}
-                                         className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all border-2 ${shirtSize === size ? 'border-ci-blue bg-blue-50 text-ci-blue' : 'border-slate-200 bg-slate-50 text-slate-700 hover:shadow-md hover:-translate-y-0.5'}`}
-                                      >
+                                      <span key={size} className="px-3 py-1.5 bg-slate-100 rounded-lg text-sm font-semibold text-slate-700">
                                          {size}
-                                      </button>
+                                      </span>
                                    ))}
                                 </div>
                              </div>
                              
-                             {/* Colors - Clickable */}
+                             {/* Colors */}
                              <div>
                                 <div className="flex items-center justify-between mb-2">
                                    <span className="text-sm font-medium text-slate-600">สีที่เลือก</span>
@@ -3381,16 +3366,11 @@ ${svgElements}
                                 <div className="flex flex-wrap gap-2">
                                    {availableColors.map(c => {
                                       const colorName = COLORS.find(col => col.value === c)?.name;
-                                      const isActive = shirtColor === c;
                                       return (
-                                         <button 
-                                            key={c} 
-                                            onClick={() => setShirtColor(c)}
-                                            className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-all hover:scale-105 border-2 ${isActive ? 'border-ci-blue bg-blue-50' : 'border-slate-200 bg-slate-50 hover:shadow-md hover:-translate-y-0.5'}`}
-                                         >
-                                            <div className={`w-5 h-5 rounded-full border-2 ${isActive ? 'border-ci-blue' : 'border-slate-300'}`} style={{ backgroundColor: c }} />
-                                            <span className={`text-xs font-semibold ${isActive ? 'text-ci-blue' : 'text-slate-600'}`}>{colorName}</span>
-                                         </button>
+                                         <div key={c} className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-lg">
+                                            <div className="w-4 h-4 rounded-full border border-slate-200" style={{ backgroundColor: c }} />
+                                            <span className="text-xs text-slate-600">{colorName}</span>
+                                         </div>
                                       );
                                    })}
                                 </div>
@@ -3450,6 +3430,25 @@ ${svgElements}
                                 </div>
                                 <p className="text-[10px] text-slate-400 mt-1">ราคาต่อชิ้น • ยังไม่รวมค่าจัดส่ง</p>
                              </div>
+                             
+                             {/* Bulk Estimate */}
+                             <div className="pt-3 border-t border-slate-100">
+                                <p className="text-xs text-slate-500 mb-2">ประมาณการจำนวนมาก</p>
+                                <div className="flex gap-2 text-center">
+                                   <div className="flex-1 py-2 bg-slate-50 rounded-lg">
+                                      <p className="text-xs text-slate-500">10 ตัว</p>
+                                      <p className="font-bold text-slate-700">฿{(currentPrice * 10).toLocaleString()}</p>
+                                   </div>
+                                   <div className="flex-1 py-2 bg-slate-50 rounded-lg">
+                                      <p className="text-xs text-slate-500">50 ตัว</p>
+                                      <p className="font-bold text-slate-700">฿{(currentPrice * 50).toLocaleString()}</p>
+                                   </div>
+                                   <div className="flex-1 py-2 bg-slate-50 rounded-lg">
+                                      <p className="text-xs text-slate-500">100 ตัว</p>
+                                      <p className="font-bold text-slate-700">฿{(currentPrice * 100).toLocaleString()}</p>
+                                   </div>
+                                </div>
+                             </div>
                           </div>
                        </div>
 
@@ -3457,14 +3456,14 @@ ${svgElements}
                        <div className="space-y-3">
                           <button 
                              onClick={() => handleFinalSave('cart')} 
-                             className="w-full h-12 bg-ci-blue text-white rounded-xl font-bold text-sm hover:shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center gap-2 shadow-lg shadow-ci-blue/30"
+                             className="w-full h-12 bg-ci-blue text-white rounded-xl font-bold text-sm hover:shadow-2xl hover:-translate-y-1 transition-all flex items-center justify-center gap-2 shadow-lg shadow-ci-blue/30"
                           >
                              <ShoppingCart className="w-5 h-5" />
-                             บันทึกและใส่ตะกร้า
+                             ใส่ตะกร้าสั่งผลิต
                           </button>
                           <button 
                              onClick={() => handleFinalSave('template')} 
-                             className="w-full h-11 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold text-sm hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                             className="w-full h-11 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
                           >
                              <Save className="w-4 h-4" />
                              บันทึกเป็นเทมเพลต
@@ -3489,7 +3488,7 @@ ${svgElements}
                 </div>
                 <h3 className="font-bold text-lg text-slate-800">คีย์ลัด</h3>
               </div>
-              <button onClick={() => setShowKeyboardShortcuts(false)} className="p-2 hover:shadow-md hover:-translate-y-0.5 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowKeyboardShortcuts(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -3542,7 +3541,7 @@ ${svgElements}
                     3D
                   </button>
                 </div>
-                <button onClick={() => setShowPreviewModal(false)} className="p-2 hover:shadow-md hover:-translate-y-0.5 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
+                <button onClick={() => setShowPreviewModal(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -3661,7 +3660,7 @@ ${svgElements}
                       className={`h-8 min-w-[2.5rem] px-3 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
                         shirtSize === s 
                           ? 'bg-ci-blue text-white shadow-md scale-105' 
-                          : 'bg-slate-100 text-slate-600 hover:shadow-md hover:-translate-y-0.5'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
                       {s}
@@ -3679,7 +3678,7 @@ ${svgElements}
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={() => { setShowPreviewModal(false); setShowExportModal(true); }} 
-                    className="px-4 py-2 bg-slate-100 hover:shadow-md hover:-translate-y-0.5 text-slate-700 rounded-lg font-medium text-sm transition-all flex items-center gap-2"
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium text-sm transition-all flex items-center gap-2"
                   >
                     <Download className="w-4 h-4" />
                     <span>ดาวน์โหลด</span>
@@ -3709,7 +3708,7 @@ ${svgElements}
                   <p className="text-xs text-slate-500">เลือกสินค้าที่ต้องการออกแบบ</p>
                 </div>
               </div>
-              <button onClick={() => setShowProductModal(false)} className="p-2 hover:shadow-md hover:-translate-y-0.5 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowProductModal(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -3793,12 +3792,12 @@ ${svgElements}
                   <p className="text-xs text-slate-400">เลือกรูปแบบที่ต้องการ</p>
                 </div>
               </div>
-              <button onClick={() => setShowExportModal(false)} className="p-2 hover:shadow-md hover:-translate-y-0.5 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowExportModal(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-6 space-y-3">
-              <button onClick={() => { exportAsPNG(); setShowExportModal(false); }} className="w-full flex items-center gap-4 p-4 border-2 border-slate-200 rounded-xl hover:border-ci-blue hover:shadow-md hover:-translate-y-0.5 transition-all group">
+              <button onClick={() => { exportAsPNG(); setShowExportModal(false); }} className="w-full flex items-center gap-4 p-4 border-2 border-slate-200 rounded-xl hover:border-ci-blue hover:bg-blue-50 transition-all group">
                 <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-green-500/30">
                   PNG
                 </div>
@@ -3809,7 +3808,7 @@ ${svgElements}
                 <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-ci-blue" />
               </button>
 
-              <button onClick={() => { exportAsJPG(); setShowExportModal(false); }} className="w-full flex items-center gap-4 p-4 border-2 border-slate-200 rounded-xl hover:border-ci-blue hover:shadow-md hover:-translate-y-0.5 transition-all group">
+              <button onClick={() => { exportAsJPG(); setShowExportModal(false); }} className="w-full flex items-center gap-4 p-4 border-2 border-slate-200 rounded-xl hover:border-ci-blue hover:bg-blue-50 transition-all group">
                 <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-orange-500/30">
                   JPG
                 </div>
@@ -3820,7 +3819,7 @@ ${svgElements}
                 <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-ci-blue" />
               </button>
 
-              <button onClick={() => { exportAsSVG(); setShowExportModal(false); }} className="w-full flex items-center gap-4 p-4 border-2 border-slate-200 rounded-xl hover:border-ci-blue hover:shadow-md hover:-translate-y-0.5 transition-all group">
+              <button onClick={() => { exportAsSVG(); setShowExportModal(false); }} className="w-full flex items-center gap-4 p-4 border-2 border-slate-200 rounded-xl hover:border-ci-blue hover:bg-blue-50 transition-all group">
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-violet-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-purple-500/30">
                   SVG
                 </div>
@@ -3831,7 +3830,7 @@ ${svgElements}
                 <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-ci-blue" />
               </button>
 
-              <button onClick={() => { exportAsPDF(); setShowExportModal(false); }} className="w-full flex items-center gap-4 p-4 border-2 border-slate-200 rounded-xl hover:border-ci-blue hover:shadow-md hover:-translate-y-0.5 transition-all group">
+              <button onClick={() => { exportAsPDF(); setShowExportModal(false); }} className="w-full flex items-center gap-4 p-4 border-2 border-slate-200 rounded-xl hover:border-ci-blue hover:bg-blue-50 transition-all group">
                 <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-rose-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-red-500/30">
                   PDF
                 </div>
