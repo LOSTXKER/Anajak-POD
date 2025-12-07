@@ -3381,20 +3381,23 @@ ${svgElements}
                           <div className="bg-white rounded-2xl p-6 border border-slate-200">
                              <h4 className="font-bold text-slate-900 mb-4">รายละเอียดค่าสกรีน</h4>
                              <div className="space-y-2">
-                                {clusterPrices.map((cp, idx) => (
-                                   <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                                      <div className="flex items-center gap-2">
-                                         <div className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-pink-500' : 'bg-slate-400'}`} />
-                                         <div>
-                                            <p className="text-sm font-medium text-slate-700">
-                                               {idx === 0 ? 'จุดแรก' : 'จุดถัดไป'} ({cp.tier.size})
-                                            </p>
-                                            <p className="text-xs text-slate-500">{cp.elementsTotalAreaCm2.toFixed(1)} cm²</p>
+                                {clusterPrices.map((cp, idx) => {
+                                   const areaCm2 = (cp.bbox.widthCm * cp.bbox.heightCm).toFixed(1);
+                                   return (
+                                      <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                         <div className="flex items-center gap-2">
+                                            <div className={`w-2 h-2 rounded-full ${cp.isFirstPoint ? 'bg-pink-500' : 'bg-slate-400'}`} />
+                                            <div>
+                                               <p className="text-sm font-medium text-slate-700">
+                                                  {cp.isFirstPoint ? 'จุดแรก' : 'จุดถัดไป'} ({cp.tier.size})
+                                               </p>
+                                               <p className="text-xs text-slate-500">{areaCm2} cm²</p>
+                                            </div>
                                          </div>
+                                         <span className="font-bold text-slate-900">฿{cp.totalPrice}</span>
                                       </div>
-                                      <span className="font-bold text-slate-900">฿{cp.totalPrice}</span>
-                                   </div>
-                                ))}
+                                   );
+                                })}
                                 <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border-t-2 border-blue-200 mt-2">
                                    <span className="font-bold text-blue-900">รวมค่าสกรีน</span>
                                    <span className="font-bold text-blue-900 text-lg">฿{printingPrice}</span>
