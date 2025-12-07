@@ -172,7 +172,7 @@ export default function CheckoutClient() {
             </Link>
             <Link 
               href="/catalog" 
-              className="py-4 px-6 bg-ci-blue text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 text-center flex items-center justify-center gap-2"
+              className="py-4 px-6 bg-ci-blue text-white font-bold rounded-2xl hover:bg-ci-blueDark transition-all shadow-lg shadow-blue-200 text-center flex items-center justify-center gap-2"
             >
               สั่งทำเพิ่ม
               <ArrowRight className="w-5 h-5" />
@@ -499,7 +499,7 @@ export default function CheckoutClient() {
               
               <button 
                 onClick={handleNextStep}
-                className="px-8 sm:px-12 py-4 bg-ci-blue text-white font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center gap-2"
+                className="px-8 sm:px-12 py-4 bg-ci-blue text-white font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-ci-blueDark transition-all flex items-center gap-2"
               >
                 {currentStep === 3 ? 'ยืนยันการชำระเงิน' : 'ขั้นตอนถัดไป'}
                 <ChevronRight className="w-5 h-5" />

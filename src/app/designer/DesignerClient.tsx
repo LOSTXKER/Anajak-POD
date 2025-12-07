@@ -2457,7 +2457,7 @@ ${svgElements}
               
               <Divider />
               
-              <button onClick={handleSaveClick} className="h-9 px-5 bg-ci-blue hover:bg-blue-700 text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2">
+              <button onClick={handleSaveClick} className="h-9 px-5 bg-ci-blue hover:bg-ci-blueDark text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2">
                  <span>ถัดไป</span>
                  <ChevronRight className="w-4 h-4" />
               </button>
@@ -3437,7 +3437,7 @@ ${svgElements}
                        <div className="space-y-3">
                           <button 
                              onClick={() => handleFinalSave('cart')} 
-                             className="w-full h-12 bg-ci-blue text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-ci-blue/30"
+                             className="w-full h-12 bg-ci-blue text-white rounded-xl font-bold text-sm hover:bg-ci-blueDark transition-all flex items-center justify-center gap-2 shadow-lg shadow-ci-blue/30"
                           >
                              <ShoppingCart className="w-5 h-5" />
                              บันทึกและใส่ตะกร้า
@@ -3664,7 +3664,7 @@ ${svgElements}
                     <Download className="w-4 h-4" />
                     <span>ดาวน์โหลด</span>
                   </button>
-                  <button onClick={() => setShowPreviewModal(false)} className="px-6 py-2 bg-ci-blue text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition-all">
+                  <button onClick={() => setShowPreviewModal(false)} className="px-6 py-2 bg-ci-blue text-white rounded-lg font-bold text-sm hover:bg-ci-blueDark transition-all">
                     ปิด
                   </button>
                 </div>
@@ -3751,7 +3751,7 @@ ${svgElements}
               </p>
               <button 
                 onClick={() => setShowProductModal(false)} 
-                className="px-6 py-2 bg-ci-blue text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition-all"
+                className="px-6 py-2 bg-ci-blue text-white rounded-lg font-bold text-sm hover:bg-ci-blueDark transition-all"
               >
                 ยืนยัน
               </button>

@@ -300,7 +300,7 @@ export default function DashboardClient({ stats, topProducts }: DashboardProps) 
               ))}
             </div>
             
-            <button className="w-full mt-6 py-3 text-sm font-bold bg-ci-blue text-white border border-ci-blue/10 rounded-xl hover:bg-blue-700 transition-all">
+            <button className="w-full mt-6 py-3 text-sm font-bold bg-ci-blue text-white border border-ci-blue/10 rounded-xl hover:bg-ci-blueDark transition-all">
               ดูรายงานฉบับเต็ม
             </button>
           </div>

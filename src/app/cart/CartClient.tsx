@@ -100,7 +100,7 @@ export default function CartClient() {
           <p className="text-slate-500 mb-10 text-lg">คุณยังไม่มีสินค้าในตะกร้า</p>
           <Link 
             href="/catalog" 
-            className="px-10 py-4 bg-ci-blue text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 flex items-center gap-2"
+            className="px-10 py-4 bg-ci-blue text-white font-bold rounded-2xl hover:bg-ci-blueDark transition-all shadow-lg shadow-blue-200 flex items-center gap-2"
           >
             เริ่มออกแบบสินค้า
             <ArrowRight className="w-5 h-5" />
@@ -274,7 +274,7 @@ export default function CartClient() {
               {/* Checkout Button */}
               <button
                 onClick={() => router.push('/checkout')}
-                className="w-full py-4 bg-ci-blue text-white font-bold rounded-2xl hover:bg-blue-700 transition-all flex items-center justify-center gap-3 shadow-lg shadow-blue-200 text-lg"
+                className="w-full py-4 bg-ci-blue text-white font-bold rounded-2xl hover:bg-ci-blueDark transition-all flex items-center justify-center gap-3 shadow-lg shadow-blue-200 text-lg"
               >
                 ดำเนินการต่อ
                 <ChevronRight className="w-5 h-5" />
