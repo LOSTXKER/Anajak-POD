@@ -4,23 +4,17 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
-  Check, CreditCard, MapPin, Truck, ChevronLeft, ShieldCheck, QrCode, 
-  Wallet, Package, ShoppingCart, ChevronRight, User, Phone, Home,
-  Building, Mail, Sparkles, PartyPopper, ArrowRight
+  Check, CreditCard, ChevronLeft, ShieldCheck, QrCode, 
+  Wallet, Truck, ChevronRight, User, Home,
+  Sparkles, PartyPopper, ArrowRight, Package
 } from 'lucide-react';
-
-const STEPS = [
-  { id: 1, label: 'ตะกร้า', icon: ShoppingCart },
-  { id: 2, label: 'ที่อยู่จัดส่ง', icon: Package },
-  { id: 3, label: 'ชำระเงิน', icon: Wallet },
-  { id: 4, label: 'เสร็จสิ้น', icon: Check },
-];
+import DashboardLayout from '../../components/DashboardLayout';
 
 export default function CheckoutClient() {
   const router = useRouter();
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentStep, setCurrentStep] = useState(2); // Start at shipping (step 2)
+  const [currentStep, setCurrentStep] = useState(1); // 1: Shipping, 2: Payment, 3: Success
   
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', phone: '', email: '',
@@ -34,7 +28,7 @@ export default function CheckoutClient() {
     const savedCart = localStorage.getItem('anajak_cart');
     if (savedCart) {
       setCartItems(JSON.parse(savedCart));
-    } else if (currentStep !== 4) {
+    } else if (currentStep !== 3) {
       router.push('/cart');
     }
     setLoading(false);
@@ -46,19 +40,19 @@ export default function CheckoutClient() {
   const total = subtotal + shipping;
 
   const handleNextStep = () => {
-    if (currentStep === 2) {
+    if (currentStep === 1) {
       if (!formData.firstName || !formData.address || !formData.phone || !formData.city || !formData.postalCode) {
         alert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
         return;
       }
-      setCurrentStep(3);
+      setCurrentStep(2);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (currentStep === 3) {
+    } else if (currentStep === 2) {
       setIsProcessing(true);
       setTimeout(() => {
         localStorage.removeItem('anajak_cart');
         window.dispatchEvent(new Event('cart-update'));
-        setCurrentStep(4);
+        setCurrentStep(3);
         setIsProcessing(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }, 2000);
@@ -67,57 +61,45 @@ export default function CheckoutClient() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
-        <div className="w-12 h-12 border-4 border-ci-blue border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-slate-500 font-medium">กำลังโหลด...</p>
-      </div>
+      <DashboardLayout title="ชำระเงิน" showCreateButton={false}>
+        <div className="min-h-[60vh] flex flex-col items-center justify-center">
+          <div className="w-10 h-10 border-4 border-ci-blue border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-slate-500 font-medium">กำลังโหลด...</p>
+        </div>
+      </DashboardLayout>
     );
   }
 
   // Success Page
-  if (currentStep === 4) {
+  if (currentStep === 3) {
     const orderId = `ORD-${Date.now().toString().slice(-8)}`;
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
-        {/* Header */}
-        <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="h-16 flex items-center justify-center">
-              <Link href="/dashboard" className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-ci-blue to-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-200">
-                  A
-                </div>
-                <span className="font-bold text-xl text-slate-800">Anajak</span>
-              </Link>
-            </div>
-          </div>
-        </header>
-
-        <main className="max-w-2xl mx-auto px-4 py-12 sm:py-20">
-          <div className="text-center mb-10">
+      <DashboardLayout title="สั่งซื้อสำเร็จ" showCreateButton={false}>
+        <div className="max-w-2xl mx-auto py-8">
+          <div className="text-center mb-8">
             {/* Success Animation */}
-            <div className="relative inline-block mb-8">
-              <div className="w-28 h-28 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white shadow-2xl shadow-green-200 animate-in zoom-in duration-500">
-                <Check className="w-14 h-14" strokeWidth={3} />
+            <div className="relative inline-block mb-6">
+              <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white shadow-xl shadow-green-200">
+                <Check className="w-12 h-12" strokeWidth={3} />
               </div>
               <div className="absolute -top-2 -right-2">
-                <Sparkles className="w-8 h-8 text-yellow-400 animate-pulse" />
+                <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
               </div>
               <div className="absolute -bottom-1 -left-3">
-                <PartyPopper className="w-7 h-7 text-pink-400" />
+                <PartyPopper className="w-5 h-5 text-pink-400" />
               </div>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-3">🎉 สั่งซื้อสำเร็จ!</h1>
-            <p className="text-slate-500 text-lg mb-2">ขอบคุณสำหรับการสั่งซื้อ</p>
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-slate-200">
-              <span className="text-slate-500">หมายเลขคำสั่งซื้อ:</span>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">🎉 สั่งซื้อสำเร็จ!</h1>
+            <p className="text-slate-500 mb-2">ขอบคุณสำหรับการสั่งซื้อ</p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full">
+              <span className="text-slate-500 text-sm">หมายเลขคำสั่งซื้อ:</span>
               <span className="font-mono font-bold text-ci-blue">{orderId}</span>
             </div>
           </div>
 
           {/* Order Details Card */}
-          <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden mb-8 animate-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6">
             {/* Shipping Info */}
             <div className="p-6 border-b border-slate-100">
               <div className="flex items-center gap-3 mb-4">
@@ -156,7 +138,7 @@ export default function CheckoutClient() {
               </div>
               <div className="flex justify-between items-center pt-4 border-t border-slate-100">
                 <span className="font-bold text-slate-800">ยอดรวมทั้งหมด</span>
-                <span className="text-2xl font-bold text-green-600">฿{total.toLocaleString()}</span>
+                <span className="text-xl font-bold text-green-600">฿{total.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -165,21 +147,21 @@ export default function CheckoutClient() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Link 
               href="/orders" 
-              className="py-4 px-6 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-2xl hover:shadow-lg hover:-translate-y-0.5 transition-all text-center flex items-center justify-center gap-2"
+              className="py-3.5 px-6 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all text-center flex items-center justify-center gap-2"
             >
               <Package className="w-5 h-5" />
               ติดตามคำสั่งซื้อ
             </Link>
             <Link 
               href="/catalog" 
-              className="py-4 px-6 bg-ci-blue text-white font-bold rounded-2xl hover:bg-ci-blueDark transition-all shadow-lg shadow-blue-200 text-center flex items-center justify-center gap-2"
+              className="py-3.5 px-6 bg-ci-blue text-white font-bold rounded-xl hover:bg-ci-blueDark transition-all shadow-lg shadow-blue-200 text-center flex items-center justify-center gap-2"
             >
               สั่งทำเพิ่ม
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
-        </main>
-      </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -187,73 +169,26 @@ export default function CheckoutClient() {
   if (isProcessing) {
     return (
       <div className="fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
-        <div className="w-20 h-20 border-4 border-ci-blue border-t-transparent rounded-full animate-spin mb-6"></div>
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">กำลังดำเนินการ</h2>
+        <div className="w-16 h-16 border-4 border-ci-blue border-t-transparent rounded-full animate-spin mb-6"></div>
+        <h2 className="text-xl font-bold text-slate-800 mb-2">กำลังดำเนินการ</h2>
         <p className="text-slate-500">กรุณารอสักครู่...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/50 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-16 flex items-center justify-between">
-            <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-ci-blue to-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-200">
-                A
-              </div>
-              <span className="font-bold text-xl text-slate-800 hidden sm:block">Anajak</span>
-            </Link>
-
-            {/* Stepper */}
-            <div className="flex items-center gap-1 sm:gap-2">
-              {STEPS.map((step, i) => {
-                const isActive = step.id === currentStep;
-                const isCompleted = step.id < currentStep;
-                const Icon = step.icon;
-                return (
-                  <div key={step.id} className="flex items-center">
-                    {i > 0 && <div className={`w-4 sm:w-8 h-0.5 ${isCompleted ? 'bg-green-500' : 'bg-slate-200'}`} />}
-                    <div className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full transition-all ${
-                      isActive ? 'bg-ci-blue text-white' : isCompleted ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-400'
-                    }`}>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        isActive ? 'bg-white/20' : isCompleted ? 'bg-white/20' : ''
-                      }`}>
-                        {isCompleted ? <Check className="w-3.5 h-3.5" /> : <Icon className="w-3.5 h-3.5" />}
-                      </div>
-                      <span className="text-xs font-bold hidden sm:inline">{step.label}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="w-10" />
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Title */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">
-            {currentStep === 2 ? 'ที่อยู่จัดส่ง' : 'ชำระเงิน'}
-          </h1>
-          <p className="text-slate-500">
-            {currentStep === 2 ? 'กรอกข้อมูลสำหรับจัดส่งสินค้า' : 'เลือกวิธีการชำระเงิน'}
-          </p>
-        </div>
-
+    <DashboardLayout 
+      title={currentStep === 1 ? 'ที่อยู่จัดส่ง' : 'ชำระเงิน'} 
+      subtitle={currentStep === 1 ? 'กรอกข้อมูลสำหรับจัดส่งสินค้า' : 'เลือกวิธีการชำระเงิน'}
+      showCreateButton={false}
+    >
+      <div className="max-w-6xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Form */}
           <div className="flex-1">
-            {/* Step 2: Shipping */}
-            {currentStep === 2 && (
-              <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+            {/* Step 1: Shipping */}
+            {currentStep === 1 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="p-6 sm:p-8">
                   {/* Contact Info */}
                   <div className="mb-8">
@@ -269,7 +204,7 @@ export default function CheckoutClient() {
                         <label className="text-sm font-bold text-slate-700">ชื่อ *</label>
                         <input 
                           type="text" 
-                          className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
+                          className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
                           placeholder="ชื่อ"
                           value={formData.firstName} 
                           onChange={e => setFormData({...formData, firstName: e.target.value})} 
@@ -279,7 +214,7 @@ export default function CheckoutClient() {
                         <label className="text-sm font-bold text-slate-700">นามสกุล</label>
                         <input 
                           type="text" 
-                          className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
+                          className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
                           placeholder="นามสกุล"
                           value={formData.lastName} 
                           onChange={e => setFormData({...formData, lastName: e.target.value})} 
@@ -289,7 +224,7 @@ export default function CheckoutClient() {
                         <label className="text-sm font-bold text-slate-700">เบอร์โทรศัพท์ *</label>
                         <input 
                           type="tel" 
-                          className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
+                          className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
                           placeholder="08x-xxx-xxxx"
                           value={formData.phone} 
                           onChange={e => setFormData({...formData, phone: e.target.value})} 
@@ -299,7 +234,7 @@ export default function CheckoutClient() {
                         <label className="text-sm font-bold text-slate-700">อีเมล</label>
                         <input 
                           type="email" 
-                          className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
+                          className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
                           placeholder="email@example.com"
                           value={formData.email} 
                           onChange={e => setFormData({...formData, email: e.target.value})} 
@@ -321,7 +256,7 @@ export default function CheckoutClient() {
                       <div className="space-y-2">
                         <label className="text-sm font-bold text-slate-700">ที่อยู่ (บ้านเลขที่, ถนน, ซอย) *</label>
                         <textarea 
-                          className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all h-24 resize-none" 
+                          className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all h-20 resize-none" 
                           placeholder="บ้านเลขที่ 123, ซอย xxx, ถนน xxx"
                           value={formData.address} 
                           onChange={e => setFormData({...formData, address: e.target.value})}
@@ -332,7 +267,7 @@ export default function CheckoutClient() {
                           <label className="text-sm font-bold text-slate-700">แขวง/ตำบล</label>
                           <input 
                             type="text" 
-                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
                             placeholder="แขวง/ตำบล"
                             value={formData.subdistrict} 
                             onChange={e => setFormData({...formData, subdistrict: e.target.value})} 
@@ -342,7 +277,7 @@ export default function CheckoutClient() {
                           <label className="text-sm font-bold text-slate-700">เขต/อำเภอ</label>
                           <input 
                             type="text" 
-                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
                             placeholder="เขต/อำเภอ"
                             value={formData.district} 
                             onChange={e => setFormData({...formData, district: e.target.value})} 
@@ -354,7 +289,7 @@ export default function CheckoutClient() {
                           <label className="text-sm font-bold text-slate-700">จังหวัด *</label>
                           <input 
                             type="text" 
-                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
                             placeholder="จังหวัด"
                             value={formData.city} 
                             onChange={e => setFormData({...formData, city: e.target.value})} 
@@ -364,7 +299,7 @@ export default function CheckoutClient() {
                           <label className="text-sm font-bold text-slate-700">รหัสไปรษณีย์ *</label>
                           <input 
                             type="text" 
-                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue outline-none transition-all" 
                             placeholder="10xxx"
                             value={formData.postalCode} 
                             onChange={e => setFormData({...formData, postalCode: e.target.value})} 
@@ -377,11 +312,11 @@ export default function CheckoutClient() {
               </div>
             )}
 
-            {/* Step 3: Payment */}
-            {currentStep === 3 && (
+            {/* Step 2: Payment */}
+            {currentStep === 2 && (
               <div className="space-y-6">
                 {/* Payment Methods */}
-                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                   <div className="p-6 sm:p-8">
                     <div className="flex items-center gap-3 mb-6">
                       <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -392,10 +327,10 @@ export default function CheckoutClient() {
 
                     <div className="space-y-4">
                       {/* PromptPay */}
-                      <label className={`flex items-center p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                      <label className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all ${
                         paymentMethod === 'promptpay' 
                           ? 'border-ci-blue bg-blue-50/50 ring-2 ring-ci-blue/20' 
-                          : 'border-slate-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5'
+                          : 'border-slate-200 hover:border-slate-300'
                       }`}>
                         <input 
                           type="radio" 
@@ -405,19 +340,19 @@ export default function CheckoutClient() {
                           onChange={() => setPaymentMethod('promptpay')} 
                         />
                         <div className="ml-4 flex-1">
-                          <span className="block font-bold text-slate-800 text-lg">สแกนจ่าย PromptPay</span>
+                          <span className="block font-bold text-slate-800">สแกนจ่าย PromptPay</span>
                           <span className="text-sm text-slate-500">ฟรีค่าธรรมเนียม • ยืนยันทันที</span>
                         </div>
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white">
-                          <QrCode className="w-6 h-6" />
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white">
+                          <QrCode className="w-5 h-5" />
                         </div>
                       </label>
 
                       {/* Credit Card */}
-                      <label className={`flex items-center p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                      <label className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all ${
                         paymentMethod === 'credit' 
                           ? 'border-ci-blue bg-blue-50/50 ring-2 ring-ci-blue/20' 
-                          : 'border-slate-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5'
+                          : 'border-slate-200 hover:border-slate-300'
                       }`}>
                         <input 
                           type="radio" 
@@ -427,28 +362,28 @@ export default function CheckoutClient() {
                           onChange={() => setPaymentMethod('credit')} 
                         />
                         <div className="ml-4 flex-1">
-                          <span className="block font-bold text-slate-800 text-lg">บัตรเครดิต / เดบิต</span>
+                          <span className="block font-bold text-slate-800">บัตรเครดิต / เดบิต</span>
                           <span className="text-sm text-slate-500">Visa, Mastercard, JCB</span>
                         </div>
-                        <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center text-white">
-                          <CreditCard className="w-6 h-6" />
+                        <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center text-white">
+                          <CreditCard className="w-5 h-5" />
                         </div>
                       </label>
                     </div>
                   </div>
                 </div>
 
-                {/* QR Code / Payment Details */}
+                {/* QR Code */}
                 {paymentMethod === 'promptpay' && (
-                  <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                  <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <div className="p-6 sm:p-8 text-center">
                       <h3 className="font-bold text-slate-800 mb-6">สแกน QR Code เพื่อชำระเงิน</h3>
-                      <div className="w-48 h-48 bg-slate-100 mx-auto mb-6 p-4 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center">
-                        <QrCode className="w-28 h-28 text-slate-400" />
+                      <div className="w-40 h-40 bg-slate-100 mx-auto mb-4 p-4 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center">
+                        <QrCode className="w-24 h-24 text-slate-400" />
                       </div>
-                      <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-50 to-green-50 rounded-2xl">
+                      <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl">
                         <span className="text-slate-600">ยอดที่ต้องชำระ:</span>
-                        <span className="text-2xl font-bold text-ci-blue">฿{total.toLocaleString()}</span>
+                        <span className="text-xl font-bold text-ci-blue">฿{total.toLocaleString()}</span>
                       </div>
                       <p className="text-sm text-slate-400 mt-4">QR Code จะหมดอายุใน 15 นาที</p>
                     </div>
@@ -456,7 +391,7 @@ export default function CheckoutClient() {
                 )}
 
                 {/* Shipping Address Preview */}
-                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -466,7 +401,7 @@ export default function CheckoutClient() {
                         <h3 className="font-bold text-slate-800">ที่อยู่จัดส่ง</h3>
                       </div>
                       <button 
-                        onClick={() => setCurrentStep(2)} 
+                        onClick={() => setCurrentStep(1)} 
                         className="text-ci-blue text-sm font-medium hover:underline"
                       >
                         แก้ไข
@@ -488,10 +423,10 @@ export default function CheckoutClient() {
             )}
 
             {/* Navigation */}
-            <div className="mt-8 flex justify-between">
+            <div className="mt-6 flex justify-between">
               <button 
-                onClick={() => currentStep === 2 ? router.push('/cart') : setCurrentStep(2)}
-                className="px-6 py-3 text-slate-500 font-bold hover:text-slate-800 flex items-center gap-2 hover:bg-white rounded-xl transition-all"
+                onClick={() => currentStep === 1 ? router.push('/cart') : setCurrentStep(1)}
+                className="px-5 py-2.5 text-slate-500 font-bold hover:text-slate-800 flex items-center gap-2 hover:bg-slate-100 rounded-xl transition-all"
               >
                 <ChevronLeft className="w-5 h-5" />
                 ย้อนกลับ
@@ -499,24 +434,24 @@ export default function CheckoutClient() {
               
               <button 
                 onClick={handleNextStep}
-                className="px-8 sm:px-12 py-4 bg-ci-blue text-white font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-ci-blueDark transition-all flex items-center gap-2"
+                className="px-8 py-3 bg-ci-blue text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:bg-ci-blueDark transition-all flex items-center gap-2"
               >
-                {currentStep === 3 ? 'ยืนยันการชำระเงิน' : 'ขั้นตอนถัดไป'}
+                {currentStep === 2 ? 'ยืนยันการชำระเงิน' : 'ขั้นตอนถัดไป'}
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
           </div>
 
           {/* Order Summary Sidebar */}
-          <div className="lg:w-[400px] flex-shrink-0">
-            <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-100 sticky top-24">
-              <h3 className="font-bold text-slate-800 text-xl mb-6">สรุปคำสั่งซื้อ</h3>
+          <div className="lg:w-96 flex-shrink-0">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 sticky top-6">
+              <h3 className="font-bold text-slate-800 text-lg mb-6">สรุปคำสั่งซื้อ</h3>
               
               {/* Items List */}
-              <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-3 mb-6 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                 {cartItems.map((item) => (
-                  <div key={item.id} className="flex gap-4 p-3 bg-slate-50 rounded-xl">
-                    <div className="w-14 h-14 bg-white rounded-lg border border-slate-200 flex-shrink-0 overflow-hidden">
+                  <div key={item.id} className="flex gap-3 p-2.5 bg-slate-50 rounded-xl">
+                    <div className="w-12 h-12 bg-white rounded-lg border border-slate-200 flex-shrink-0 overflow-hidden">
                       <img src={item.previewImage} className="w-full h-full object-contain mix-blend-multiply p-1" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -530,23 +465,23 @@ export default function CheckoutClient() {
               </div>
 
               {/* Price Breakdown */}
-              <div className="border-t border-slate-100 pt-4 space-y-3 mb-6">
-                <div className="flex justify-between text-slate-600">
+              <div className="border-t border-slate-100 pt-4 space-y-2 mb-4">
+                <div className="flex justify-between text-slate-600 text-sm">
                   <span>ยอดรวมสินค้า ({totalItems} ชิ้น)</span>
                   <span>฿{subtotal.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-slate-600">
+                <div className="flex justify-between text-slate-600 text-sm">
                   <span>ค่าจัดส่ง</span>
                   <span>฿{shipping.toLocaleString()}</span>
                 </div>
               </div>
 
               {/* Total */}
-              <div className="bg-gradient-to-r from-ci-blue to-blue-600 p-5 rounded-2xl text-white mb-6">
+              <div className="bg-gradient-to-r from-ci-blue to-blue-600 p-4 rounded-xl text-white mb-4">
                 <div className="flex justify-between items-end">
                   <div>
                     <span className="text-blue-200 text-sm">ยอดที่ต้องชำระ</span>
-                    <p className="text-3xl font-bold">฿{total.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">฿{total.toLocaleString()}</p>
                   </div>
                 </div>
               </div>
@@ -566,7 +501,7 @@ export default function CheckoutClient() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
