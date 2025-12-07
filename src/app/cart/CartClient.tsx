@@ -3,8 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, ChevronRight } from 'lucide-react';
+import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, ChevronRight, Check, ShoppingCart, MapPin, CreditCard, CheckCircle } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
+
+const CHECKOUT_STEPS = [
+  { id: 1, label: 'ตะกร้า', icon: ShoppingCart },
+  { id: 2, label: 'ที่อยู่จัดส่ง', icon: MapPin },
+  { id: 3, label: 'ชำระเงิน', icon: CreditCard },
+  { id: 4, label: 'เสร็จสิ้น', icon: CheckCircle },
+];
 
 interface CartItem {
   id: string;
@@ -91,6 +98,40 @@ export default function CartClient() {
 
   return (
     <DashboardLayout title="ตะกร้าสินค้า" subtitle={`${totalItems} รายการ`} showCreateButton={false}>
+      {/* Progress Bar */}
+      <div className="max-w-3xl mx-auto mb-8">
+        <div className="flex items-center justify-between">
+          {CHECKOUT_STEPS.map((step, i) => {
+            const isActive = step.id === 1;
+            const isCompleted = step.id < 1;
+            const Icon = step.icon;
+            return (
+              <div key={step.id} className="flex items-center flex-1">
+                <div className="flex flex-col items-center flex-1">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
+                    isActive 
+                      ? 'bg-ci-blue text-white shadow-lg shadow-blue-200' 
+                      : isCompleted 
+                        ? 'bg-green-500 text-white' 
+                        : 'bg-slate-100 text-slate-400'
+                  }`}>
+                    {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+                  </div>
+                  <span className={`text-xs font-medium ${
+                    isActive ? 'text-ci-blue' : isCompleted ? 'text-green-600' : 'text-slate-400'
+                  }`}>{step.label}</span>
+                </div>
+                {i < CHECKOUT_STEPS.length - 1 && (
+                  <div className={`h-1 flex-1 mx-2 rounded-full -mt-6 ${
+                    step.id < 1 ? 'bg-green-500' : 'bg-slate-200'
+                  }`} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Cart Items */}

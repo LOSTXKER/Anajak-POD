@@ -6,9 +6,16 @@ import Link from 'next/link';
 import { 
   Check, CreditCard, ChevronLeft, ShieldCheck, QrCode, 
   Wallet, Truck, ChevronRight, User, Home,
-  Sparkles, PartyPopper, ArrowRight, Package
+  Sparkles, PartyPopper, ArrowRight, Package, ShoppingCart, MapPin, CheckCircle
 } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
+
+const CHECKOUT_STEPS = [
+  { id: 1, label: 'ตะกร้า', icon: ShoppingCart },
+  { id: 2, label: 'ที่อยู่จัดส่ง', icon: MapPin },
+  { id: 3, label: 'ชำระเงิน', icon: CreditCard },
+  { id: 4, label: 'เสร็จสิ้น', icon: CheckCircle },
+];
 
 export default function CheckoutClient() {
   const router = useRouter();
@@ -75,7 +82,29 @@ export default function CheckoutClient() {
     const orderId = `ORD-${Date.now().toString().slice(-8)}`;
     return (
       <DashboardLayout title="สั่งซื้อสำเร็จ" showCreateButton={false}>
-        <div className="max-w-2xl mx-auto py-8">
+        {/* Progress Bar - All Complete */}
+        <div className="max-w-3xl mx-auto mb-8">
+          <div className="flex items-center justify-between">
+            {CHECKOUT_STEPS.map((step, i) => {
+              const Icon = step.icon;
+              return (
+                <div key={step.id} className="flex items-center flex-1">
+                  <div className="flex flex-col items-center flex-1">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2 bg-green-500 text-white">
+                      <Check className="w-5 h-5" />
+                    </div>
+                    <span className="text-xs font-medium text-green-600">{step.label}</span>
+                  </div>
+                  {i < CHECKOUT_STEPS.length - 1 && (
+                    <div className="h-1 flex-1 mx-2 rounded-full -mt-6 bg-green-500" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="max-w-2xl mx-auto py-4">
           <div className="text-center mb-8">
             {/* Success Animation */}
             <div className="relative inline-block mb-6">
@@ -176,12 +205,49 @@ export default function CheckoutClient() {
     );
   }
 
+  // Map currentStep (1=shipping, 2=payment) to checkout step (2, 3)
+  const activeStep = currentStep + 1;
+
   return (
     <DashboardLayout 
       title={currentStep === 1 ? 'ที่อยู่จัดส่ง' : 'ชำระเงิน'} 
       subtitle={currentStep === 1 ? 'กรอกข้อมูลสำหรับจัดส่งสินค้า' : 'เลือกวิธีการชำระเงิน'}
       showCreateButton={false}
     >
+      {/* Progress Bar */}
+      <div className="max-w-3xl mx-auto mb-8">
+        <div className="flex items-center justify-between">
+          {CHECKOUT_STEPS.map((step, i) => {
+            const isActive = step.id === activeStep;
+            const isCompleted = step.id < activeStep;
+            const Icon = step.icon;
+            return (
+              <div key={step.id} className="flex items-center flex-1">
+                <div className="flex flex-col items-center flex-1">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
+                    isActive 
+                      ? 'bg-ci-blue text-white shadow-lg shadow-blue-200' 
+                      : isCompleted 
+                        ? 'bg-green-500 text-white' 
+                        : 'bg-slate-100 text-slate-400'
+                  }`}>
+                    {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+                  </div>
+                  <span className={`text-xs font-medium ${
+                    isActive ? 'text-ci-blue' : isCompleted ? 'text-green-600' : 'text-slate-400'
+                  }`}>{step.label}</span>
+                </div>
+                {i < CHECKOUT_STEPS.length - 1 && (
+                  <div className={`h-1 flex-1 mx-2 rounded-full -mt-6 ${
+                    step.id < activeStep ? 'bg-green-500' : 'bg-slate-200'
+                  }`} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Form */}
