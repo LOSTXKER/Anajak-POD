@@ -2457,7 +2457,7 @@ ${svgElements}
               
               <Divider />
               
-              <button onClick={handleSaveClick} className="h-9 px-5 bg-ci-blue hover:bg-blue-600 text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2">
+              <button onClick={handleSaveClick} className="h-9 px-5 bg-ci-blue hover:bg-blue-700 text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-2">
                  <span>ถัดไป</span>
                  <ChevronRight className="w-4 h-4" />
               </button>
@@ -3683,7 +3683,7 @@ ${svgElements}
                     <Download className="w-4 h-4" />
                     <span>ดาวน์โหลด</span>
                   </button>
-                  <button onClick={() => setShowPreviewModal(false)} className="px-6 py-2 bg-ci-blue text-white rounded-lg font-bold text-sm hover:bg-blue-600 transition-all">
+                  <button onClick={() => setShowPreviewModal(false)} className="px-6 py-2 bg-ci-blue text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition-all">
                     ปิด
                   </button>
                 </div>
@@ -3770,7 +3770,7 @@ ${svgElements}
               </p>
               <button 
                 onClick={() => setShowProductModal(false)} 
-                className="px-6 py-2 bg-ci-blue text-white rounded-lg font-bold text-sm hover:bg-blue-600 transition-all"
+                className="px-6 py-2 bg-ci-blue text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition-all"
               >
                 ยืนยัน
               </button>

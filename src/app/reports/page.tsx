@@ -34,7 +34,7 @@ export default function ReportsPage() {
               <Calendar className="w-4 h-4 mr-2" />
               กำหนดเอง
             </button>
-            <button className="flex items-center px-4 py-2.5 bg-ci-blue text-white rounded-xl text-sm font-bold hover:bg-ci-blueDark transition-all shadow-lg shadow-ci-blue/20">
+            <button className="flex items-center px-4 py-2.5 bg-ci-blue text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-ci-blue/20">
               <Download className="w-4 h-4 mr-2" />
               Export CSV
             </button>

@@ -410,7 +410,7 @@ export default function TemplatesPage() {
                         </button>
                       </>
                     ) : (
-                      <button className="flex-1 py-2.5 bg-ci-blue text-white text-sm font-bold rounded-xl hover:bg-ci-blueDark shadow-lg shadow-ci-blue/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                      <button className="flex-1 py-2.5 bg-ci-blue text-white text-sm font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-ci-blue/20 transition-all flex items-center justify-center gap-2">
                         <ShoppingCart className="w-4 h-4" />
                         สั่งผลิตเลย
                       </button>

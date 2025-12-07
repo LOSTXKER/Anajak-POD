@@ -93,7 +93,7 @@ export default function AffiliatePage() {
                 <h3 className="text-2xl font-bold text-slate-800">฿2,450.00</h3>
               </div>
             </div>
-            <button className="w-full py-3 bg-ci-blue text-white rounded-xl font-bold text-sm hover:bg-ci-blueDark transition-all shadow-lg shadow-ci-blue/20">
+            <button className="w-full py-3 bg-ci-blue text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all shadow-lg shadow-ci-blue/20">
               แจ้งถอนเงิน
             </button>
           </div>
