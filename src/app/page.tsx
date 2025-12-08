@@ -1,440 +1,416 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { 
-  ArrowRight, Shirt, Palette, Truck, Star, Check, 
-  Sparkles, Zap, Shield, Users, ChevronRight,
-  Play, Menu, X
-} from 'lucide-react';
-
-const FEATURES = [
-  {
-    icon: Palette,
-    title: 'ออกแบบง่าย',
-    description: 'เครื่องมือออกแบบใช้งานง่าย ไม่ต้องมีประสบการณ์',
-    color: 'from-pink-500 to-rose-500',
-    shadow: 'shadow-pink-200',
-  },
-  {
-    icon: Shirt,
-    title: 'คุณภาพสูง',
-    description: 'เสื้อผ้าคุณภาพดี พิมพ์ด้วยเทคนิค DTF/DTG',
-    color: 'from-blue-500 to-cyan-500',
-    shadow: 'shadow-blue-200',
-  },
-  {
-    icon: Truck,
-    title: 'จัดส่งรวดเร็ว',
-    description: 'ผลิตและจัดส่งภายใน 3-5 วันทำการ',
-    color: 'from-green-500 to-emerald-500',
-    shadow: 'shadow-green-200',
-  },
-  {
-    icon: Shield,
-    title: 'รับประกันคุณภาพ',
-    description: 'ไม่พอใจยินดีคืนเงิน 100%',
-    color: 'from-purple-500 to-violet-500',
-    shadow: 'shadow-purple-200',
-  },
-];
-
-const TESTIMONIALS = [
-  {
-    name: 'คุณสมชาย',
-    role: 'เจ้าของร้าน Streetwear',
-    content: 'ใช้บริการมาหลายครั้ง คุณภาพดีมาก ลูกค้าชอบทุกคน',
-    avatar: '👨‍💼',
-    rating: 5,
-  },
-  {
-    name: 'คุณมานี',
-    role: 'นักออกแบบอิสระ',
-    content: 'ระบบใช้งานง่ายมาก แค่อัพโหลดรูปก็พิมพ์ได้เลย',
-    avatar: '👩‍🎨',
-    rating: 5,
-  },
-  {
-    name: 'คุณวิชัย',
-    role: 'จัดทำเสื้อทีม',
-    content: 'สั่งทำเสื้อทีมบริษัท 100 ตัว ส่งตรงเวลา คุณภาพเกินราคา',
-    avatar: '👨‍💻',
-    rating: 5,
-  },
-];
-
-const PRODUCTS = [
-  { name: 'เสื้อยืดคอกลม', price: 199, image: '/products/tshirt.png' },
-  { name: 'เสื้อโปโล', price: 299, image: '/products/polo.png' },
-  { name: 'เสื้อแขนยาว', price: 249, image: '/products/longsleeve.png' },
-];
+import Image from 'next/image';
+import { ArrowRight, CheckCircle2, ShoppingBag, Palette, Truck, Zap, Star, ShieldCheck, PlayCircle } from 'lucide-react';
+import LandingHeader from '@/components/LandingHeader';
+import LandingFooter from '@/components/LandingFooter';
 
 export default function LandingPage() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const [activeMode, setActiveMode] = useState<'seller' | 'personal'>('personal');
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/90 backdrop-blur-xl shadow-sm' : 'bg-transparent'
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-16 sm:h-20 flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-ci-blue to-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-200">
-                A
-              </div>
-              <span className="font-bold text-xl text-slate-800">Anajak POD</span>
-            </Link>
-
-            {/* Desktop Menu */}
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="#features" className="text-slate-600 hover:text-ci-blue font-medium transition-colors">คุณสมบัติ</Link>
-              <Link href="#products" className="text-slate-600 hover:text-ci-blue font-medium transition-colors">สินค้า</Link>
-              <Link href="#testimonials" className="text-slate-600 hover:text-ci-blue font-medium transition-colors">รีวิว</Link>
-              <Link href="#pricing" className="text-slate-600 hover:text-ci-blue font-medium transition-colors">ราคา</Link>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="hidden md:flex items-center gap-3">
-              <Link 
-                href="/dashboard" 
-                className="px-4 py-2 text-slate-600 font-medium hover:text-ci-blue transition-colors"
-              >
-                เข้าสู่ระบบ
-              </Link>
-              <Link 
-                href="/catalog" 
-                className="px-5 py-2.5 bg-ci-blue text-white font-bold rounded-xl hover:bg-ci-blueDark transition-all shadow-lg shadow-blue-200"
-              >
-                เริ่มออกแบบฟรี
-              </Link>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button 
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 text-slate-600"
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-ci-blue/20 selection:text-ci-blue">
+      <LandingHeader />
+      
+      <main>
+        {/* Hero Section */}
+        <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute inset-0 z-0">
+            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-bl from-blue-100/40 to-transparent rounded-full blur-3xl -translate-y-1/4 translate-x-1/4" />
+            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-yellow-100/40 to-transparent rounded-full blur-3xl translate-y-1/4 -translate-x-1/4" />
           </div>
-        </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white border-t border-slate-100 shadow-lg">
-            <div className="px-4 py-6 space-y-4">
-              <Link href="#features" className="block text-slate-600 font-medium">คุณสมบัติ</Link>
-              <Link href="#products" className="block text-slate-600 font-medium">สินค้า</Link>
-              <Link href="#testimonials" className="block text-slate-600 font-medium">รีวิว</Link>
-              <Link href="#pricing" className="block text-slate-600 font-medium">ราคา</Link>
-              <div className="pt-4 border-t border-slate-100 space-y-3">
-                <Link href="/dashboard" className="block text-center py-2 text-slate-600 font-medium">เข้าสู่ระบบ</Link>
-                <Link href="/catalog" className="block text-center py-3 bg-ci-blue text-white font-bold rounded-xl">เริ่มออกแบบฟรี</Link>
-              </div>
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Hero Section */}
-      <section className="pt-24 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-50 via-blue-50/30 to-white relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-200 rounded-full blur-3xl opacity-30 animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-200 rounded-full blur-3xl opacity-30 animate-pulse" />
-        
-        <div className="max-w-7xl mx-auto relative">
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-            {/* Text Content */}
-            <div className="flex-1 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full text-ci-blue font-medium text-sm mb-6">
-                <Sparkles className="w-4 h-4" />
-                ออกแบบเสื้อของคุณเอง
+          <div className="container mx-auto px-4 md:px-6 relative z-10">
+            <div className="text-center max-w-4xl mx-auto mb-12">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-ci-blue text-sm font-semibold mb-6 animate-fade-in-up">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                ผลิตโดยโรงงาน Anajak T-Shirt ประสบการณ์กว่า 20 ปี
               </div>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight mb-6">
-                สร้างเสื้อ
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-ci-blue to-purple-600"> ดีไซน์เฉพาะ </span>
-                ของคุณ
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-tight animate-fade-in-up [animation-delay:100ms]">
+                สร้างเสื้อและสินค้า<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-ci-blue to-blue-600">ในแบบของคุณเอง</span>
               </h1>
               
-              <p className="text-lg sm:text-xl text-slate-600 mb-8 max-w-xl mx-auto lg:mx-0">
-                ออกแบบเสื้อผ้าสวยๆ ได้ง่ายๆ ไม่ต้องมีประสบการณ์ 
-                พิมพ์คุณภาพสูง จัดส่งถึงบ้าน
+              <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up [animation-delay:200ms]">
+                Print on Demand คุณภาพโรงงาน พิมพ์ตามสั่ง ไม่มีขั้นต่ำ
+                <br className="hidden md:block" /> 
+                ออกแบบง่าย ผลิตไว ส่งตรงถึงมือคุณ
               </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
+
+              {/* Mode Toggle Pills */}
+              <div className="flex justify-center mb-10 animate-fade-in-up [animation-delay:300ms]">
+                <div className="bg-white p-1.5 rounded-2xl shadow-lg border border-slate-100 inline-flex">
+                  <button
+                    onClick={() => setActiveMode('personal')}
+                    className={`px-6 py-3 rounded-xl text-sm font-bold transition-all ${
+                      activeMode === 'personal' 
+                        ? 'bg-ci-blue text-white shadow-md' 
+                        : 'text-slate-500 hover:bg-slate-50'
+                    }`}
+                  >
+                    👕 ซื้อใส่เอง
+                  </button>
+                  <button
+                    onClick={() => setActiveMode('seller')}
+                    className={`px-6 py-3 rounded-xl text-sm font-bold transition-all ${
+                      activeMode === 'seller' 
+                        ? 'bg-ci-blue text-white shadow-md' 
+                        : 'text-slate-500 hover:bg-slate-50'
+                    }`}
+                  >
+                    🛒 ทำขาย / สร้างแบรนด์
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up [animation-delay:400ms]">
+                <Link 
+                  href="/designer" 
+                  className="w-full sm:w-auto px-8 py-4 bg-ci-blue text-white rounded-xl font-bold text-lg shadow-xl shadow-ci-blue/20 hover:bg-ci-blueDark hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
+                >
+                  <Palette className="w-5 h-5" />
+                  เริ่มออกแบบเลย - ฟรี
+                </Link>
                 <Link 
                   href="/catalog" 
-                  className="px-8 py-4 bg-ci-blue text-white font-bold rounded-2xl hover:bg-ci-blueDark transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-2 text-lg"
+                  className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border-2 border-slate-200 rounded-xl font-bold text-lg hover:border-ci-blue hover:text-ci-blue hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
                 >
-                  เริ่มออกแบบเลย
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-                <Link 
-                  href="#demo" 
-                  className="px-8 py-4 bg-white text-slate-700 font-bold rounded-2xl border-2 border-slate-200 hover:border-ci-blue hover:text-ci-blue transition-all flex items-center justify-center gap-2"
-                >
-                  <Play className="w-5 h-5" />
-                  ดูวิธีใช้งาน
+                  ดูสินค้าทั้งหมด
                 </Link>
               </div>
+            </div>
 
-              {/* Trust Badges */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-slate-500 text-sm">
-                <div className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-green-500" />
-                  ไม่ต้องสมัครสมาชิก
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-green-500" />
-                  ออกแบบฟรี
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-green-500" />
-                  สั่งผลิตขั้นต่ำ 1 ตัว
+            {/* Hero Image / Mockup */}
+            <div className="relative max-w-5xl mx-auto mt-16 animate-fade-in-up [animation-delay:500ms]">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl border-8 border-white bg-slate-100 aspect-[16/9] group">
+                {/* Simulated Interface or Showcase */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-slate-200 flex items-center justify-center">
+                   <div className="text-center">
+                      <div className="relative w-64 h-64 mx-auto mb-6 transform group-hover:scale-105 transition-transform duration-500">
+                        <Image 
+                           src="/shirt/front.png" 
+                           alt="T-Shirt Mockup" 
+                           fill
+                           className="object-contain drop-shadow-2xl"
+                        />
+                         {/* Design Overlay */}
+                        <div className="absolute top-[25%] left-[30%] w-[40%] h-[40%] bg-blue-500/10 border-2 border-dashed border-blue-400 rounded-lg flex items-center justify-center">
+                          <span className="text-blue-500 text-xs font-bold bg-white/80 px-2 py-1 rounded">พื้นที่ออกแบบ</span>
+                        </div>
+                      </div>
+                      <div className="bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg inline-flex items-center gap-3">
+                         <div className="flex -space-x-2">
+                            {[1,2,3].map(i => (
+                               <div key={i} className="w-8 h-8 rounded-full bg-slate-200 border-2 border-white" />
+                            ))}
+                         </div>
+                         <span className="text-sm font-medium text-slate-600">ออกแบบแล้ว 50,000+ ชิ้น</span>
+                      </div>
+                   </div>
                 </div>
               </div>
-            </div>
+              
+              {/* Floating Elements */}
+              <div className="absolute -left-4 md:-left-12 top-1/4 bg-white p-4 rounded-2xl shadow-xl animate-float-slow">
+                 <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                       <Truck className="w-5 h-5" />
+                    </div>
+                    <div>
+                       <p className="text-xs text-slate-500 font-bold uppercase">จัดส่งรวดเร็ว</p>
+                       <p className="font-bold text-slate-800">2-3 วันถึงมือ</p>
+                    </div>
+                 </div>
+              </div>
 
-            {/* Hero Image */}
-            <div className="flex-1 relative">
-              <div className="relative w-full max-w-md mx-auto">
-                {/* T-shirt mockup placeholder */}
-                <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 rounded-3xl shadow-2xl flex items-center justify-center overflow-hidden">
-                  <div className="text-center p-8">
-                    <Shirt className="w-32 h-32 text-slate-300 mx-auto mb-4" />
-                    <p className="text-slate-400 font-medium">ตัวอย่างเสื้อของคุณ</p>
-                  </div>
-                </div>
-                
-                {/* Floating badges */}
-                <div className="absolute -top-4 -right-4 px-4 py-2 bg-white rounded-xl shadow-lg border border-slate-100 flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-yellow-500" />
-                  <span className="font-bold text-slate-800">ผลิตเร็ว</span>
-                </div>
-                <div className="absolute -bottom-4 -left-4 px-4 py-2 bg-white rounded-xl shadow-lg border border-slate-100 flex items-center gap-2">
-                  <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                  <span className="font-bold text-slate-800">4.9/5 คะแนน</span>
-                </div>
+              <div className="absolute -right-4 md:-right-12 bottom-1/4 bg-white p-4 rounded-2xl shadow-xl animate-float-slow [animation-delay:2s]">
+                 <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                       <Zap className="w-5 h-5" />
+                    </div>
+                    <div>
+                       <p className="text-xs text-slate-500 font-bold uppercase">ผลิตไว</p>
+                       <p className="font-bold text-slate-800">เสร็จใน 5 นาที</p>
+                    </div>
+                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Stats Section */}
-      <section className="py-12 bg-white border-y border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <p className="text-3xl sm:text-4xl font-bold text-ci-blue mb-1">10,000+</p>
-              <p className="text-slate-500 font-medium">ลูกค้าที่พอใจ</p>
-            </div>
-            <div>
-              <p className="text-3xl sm:text-4xl font-bold text-ci-blue mb-1">50,000+</p>
-              <p className="text-slate-500 font-medium">เสื้อที่ผลิต</p>
-            </div>
-            <div>
-              <p className="text-3xl sm:text-4xl font-bold text-ci-blue mb-1">4.9</p>
-              <p className="text-slate-500 font-medium">คะแนนเฉลี่ย</p>
-            </div>
-            <div>
-              <p className="text-3xl sm:text-4xl font-bold text-ci-blue mb-1">3-5 วัน</p>
-              <p className="text-slate-500 font-medium">จัดส่ง</p>
-            </div>
+        {/* Value Proposition Strip */}
+        <div className="bg-slate-900 text-white py-12">
+          <div className="container mx-auto px-4 md:px-6">
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                {[
+                   { icon: Zap, label: "ออกแบบง่าย", desc: "ใน 5 นาที" },
+                   { icon: ShieldCheck, label: "ไม่ต้องคุยกับใคร", desc: "ระบบอัตโนมัติ" },
+                   { icon: Truck, label: "ส่งไว", desc: "2-3 วันได้รับ" },
+                   { icon: Star, label: "โรงงานผลิตเอง", desc: "ไม่ผ่านตัวแทน" },
+                ].map((item, i) => (
+                   <div key={i} className="flex flex-col items-center text-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-ci-yellow mb-1">
+                         <item.icon className="w-6 h-6" />
+                      </div>
+                      <div>
+                         <h3 className="font-bold text-lg">{item.label}</h3>
+                         <p className="text-slate-400 text-sm">{item.desc}</p>
+                      </div>
+                   </div>
+                ))}
+             </div>
           </div>
         </div>
-      </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-              ทำไมต้องเลือกเรา?
-            </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              บริการครบวงจร ตั้งแต่ออกแบบจนถึงจัดส่งถึงมือลูกค้า
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FEATURES.map((feature, i) => {
-              const Icon = feature.icon;
-              return (
-                <div 
-                  key={i}
-                  className="group p-6 bg-white rounded-2xl border border-slate-100 hover:border-transparent hover:shadow-xl transition-all duration-300"
-                >
-                  <div className={`w-14 h-14 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center text-white mb-5 shadow-lg ${feature.shadow} group-hover:scale-110 transition-transform`}>
-                    <Icon className="w-7 h-7" />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-800 mb-2">{feature.title}</h3>
-                  <p className="text-slate-600">{feature.description}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* How it Works */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-50 to-blue-50/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-              ขั้นตอนง่ายๆ แค่ 3 ขั้นตอน
-            </h2>
-            <p className="text-lg text-slate-600">
-              ออกแบบและสั่งผลิตเสื้อของคุณได้ง่ายๆ
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { step: 1, title: 'เลือกสินค้า', desc: 'เลือกประเภทเสื้อ สี และไซส์ที่ต้องการ', icon: '👕' },
-              { step: 2, title: 'ออกแบบ', desc: 'อัพโหลดรูปหรือใช้เครื่องมือออกแบบของเรา', icon: '🎨' },
-              { step: 3, title: 'สั่งผลิต', desc: 'ยืนยันคำสั่งซื้อ รอรับสินค้าที่บ้าน', icon: '📦' },
-            ].map((item, i) => (
-              <div key={i} className="relative">
-                <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 text-center">
-                  <div className="text-5xl mb-4">{item.icon}</div>
-                  <div className="w-10 h-10 bg-ci-blue text-white rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-4">
-                    {item.step}
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-800 mb-2">{item.title}</h3>
-                  <p className="text-slate-600">{item.desc}</p>
-                </div>
-                {i < 2 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2">
-                    <ChevronRight className="w-8 h-8 text-slate-300" />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link 
-              href="/catalog" 
-              className="inline-flex items-center gap-2 px-8 py-4 bg-ci-blue text-white font-bold rounded-2xl hover:bg-ci-blueDark transition-all shadow-lg shadow-blue-200"
-            >
-              เริ่มออกแบบตอนนี้
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section id="testimonials" className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-              ลูกค้าพูดถึงเรา
-            </h2>
-            <p className="text-lg text-slate-600">
-              ความเห็นจากลูกค้าที่ใช้บริการจริง
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <div key={i} className="p-6 bg-slate-50 rounded-2xl">
-                <div className="flex gap-1 mb-4">
-                  {[...Array(t.rating)].map((_, j) => (
-                    <Star key={j} className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                  ))}
-                </div>
-                <p className="text-slate-700 mb-6">"{t.content}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-2xl">
-                    {t.avatar}
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-800">{t.name}</p>
-                    <p className="text-sm text-slate-500">{t.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-ci-blue to-blue-600">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            พร้อมสร้างเสื้อของคุณเองหรือยัง?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            เริ่มออกแบบได้เลยตอนนี้ ไม่ต้องสมัครสมาชิก ฟรี!
-          </p>
-          <Link 
-            href="/catalog" 
-            className="inline-flex items-center gap-2 px-10 py-5 bg-white text-ci-blue font-bold rounded-2xl hover:bg-slate-100 transition-all shadow-2xl text-lg"
-          >
-            เริ่มออกแบบฟรี
-            <ArrowRight className="w-6 h-6" />
-          </Link>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 bg-slate-900 text-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            {/* Brand */}
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-ci-blue font-bold text-lg">
-                  A
-                </div>
-                <span className="font-bold text-xl">Anajak POD</span>
-              </div>
-              <p className="text-slate-400 max-w-md">
-                บริการพิมพ์เสื้อตามสั่ง คุณภาพสูง ราคาเป็นกันเอง 
-                ออกแบบง่าย จัดส่งเร็ว
+        {/* Dynamic Content Section based on Mode */}
+        <section className="py-24 bg-white">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <span className="text-ci-blue font-bold tracking-wider uppercase text-sm mb-2 block">
+                {activeMode === 'personal' ? 'FOR YOU' : 'FOR BUSINESS'}
+              </span>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                {activeMode === 'personal' 
+                  ? 'สร้างสรรค์ไอเดียของคุณให้เป็นจริง' 
+                  : 'เริ่มต้นธุรกิจเสื้อผ้าของคุณได้ทันที'}
+              </h2>
+              <p className="text-lg text-slate-600">
+                {activeMode === 'personal'
+                  ? 'ไม่ว่าจะเป็นเสื้อทีม ของขวัญ หรือใส่เอง สั่งทำได้ง่ายๆ ไม่มีขั้นต่ำ'
+                  : 'ไม่ต้องสต็อกของ ไม่ต้องแพ็คของ เราจัดการให้หมด คุณแค่ "ออกแบบและขาย"'}
               </p>
             </div>
 
-            {/* Links */}
-            <div>
-              <h4 className="font-bold mb-4">ลิงก์ด่วน</h4>
-              <div className="space-y-2 text-slate-400">
-                <Link href="/catalog" className="block hover:text-white transition-colors">เลือกสินค้า</Link>
-                <Link href="/templates" className="block hover:text-white transition-colors">เทมเพลตสำเร็จรูป</Link>
-                <Link href="/dashboard" className="block hover:text-white transition-colors">เข้าสู่ระบบ</Link>
-              </div>
+            <div className="grid md:grid-cols-3 gap-8">
+              {(activeMode === 'personal' ? [
+                {
+                  title: "1. เลือกสินค้า",
+                  desc: "เลือกจากสินค้าคุณภาพกว่า 50+ รายการ ทั้งเสื้อยืด ฮู้ด กระเป๋า และอื่นๆ",
+                  image: "/shirt/front.png" // Placeholder
+                },
+                {
+                  title: "2. ออกแบบ",
+                  desc: "ใช้เครื่องมือออกแบบออนไลน์ของเรา อัพโหลดรูป ใส่ข้อความ ได้ดั่งใจ",
+                  image: "/shirt/front.png" // Placeholder
+                },
+                {
+                  title: "3. รอรับของ",
+                  desc: "สั่งซื้อและชำระเงิน นั่งรอรับของที่บ้านใน 2-3 วัน",
+                  image: "/shirt/front.png" // Placeholder
+                }
+              ] : [
+                {
+                  title: "1. สร้างร้านค้า",
+                  desc: "สมัครสมาชิกและตั้งค่าร้านค้าของคุณ เชื่อมต่อกับ Shopee/Lazada ได้ง่ายๆ",
+                  image: "/shirt/front.png" // Placeholder
+                },
+                {
+                  title: "2. ออกแบบและตั้งราคา",
+                  desc: "ออกแบบสินค้าและกำหนดกำไรที่คุณต้องการ เราแสดงต้นทุนให้เห็นชัดเจน",
+                  image: "/shirt/front.png" // Placeholder
+                },
+                {
+                  title: "3. รับกำไร",
+                  desc: "เมื่อมีออเดอร์ เราผลิตและจัดส่งให้ในนามคุณ คุณรับส่วนต่างกำไรทันที",
+                  image: "/shirt/front.png" // Placeholder
+                }
+              ]).map((step, i) => (
+                <div key={i} className="bg-slate-50 rounded-2xl p-8 border border-slate-100 hover:shadow-lg transition-all group">
+                  <div className="h-48 bg-white rounded-xl mb-6 relative overflow-hidden flex items-center justify-center p-4 border border-slate-100">
+                     <div className="absolute top-2 right-2 w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                        {i + 1}
+                     </div>
+                     <Image
+                        src={step.image}
+                        alt={step.title}
+                        width={200}
+                        height={200}
+                        className="object-contain group-hover:scale-110 transition-transform duration-500"
+                     />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-3">{step.title}</h3>
+                  <p className="text-slate-600 leading-relaxed">{step.desc}</p>
+                </div>
+              ))}
             </div>
 
-            {/* Contact */}
-            <div>
-              <h4 className="font-bold mb-4">ติดต่อเรา</h4>
-              <div className="space-y-2 text-slate-400">
-                <p>📧 support@anajak.com</p>
-                <p>📞 02-xxx-xxxx</p>
-                <p>💬 Line: @anajak</p>
-              </div>
+            <div className="mt-16 text-center">
+              <Link 
+                href="/designer" 
+                className="inline-flex items-center gap-2 text-ci-blue font-bold text-lg hover:underline decoration-2 underline-offset-4"
+              >
+                ลองออกแบบดูตอนนี้ <ArrowRight className="w-5 h-5" />
+              </Link>
             </div>
           </div>
+        </section>
 
-          <div className="pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
-            <p>© 2024 Anajak POD. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+        {/* Featured Products */}
+        <section className="py-24 bg-slate-50">
+           <div className="container mx-auto px-4 md:px-6">
+              <div className="flex justify-between items-end mb-12">
+                 <div>
+                    <h2 className="text-3xl font-bold text-slate-900 mb-2">สินค้ายอดนิยม</h2>
+                    <p className="text-slate-600">คุณภาพระดับพรีเมียม การันตีด้วยยอดขายอันดับ 1</p>
+                 </div>
+                 <Link href="/catalog" className="hidden md:flex items-center text-slate-600 hover:text-ci-blue font-bold transition-colors">
+                    ดูทั้งหมด <ArrowRight className="w-4 h-4 ml-1" />
+                 </Link>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                 {[
+                    { name: "Premium Cotton T-Shirt", price: "฿150", image: "/shirt/front.png", colors: 12 },
+                    { name: "Oversized Street Tee", price: "฿220", image: "/shirt/front.png", colors: 8 },
+                    { name: "Classic Hoodie", price: "฿450", image: "/shirt/front.png", colors: 6 },
+                    { name: "Canvas Tote Bag", price: "฿120", image: "/shirt/front.png", colors: 4 },
+                 ].map((product, i) => (
+                    <Link href="/catalog/1" key={i} className="group bg-white rounded-2xl overflow-hidden border border-slate-200 hover:shadow-xl transition-all hover:-translate-y-1">
+                       <div className="aspect-square relative bg-slate-100 p-6 flex items-center justify-center">
+                          <Image
+                             src={product.image}
+                             alt={product.name}
+                             fill
+                             className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <button className="absolute bottom-3 right-3 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-slate-700 hover:bg-ci-blue hover:text-white transition-colors opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300">
+                             <Palette className="w-5 h-5" />
+                          </button>
+                       </div>
+                       <div className="p-4">
+                          <h3 className="font-bold text-slate-900 mb-1 truncate">{product.name}</h3>
+                          <div className="flex justify-between items-center">
+                             <span className="text-ci-blue font-bold">{product.price}</span>
+                             <span className="text-xs text-slate-500">{product.colors} สี</span>
+                          </div>
+                       </div>
+                    </Link>
+                 ))}
+              </div>
+              
+              <div className="mt-8 text-center md:hidden">
+                 <Link href="/catalog" className="btn-secondary w-full justify-center">
+                    ดูสินค้าทั้งหมด
+                 </Link>
+              </div>
+           </div>
+        </section>
+
+        {/* Trust & Quality Section */}
+        <section className="py-24 bg-white overflow-hidden">
+           <div className="container mx-auto px-4 md:px-6">
+              <div className="grid lg:grid-cols-2 gap-16 items-center">
+                 <div className="relative">
+                    <div className="absolute -inset-4 bg-gradient-to-r from-blue-100 to-yellow-100 rounded-3xl blur-2xl opacity-50" />
+                    <div className="relative bg-slate-900 rounded-3xl p-8 md:p-12 text-white overflow-hidden">
+                       <div className="absolute top-0 right-0 w-64 h-64 bg-ci-blue/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                       
+                       <h3 className="text-2xl font-bold mb-6">ทำไมต้อง Anajak POD?</h3>
+                       <ul className="space-y-4">
+                          {[
+                             "โรงงานผลิตเอง ไม่ผ่านคนกลาง ราคาดีที่สุด",
+                             "ใช้เครื่องจักร Epson F3070 Industrial Grade",
+                             "เทคนิค DTG และ DTF ความละเอียดสูง",
+                             "หมึกแท้ Eco-Friendly ปลอดภัย ไม่ลอก",
+                             "QC ตรวจสอบคุณภาพทุกชิ้นก่อนส่ง"
+                          ].map((item, i) => (
+                             <li key={i} className="flex items-start gap-3">
+                                <CheckCircle2 className="w-6 h-6 text-green-400 shrink-0" />
+                                <span className="text-slate-200">{item}</span>
+                             </li>
+                          ))}
+                       </ul>
+
+                       <div className="mt-8 pt-8 border-t border-white/10 flex gap-8">
+                          <div>
+                             <p className="text-3xl font-bold text-ci-yellow">20+</p>
+                             <p className="text-sm text-slate-400">ปีประสบการณ์</p>
+                          </div>
+                          <div>
+                             <p className="text-3xl font-bold text-ci-yellow">50k+</p>
+                             <p className="text-sm text-slate-400">ออเดอร์จัดส่ง</p>
+                          </div>
+                          <div>
+                             <p className="text-3xl font-bold text-ci-yellow">4.9</p>
+                             <p className="text-sm text-slate-400">คะแนนรีวิว</p>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+
+                 <div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">
+                       มาตรฐานโรงงาน <br />
+                       <span className="text-ci-blue">ในราคาที่คุณเข้าถึงได้</span>
+                    </h2>
+                    <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                       เราไม่ใช่แค่แพลตฟอร์ม แต่เราคือโรงงานผู้ผลิตตัวจริงที่มีประสบการณ์กว่า 20 ปี 
+                       เราเข้าใจเรื่องผ้า เรื่องสี และเรื่องการสกรีนดีที่สุด 
+                       เพื่อให้คุณมั่นใจได้ว่าสินค้าทุกชิ้นที่ส่งถึงมือคุณ หรือลูกค้าของคุณ 
+                       คือสินค้าที่มีคุณภาพดีที่สุด
+                    </p>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                       <Link href="/about" className="p-4 rounded-xl border border-slate-200 hover:border-ci-blue hover:bg-blue-50 transition-all group">
+                          <PlayCircle className="w-8 h-8 text-ci-blue mb-3 group-hover:scale-110 transition-transform" />
+                          <h4 className="font-bold text-slate-900">ดูวิดีโอโรงงาน</h4>
+                          <p className="text-sm text-slate-500">เยี่ยมชมกระบวนการผลิต</p>
+                       </Link>
+                       <Link href="/corporate" className="p-4 rounded-xl border border-slate-200 hover:border-ci-blue hover:bg-blue-50 transition-all group">
+                          <ShoppingBag className="w-8 h-8 text-ci-blue mb-3 group-hover:scale-110 transition-transform" />
+                          <h4 className="font-bold text-slate-900">สั่งจำนวนมาก?</h4>
+                          <p className="text-sm text-slate-500">ขอใบเสนอราคาพิเศษ</p>
+                       </Link>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-24 bg-gradient-to-br from-ci-blue to-blue-700 text-white relative overflow-hidden">
+           <div className="absolute inset-0">
+              <div className="absolute top-0 left-0 w-full h-full bg-[url('/grid-pattern.svg')] opacity-10" />
+              <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-white/10 rounded-full blur-3xl translate-y-1/2 translate-x-1/2" />
+           </div>
+
+           <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">พร้อมเริ่มต้นแล้วหรือยัง?</h2>
+              <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
+                 เปลี่ยนไอเดียของคุณให้เป็นสินค้าจริงได้ใน 5 นาที
+                 <br />ไม่มีค่าใช้จ่ายแอบแฝง ไม่ต้องสมัครก็ลองออกแบบได้
+              </p>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                 <Link 
+                    href="/designer" 
+                    className="w-full sm:w-auto px-10 py-5 bg-white text-ci-blue rounded-xl font-bold text-xl shadow-xl hover:bg-blue-50 hover:-translate-y-1 transition-all"
+                 >
+                    เริ่มออกแบบเลย - ฟรี
+                 </Link>
+                 <Link 
+                    href="/contact" 
+                    className="w-full sm:w-auto px-10 py-5 bg-transparent border-2 border-white/30 text-white rounded-xl font-bold text-xl hover:bg-white/10 transition-all"
+                 >
+                    ติดต่อทีมงาน
+                 </Link>
+              </div>
+              
+              <p className="mt-8 text-sm text-blue-200/80">
+                 *ไม่ต้องใช้บัตรเครดิต • ออกแบบฟรี 100% • ไม่มีขั้นต่ำ
+              </p>
+           </div>
+        </section>
+      </main>
+
+      <LandingFooter />
     </div>
   );
 }
