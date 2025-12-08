@@ -14,6 +14,7 @@ import LandingHeader from '@/components/LandingHeader';
 import LandingFooter from '@/components/LandingFooter';
 import ProductionTicker from '@/components/ProductionTicker';
 import TypeWriter from '@/components/TypeWriter';
+import HeroDesigner from '@/components/HeroDesigner';
 
 export default function LandingPage() {
   const [activeMode, setActiveMode] = useState<'seller' | 'personal'>('personal');
@@ -86,9 +87,9 @@ export default function LandingPage() {
       
       <main>
         {/* ============================================
-            HERO SECTION - "ทำเสื้อได้ภายใน 5 นาที"
+            HERO SECTION - Stacked Layout
         ============================================ */}
-        <section className="relative min-h-screen flex items-center pt-28 pb-16 overflow-hidden">
+        <section className="relative pt-28 pb-12 overflow-hidden">
           {/* Background */}
           <div className="absolute inset-0 bg-gradient-to-b from-blue-50/80 via-white to-slate-50" />
           <div className="absolute inset-0 bg-dot-pattern opacity-50" />
@@ -98,226 +99,115 @@ export default function LandingPage() {
           <div className="absolute bottom-1/4 left-[5%] w-96 h-96 bg-ci-blue/10 rounded-full blur-3xl animate-pulse-slow delay-300" />
 
           <div className="container mx-auto px-4 md:px-6 relative z-10">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-              {/* Left: Content */}
-              <div className="text-center lg:text-left">
-                {/* Trust Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-md border border-slate-100 text-sm font-medium mb-8 animate-fade-in-up">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            {/* Top: Hero Text - Centered */}
+            <div className="text-center max-w-3xl mx-auto mb-10">
+              {/* Trust Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-md border border-slate-100 text-sm font-medium mb-6 animate-fade-in-up">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <span className="text-slate-600">
+                  ผลิตโดยโรงงาน <span className="font-bold text-ci-blue">Anajak T-Shirt</span> • ประสบการณ์กว่า 20 ปี
+                </span>
+              </div>
+            
+              {/* Main Headline */}
+              <div className={`transition-all duration-300 ${modeAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
+                <h1 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4 animate-fade-in-up delay-100">
+                  {activeMode === 'personal' ? (
+                    <TypeWriter 
+                      key="personal"
+                      words={['ทำเสื้อได้ภายใน', 'ออกแบบเสื้อใน', 'สร้างของขวัญใน']}
+                      typingSpeed={80}
+                      deletingSpeed={40}
+                      pauseTime={3000}
+                      className="text-slate-900"
+                    />
+                  ) : (
+                    <TypeWriter 
+                      key="seller"
+                      words={['เปิดร้านได้ใน', 'สร้างแบรนด์ใน', 'เริ่มธุรกิจใน']}
+                      typingSpeed={80}
+                      deletingSpeed={40}
+                      pauseTime={3000}
+                      className="text-slate-900"
+                    />
+                  )}
+                  {' '}
+                  <span className="relative inline-block">
+                    <span className="gradient-text">5 นาที</span>
+                    <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 12" fill="none">
+                      <path d="M2 10C50 2 150 2 198 10" stroke="#fec91b" strokeWidth="4" strokeLinecap="round"/>
+                    </svg>
                   </span>
-                  <span className="text-slate-600">
-                    ผลิตโดยโรงงาน <span className="font-bold text-ci-blue">Anajak T-Shirt</span> • ประสบการณ์กว่า 20 ปี
-                  </span>
-                </div>
+                </h1>
               
-                {/* Main Headline with TypeWriter - Mode Specific */}
-                <div className={`transition-all duration-300 ${modeAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
-                  <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6 animate-fade-in-up delay-100">
-                    {activeMode === 'personal' ? (
-                      <TypeWriter 
-                        key="personal"
-                        words={['ทำเสื้อได้ภายใน', 'ออกแบบเสื้อใน', 'สร้างของขวัญใน']}
-                        typingSpeed={80}
-                        deletingSpeed={40}
-                        pauseTime={3000}
-                        className="text-slate-900"
-                      />
-                    ) : (
-                      <TypeWriter 
-                        key="seller"
-                        words={['เปิดร้านได้ใน', 'สร้างแบรนด์ใน', 'เริ่มธุรกิจใน']}
-                        typingSpeed={80}
-                        deletingSpeed={40}
-                        pauseTime={3000}
-                        className="text-slate-900"
-                      />
-                    )}
-                    <br />
-                    <span className="relative inline-block">
-                      <span className="gradient-text">5 นาที</span>
-                      <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 12" fill="none">
-                        <path d="M2 10C50 2 150 2 198 10" stroke="#fec91b" strokeWidth="4" strokeLinecap="round"/>
-                      </svg>
-                    </span>
-                  </h1>
-                
-                  {/* Subheadline - Mode Specific */}
-                  <p className="text-lg md:text-xl text-slate-600 mb-8 leading-relaxed animate-fade-in-up delay-200 max-w-xl mx-auto lg:mx-0">
-                    {activeMode === 'personal' ? (
-                      <>
-                        <span className="font-medium text-slate-800">ไม่ต้องคุยกับโรงงาน</span> • ไม่ต้องรอใบเสนอราคา • ไม่ต้องแก้ไฟล์
-                        <br />
-                        <span className="text-ci-blue font-semibold">ออกแบบเอง → สั่งทันที → ส่งถึงมือใน 2-3 วัน</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="font-medium text-slate-800">ไม่ต้องสต็อกสินค้า</span> • ไม่ต้องจัดส่งเอง • ไม่ต้องลงทุนล่วงหน้า
-                        <br />
-                        <span className="text-ci-blue font-semibold">ลูกค้าสั่ง → เราผลิต → เราส่งให้ในนามคุณ</span>
-                      </>
-                    )}
-                  </p>
-                </div>
-
-                {/* Mode Switcher - Enhanced */}
-                <div className="flex justify-center lg:justify-start mb-8 animate-fade-in-up delay-300">
-                  <div className="bg-white p-1.5 rounded-2xl shadow-lg border border-slate-200 inline-flex gap-1">
-                    <button
-                      onClick={() => handleModeChange('personal')}
-                      className={`px-6 py-3.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
-                        activeMode === 'personal' 
-                          ? 'bg-gradient-to-r from-ci-blue to-blue-600 text-white shadow-md' 
-                          : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      <Shirt className={`w-5 h-5 transition-transform duration-300 ${activeMode === 'personal' ? 'scale-110' : ''}`} />
-                      <span>ซื้อใส่เอง</span>
-                    </button>
-                    <button
-                      onClick={() => handleModeChange('seller')}
-                      className={`px-6 py-3.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
-                        activeMode === 'seller' 
-                          ? 'bg-gradient-to-r from-ci-blue to-blue-600 text-white shadow-md' 
-                          : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      <Store className={`w-5 h-5 transition-transform duration-300 ${activeMode === 'seller' ? 'scale-110' : ''}`} />
-                      <span>ทำขาย / สร้างแบรนด์</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* CTAs - Mode Specific */}
-                <div className={`flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-8 animate-fade-in-up delay-400 transition-all duration-300 ${modeAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
+                {/* Subheadline */}
+                <p className="text-base md:text-lg text-slate-600 mb-6 leading-relaxed animate-fade-in-up delay-200">
                   {activeMode === 'personal' ? (
                     <>
-                      <Link href="/designer" className="btn-primary text-lg px-8 py-4 w-full sm:w-auto">
-                        <Palette className="w-5 h-5" />
-                        เริ่มออกแบบเลย - ฟรี
-                      </Link>
-                      <Link href="/catalog" className="btn-secondary text-lg px-8 py-4 w-full sm:w-auto">
-                        ดูสินค้าทั้งหมด
-                      </Link>
+                      <span className="font-medium text-slate-800">ไม่ต้องคุยกับโรงงาน</span> • ไม่ต้องรอใบเสนอราคา • ไม่ต้องแก้ไฟล์
                     </>
                   ) : (
                     <>
-                      <Link href="/seller/register" className="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-ci-blue to-blue-600 rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all w-full sm:w-auto">
-                        <Store className="w-5 h-5" />
-                        เปิดร้านฟรี - 0 บาท
-                      </Link>
-                      <Link href="/seller/demo" className="btn-secondary text-lg px-8 py-4 w-full sm:w-auto">
-                        <Play className="w-5 h-5" />
-                        ดูวิธีทำเงิน
-                      </Link>
+                      <span className="font-medium text-slate-800">ไม่ต้องสต็อกสินค้า</span> • ไม่ต้องจัดส่งเอง • ไม่ต้องลงทุนล่วงหน้า
                     </>
                   )}
-                </div>
+                </p>
+              </div>
 
-                {/* Bottom Link - Mode Specific */}
-                <div className={`transition-all duration-300 ${modeAnimating ? 'opacity-0' : 'opacity-100'}`}>
-                  {activeMode === 'personal' ? (
-                    <Link 
-                      href="/corporate" 
-                      className="inline-flex items-center gap-2 text-slate-500 hover:text-ci-blue transition-colors animate-fade-in-up delay-500"
-                    >
-                      <Building2 className="w-4 h-4" />
-                      <span>สั่งเสื้อองค์กร 20+ ตัว? <span className="font-bold underline">รับส่วนลดพิเศษ</span></span>
-                    </Link>
-                  ) : (
-                    <Link 
-                      href="/seller/success-stories" 
-                      className="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors animate-fade-in-up delay-500"
-                    >
-                      <TrendingUp className="w-4 h-4" />
-                      <span>ดูเคสตัวอย่าง: <span className="font-bold underline text-blue-600">คนที่ทำรายได้ 50,000+/เดือน</span></span>
-                    </Link>
-                  )}
+              {/* Mode Switcher */}
+              <div className="flex justify-center mb-6 animate-fade-in-up delay-300">
+                <div className="bg-white p-1 rounded-xl shadow-lg border border-slate-200 inline-flex gap-1">
+                  <button
+                    onClick={() => handleModeChange('personal')}
+                    className={`px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
+                      activeMode === 'personal' 
+                        ? 'bg-gradient-to-r from-ci-blue to-blue-600 text-white shadow-md' 
+                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Shirt className={`w-4 h-4 transition-transform duration-300 ${activeMode === 'personal' ? 'scale-110' : ''}`} />
+                    <span>ซื้อใส่เอง</span>
+                  </button>
+                  <button
+                    onClick={() => handleModeChange('seller')}
+                    className={`px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
+                      activeMode === 'seller' 
+                        ? 'bg-gradient-to-r from-ci-blue to-blue-600 text-white shadow-md' 
+                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Store className={`w-4 h-4 transition-transform duration-300 ${activeMode === 'seller' ? 'scale-110' : ''}`} />
+                    <span>ทำขาย / สร้างแบรนด์</span>
+                  </button>
                 </div>
+              </div>
 
-                {/* Stats */}
-                <div className="flex items-center justify-center lg:justify-start gap-6 mt-10 pt-10 border-t border-slate-200 animate-fade-in-up delay-500">
-                  <div className="text-center">
-                    <div className="flex items-center gap-1 text-ci-yellow mb-1">
-                      {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
-                    </div>
-                    <p className="text-sm text-slate-500">
-                      <span className="font-bold text-slate-800">4.9</span> (12,500+ รีวิว)
-                    </p>
+              {/* Stats - Compact & Mobile Friendly */}
+              <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6 animate-fade-in-up delay-400">
+                <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5 text-ci-yellow">
+                    {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 md:w-3.5 md:h-3.5 fill-current" />)}
                   </div>
-                  <div className="w-px h-10 bg-slate-200" />
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-slate-800">50,000+</p>
-                    <p className="text-sm text-slate-500">ออเดอร์จัดส่ง</p>
-                  </div>
-                  <div className="w-px h-10 bg-slate-200" />
-                  <div className="text-center">
-                    <Factory className="w-6 h-6 text-ci-blue mx-auto mb-1" />
-                    <p className="text-sm text-slate-500">ผลิตในไทย</p>
-                  </div>
+                  <span className="text-xs md:text-sm text-slate-600 ml-1"><span className="font-bold">4.9</span></span>
+                </div>
+                <div className="hidden md:block w-px h-5 bg-slate-300" />
+                <div className="text-xs md:text-sm text-slate-600">
+                  <span className="font-bold text-slate-800">50,000+</span> ออเดอร์
+                </div>
+                <div className="hidden md:block w-px h-5 bg-slate-300" />
+                <div className="flex items-center gap-1 text-xs md:text-sm text-slate-600">
+                  <Factory className="w-3.5 h-3.5 md:w-4 md:h-4 text-ci-blue" />
+                  <span>ผลิตในไทย</span>
+                </div>
               </div>
             </div>
 
-              {/* Right: Hero Visual */}
-              <div className="relative animate-fade-in-up delay-300">
-                <div className="relative">
-                  {/* Main mockup */}
-                  <div className="relative bg-gradient-to-br from-slate-100 to-slate-200 rounded-3xl p-8 shadow-2xl">
-                    <div className="relative aspect-square max-w-md mx-auto">
-                        <Image 
-                           src="/shirt/front.png" 
-                           alt="T-Shirt Mockup" 
-                           fill
-                           className="object-contain drop-shadow-2xl"
-                        priority
-                      />
-                      {/* Design area indicator */}
-                      <div className="absolute top-[20%] left-[25%] w-[50%] h-[45%] border-2 border-dashed border-ci-blue/50 rounded-lg bg-ci-blue/5 flex items-center justify-center">
-                        <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-full shadow-lg">
-                          <span className="text-ci-blue text-sm font-bold">พื้นที่ออกแบบ</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Floating cards */}
-                  <div className="absolute -left-4 md:-left-12 top-1/4 bg-white p-4 rounded-2xl shadow-xl animate-float-slow z-10">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center text-green-600">
-                        <Truck className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">จัดส่งเร็ว</p>
-                        <p className="font-bold text-slate-800 text-lg">2-3 วันถึงมือ</p>
-                      </div>
-                    </div>
-                  </div>
-              
-                  <div className="absolute -right-4 md:-right-12 bottom-1/4 bg-white p-4 rounded-2xl shadow-xl animate-float-slow delay-200 z-10">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600">
-                        <Zap className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">ออกแบบง่าย</p>
-                        <p className="font-bold text-slate-800 text-lg">เสร็จใน 5 นาที</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="absolute left-1/2 -translate-x-1/2 -bottom-6 bg-gradient-to-r from-ci-blue to-blue-600 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3 z-10">
-                    <div className="flex -space-x-2">
-                      {[Palette, Shirt, Package, Sparkles].map((Icon, i) => (
-                        <div key={i} className="w-8 h-8 rounded-full bg-white/20 border-2 border-white flex items-center justify-center">
-                          <Icon className="w-4 h-4" />
-              </div>
-                      ))}
-                    </div>
-                    <span className="text-sm font-medium">ออกแบบแล้ว <span className="font-bold">50,000+</span> ชิ้น</span>
-                    </div>
-                 </div>
-              </div>
+            {/* Bottom: Interactive Designer - Full Width */}
+            <div className="animate-fade-in-up delay-500">
+              <HeroDesigner />
             </div>
           </div>
         </section>
