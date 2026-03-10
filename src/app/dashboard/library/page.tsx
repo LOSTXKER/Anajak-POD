@@ -159,7 +159,7 @@ export default function LibraryPage() {
                     
                     {/* Overlay Actions */}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                       <button className="p-2 bg-white rounded-full text-slate-700 hover:text-ci-blue hover:scale-110 transition-all" title="ดาวน์โหลด">
+                       <button onClick={() => window.open(asset.url, '_blank')} className="p-2 bg-white rounded-full text-slate-700 hover:text-ci-blue hover:scale-110 transition-all" title="ดาวน์โหลด">
                          <Download className="w-4 h-4" />
                        </button>
                        <button onClick={() => handleDelete(asset)} className="p-2 bg-white rounded-full text-slate-700 hover:text-red-500 hover:scale-110 transition-all" title="ลบ">
@@ -173,8 +173,8 @@ export default function LibraryPage() {
                           <h3 className="font-bold text-sm text-slate-800 truncate group-hover:text-ci-blue transition-colors" title={asset.name}>{asset.name}</h3>
                           <p className="text-xs text-slate-400 mt-0.5">{asset.date}</p>
                        </div>
-                       <button className="text-slate-300 hover:text-ci-blue">
-                          <MoreVertical className="w-4 h-4" />
+                       <button onClick={() => handleDelete(asset)} className="text-slate-300 hover:text-red-500">
+                          <Trash2 className="w-4 h-4" />
                        </button>
                     </div>
                     <div className="mt-3 pt-3 border-t border-slate-50 flex items-center justify-between text-[10px] text-slate-400">
@@ -217,8 +217,8 @@ export default function LibraryPage() {
                       <td className="px-6 py-4 text-slate-500">{asset.size}</td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 hover:text-slate-900" title="ดาวน์โหลด"><Download className="w-4 h-4" /></button>
-                          <button className="p-1.5 hover:bg-red-50 rounded-lg text-slate-500 hover:text-red-600" title="ลบ"><Trash2 className="w-4 h-4" /></button>
+                          <button onClick={() => window.open(asset.url, '_blank')} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 hover:text-slate-900" title="ดาวน์โหลด"><Download className="w-4 h-4" /></button>
+                          <button onClick={() => handleDelete(asset)} className="p-1.5 hover:bg-red-50 rounded-lg text-slate-500 hover:text-red-600" title="ลบ"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </td>
                     </tr>

@@ -25,22 +25,25 @@ export default function LandingFooter() {
               คุณภาพระดับส่งออก สั่งง่าย ส่งไว ไม่มีขั้นต่ำ
             </p>
             <div className="flex gap-3">
-              <Link 
-                href="#" 
+              <Link
+                href="https://facebook.com/anajaktshirt"
+                target="_blank" rel="noopener noreferrer"
                 className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center hover:bg-ci-blue transition-colors"
                 aria-label="Facebook"
               >
                 <Facebook className="w-5 h-5" />
               </Link>
-              <Link 
-                href="#" 
+              <Link
+                href="https://instagram.com/anajaktshirt"
+                target="_blank" rel="noopener noreferrer"
                 className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center hover:bg-ci-blue transition-colors"
                 aria-label="Instagram"
               >
                 <Instagram className="w-5 h-5" />
               </Link>
-              <Link 
-                href="#" 
+              <Link
+                href="https://lin.ee/anajak"
+                target="_blank" rel="noopener noreferrer"
                 className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center hover:bg-green-500 transition-colors"
                 aria-label="LINE"
               >

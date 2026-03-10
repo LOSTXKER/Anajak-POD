@@ -216,10 +216,6 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
 
               {/* Action Buttons */}
               <div className="flex items-center gap-3">
-                <button className="p-2.5 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl border border-slate-200 hover:border-slate-300 transition-all">
-                   <Filter className="w-5 h-5" />
-                </button>
-                {/* Updated Button: Outline Slate */}
                 <button onClick={handleExport} className="flex items-center px-4 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-colors">
                   <Download className="w-4 h-4 mr-2" />
                   Export

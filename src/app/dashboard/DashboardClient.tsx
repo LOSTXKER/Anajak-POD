@@ -184,9 +184,9 @@ export default function DashboardClient({ stats, topProducts, weeklySales = [], 
             <div className="lg:col-span-1 border-l border-slate-100 pl-8 hidden lg:block">
               <div className="flex justify-between items-center mb-6">
                 <h4 className="text-lg font-bold text-slate-800">ข่าวสารล่าสุด</h4>
-                <button className="text-xs font-bold text-ci-blue hover:bg-ci-blue/5 px-2 py-1 rounded-lg transition-colors">
-                  ดูทั้งหมด
-                </button>
+                <span className="text-xs font-bold text-slate-400 px-2 py-1">
+                  ล่าสุด
+                </span>
               </div>
 
               <div className="space-y-4">

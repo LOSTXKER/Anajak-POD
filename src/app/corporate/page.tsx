@@ -122,9 +122,9 @@ export default function CorporatePage() {
                   
                   <div className="space-y-4">
                     {[
-                      { range: "20-49 ชิ้น", discount: "ส่วนลด 10%", price: "฿XXX / ตัว" },
-                      { range: "50-99 ชิ้น", discount: "ส่วนลด 15%", price: "฿XXX / ตัว" },
-                      { range: "100-299 ชิ้น", discount: "ส่วนลด 20%", price: "฿XXX / ตัว" },
+                      { range: "20-49 ชิ้น", discount: "ส่วนลด 10%", price: "ติดต่อสอบถาม" },
+                      { range: "50-99 ชิ้น", discount: "ส่วนลด 15%", price: "ติดต่อสอบถาม" },
+                      { range: "100-299 ชิ้น", discount: "ส่วนลด 20%", price: "ติดต่อสอบถาม" },
                       { range: "300+ ชิ้น", discount: "ส่วนลด 25% + พิเศษ", price: "ติดต่อเรา" },
                     ].map((tier, i) => (
                       <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100">
