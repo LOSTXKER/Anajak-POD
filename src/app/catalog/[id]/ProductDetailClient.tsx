@@ -47,6 +47,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'details' | 'size' | 'care' | 'reviews'>('details');
   const [mainImage, setMainImage] = useState(product.imageUrl || '');
+  const [liked, setLiked] = useState(false);
 
   const memberPrice = Math.floor(product.price * 0.9); // Mock calculation
 
@@ -89,8 +90,11 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
               )}
-              <button className="absolute top-6 right-6 p-3 bg-white/80 backdrop-blur-md rounded-full shadow-sm hover:text-rose-500 transition-colors hover:scale-110">
-                <Heart className="w-6 h-6" />
+              <button
+                onClick={() => setLiked(prev => !prev)}
+                className={`absolute top-6 right-6 p-3 bg-white/80 backdrop-blur-md rounded-full shadow-sm transition-colors hover:scale-110 ${liked ? 'text-rose-500' : 'hover:text-rose-500'}`}
+              >
+                <Heart className={`w-6 h-6 ${liked ? 'fill-current' : ''}`} />
               </button>
               {product.badge && (
                 <span className="absolute top-6 left-6 px-4 py-2 bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-500/20 backdrop-blur-md">
@@ -131,7 +135,17 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                    {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
                  </div>
                  <span className="text-slate-400 font-medium">(4.9/5 จาก 128 รีวิว)</span>
-                 <button className="text-ci-blue font-bold hover:underline flex items-center gap-1">
+                 <button
+                   onClick={async () => {
+                     try {
+                       await navigator.share({ title: product.title, url: window.location.href });
+                     } catch {
+                       await navigator.clipboard.writeText(window.location.href);
+                       alert('คัดลอกลิงก์แล้ว');
+                     }
+                   }}
+                   className="text-ci-blue font-bold hover:underline flex items-center gap-1"
+                 >
                    <Share2 className="w-4 h-4" /> แชร์
                  </button>
               </div>
@@ -207,7 +221,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               <div className="mb-12">
                 <div className="flex justify-between items-end mb-4">
                    <h3 className="font-bold text-slate-800 text-lg">เลือกขนาด</h3>
-                   <button className="text-xs text-ci-blue hover:text-blue-700 font-bold flex items-center bg-ci-blue/5 px-3 py-1.5 rounded-lg transition-colors">
+                   <button
+                     onClick={() => setActiveTab('size')}
+                     className="text-xs text-ci-blue hover:text-blue-700 font-bold flex items-center bg-ci-blue/5 px-3 py-1.5 rounded-lg transition-colors"
+                   >
                        <Ruler className="w-3 h-3 mr-1.5" /> ตารางไซส์
                    </button>
                 </div>
@@ -451,7 +468,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                           </div>
                           <p className="text-sm text-slate-500">จาก 128 รีวิวทั้งหมด</p>
                        </div>
-                       <button className="ml-auto px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl text-sm hover:bg-slate-100">
+                       <button
+                         onClick={() => alert('ฟีเจอร์รีวิวจะเปิดให้ใช้งานเร็วๆ นี้')}
+                         className="ml-auto px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl text-sm hover:bg-slate-100"
+                       >
                           เขียนรีวิว
                        </button>
                     </div>

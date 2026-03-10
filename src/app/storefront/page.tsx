@@ -1,7 +1,7 @@
 'use client';
 
 import DashboardLayout from '@/components/DashboardLayout';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Save, Settings, Package, Truck, Megaphone, FileText, ExternalLink, Palette, Image as ImageIcon, MousePointerClick, Loader2 } from 'lucide-react';
 import { saveStorefrontSettings, type StorefrontState } from '@/app/actions/storefront';
 
@@ -9,6 +9,8 @@ export default function StorefrontPage() {
   const [activeTab, setActiveTab] = useState('general');
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [selectedShipping, setSelectedShipping] = useState(0);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = async () => {
     setSaving(true);
@@ -94,7 +96,7 @@ export default function StorefrontPage() {
                     </span>
                   </div>
                   <a 
-                    href="#" 
+                    href="/storefront" 
                     target="_blank" 
                     className="flex items-center justify-center px-6 py-3 text-sm font-bold text-white bg-slate-800 rounded-xl hover:bg-slate-900 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
                   >
@@ -123,7 +125,11 @@ export default function StorefrontPage() {
                         <label htmlFor="store-logo" className="block text-sm font-bold text-slate-700 mb-2">
                           โลโก้ร้านค้า
                         </label>
-                        <div className="w-full aspect-video rounded-2xl border-2 border-dashed border-slate-200 hover:border-ci-blue/50 hover:bg-slate-50 transition-all flex flex-col items-center justify-center cursor-pointer group">
+                        <div
+                          onClick={() => logoInputRef.current?.click()}
+                          className="w-full aspect-video rounded-2xl border-2 border-dashed border-slate-200 hover:border-ci-blue/50 hover:bg-slate-50 transition-all flex flex-col items-center justify-center cursor-pointer group"
+                        >
+                          <input ref={logoInputRef} type="file" accept="image/*" className="hidden" />
                           <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-ci-blue group-hover:shadow-md transition-all mb-2">
                             <ImageIcon className="w-6 h-6" />
                           </div>
@@ -192,10 +198,11 @@ export default function StorefrontPage() {
                 <div>
                   <h2 className="text-xl font-bold text-slate-800 mb-1">สินค้าในหน้าร้าน</h2>
                   <p className="text-sm text-slate-500">
-                    คุณมีสินค้า <span className="font-bold text-ci-blue bg-ci-blue/10 px-2 py-0.5 rounded-md">2</span> ชิ้น ที่แสดงอยู่
+                    คุณมีสินค้า <span className="font-bold text-ci-blue bg-ci-blue/10 px-2 py-0.5 rounded-md">0</span> ชิ้น ที่แสดงอยู่
                   </p>
                 </div>
                 <button 
+                  onClick={() => window.location.href = '/designer'}
                   className="flex items-center justify-center px-6 py-3 text-sm font-bold text-white rounded-xl shadow-lg shadow-ci-blue/20 hover:shadow-ci-blue/40 hover:-translate-y-0.5 transition-all active:scale-95 bg-gradient-to-r from-ci-blue to-blue-600"
                 >
                   <Package className="w-4 h-4 mr-2" />
@@ -212,7 +219,7 @@ export default function StorefrontPage() {
                   <p className="text-slate-400 max-w-xs mx-auto mb-6">
                     เลือกสินค้าจากแคตตาล็อกหรือเทมเพลตที่คุณออกแบบไว้ เพื่อนำมาขายในหน้าร้าน
                   </p>
-                  <button className="text-ci-blue font-bold hover:underline">
+                  <button onClick={() => window.location.href = '/catalog'} className="text-ci-blue font-bold hover:underline">
                     เลือกสินค้าจากแคตตาล็อก →
                   </button>
                 </div>
@@ -235,33 +242,35 @@ export default function StorefrontPage() {
               
               <div className="space-y-4 max-w-2xl">
                 {[
-                  { label: 'ค่าส่งอัตราเดียว (Flat Rate)', active: true, hasInput: true, desc: 'คิดค่าส่งเท่ากันทุกออเดอร์' },
-                  { label: 'ส่งฟรี (Free Shipping)', active: false, hasInput: false, desc: 'ลูกค้าไม่ต้องเสียค่าจัดส่ง' },
-                  { label: 'ส่งฟรีตามเงื่อนไข', active: false, hasInput: true, desc: 'เมื่อยอดสั่งซื้อถึงกำหนด' }
-                ].map((option, idx) => (
+                  { label: 'ค่าส่งอัตราเดียว (Flat Rate)', hasInput: true, desc: 'คิดค่าส่งเท่ากันทุกออเดอร์' },
+                  { label: 'ส่งฟรี (Free Shipping)', hasInput: false, desc: 'ลูกค้าไม่ต้องเสียค่าจัดส่ง' },
+                  { label: 'ส่งฟรีตามเงื่อนไข', hasInput: true, desc: 'เมื่อยอดสั่งซื้อถึงกำหนด' }
+                ].map((option, idx) => {
+                  const isActive = selectedShipping === idx;
+                  return (
                   <label 
                     key={idx}
                     className={`group block p-6 bg-white rounded-2xl border-2 cursor-pointer transition-all ${
-                      option.active 
+                      isActive 
                         ? 'border-ci-blue bg-ci-blue/5 shadow-md shadow-ci-blue/5' 
                         : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className={`font-bold ${option.active ? 'text-ci-blue' : 'text-slate-700'}`}>
+                      <span className={`font-bold ${isActive ? 'text-ci-blue' : 'text-slate-700'}`}>
                         {option.label}
                       </span>
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                        option.active ? 'border-ci-blue bg-ci-blue' : 'border-slate-300 bg-white'
+                        isActive ? 'border-ci-blue bg-ci-blue' : 'border-slate-300 bg-white'
                       }`}>
-                        {option.active && <div className="w-2 h-2 bg-white rounded-full" />}
+                        {isActive && <div className="w-2 h-2 bg-white rounded-full" />}
                       </div>
                     </div>
                     <p className="text-xs text-slate-400 mb-4 pl-0.5">{option.desc}</p>
                     
-                    <input type="radio" name="shipping-option" className="hidden" checked={option.active} readOnly />
+                    <input type="radio" name="shippingOption" className="hidden" checked={isActive} onChange={() => setSelectedShipping(idx)} />
                     
-                    {option.hasInput && option.active && (
+                    {option.hasInput && isActive && (
                       <div className="flex items-center gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
                         <span className="text-sm font-medium text-slate-600">ราคา:</span>
                         <div className="relative w-32">
@@ -276,7 +285,8 @@ export default function StorefrontPage() {
                       </div>
                     )}
                   </label>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

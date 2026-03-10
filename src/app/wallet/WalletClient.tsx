@@ -27,6 +27,8 @@ export default function WalletClient({ wallet, transactions }: WalletClientProps
   const [selectedPeriod, setSelectedPeriod] = useState('30days');
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(5);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Calculate stats from real data (simple version)
   const totalIncome = transactions
@@ -99,10 +101,7 @@ export default function WalletClient({ wallet, transactions }: WalletClientProps
                 </div>
               </div>
               <h3 className="text-3xl font-bold text-slate-800 mb-2">฿{totalIncome.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
-              <div className="inline-flex items-center text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">
-                +12.5%
-                <span className="text-emerald-400 ml-1 font-medium">จากเดือนก่อน</span>
-              </div>
+              <p className="text-sm font-medium text-slate-400">ทั้งหมด</p>
             </div>
           </div>
 
@@ -152,7 +151,7 @@ export default function WalletClient({ wallet, transactions }: WalletClientProps
           </div>
 
           <div className="divide-y divide-slate-100">
-            {transactions.map((transaction) => {
+            {transactions.slice(0, visibleCount).map((transaction) => {
               const { Icon, style } = getTransactionIcon(transaction.type);
               return (
                 <div
@@ -193,8 +192,20 @@ export default function WalletClient({ wallet, transactions }: WalletClientProps
                       </div>
                     </div>
                     
-                    <button className="p-2 text-slate-300 hover:text-slate-500 hover:bg-slate-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(transaction.id);
+                        setCopiedId(transaction.id);
+                        setTimeout(() => setCopiedId(null), 2000);
+                      }}
+                      className="p-2 text-slate-300 hover:text-slate-500 hover:bg-slate-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 relative"
+                    >
                       <MoreHorizontal className="w-5 h-5" />
+                      {copiedId === transaction.id && (
+                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap">
+                          คัดลอกแล้ว
+                        </span>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -202,11 +213,16 @@ export default function WalletClient({ wallet, transactions }: WalletClientProps
             })}
           </div>
           
-          <div className="p-6 bg-slate-50/50 border-t border-slate-100 text-center">
-            <button className="text-sm font-bold text-slate-500 hover:text-ci-blue transition-colors">
-              โหลดเพิ่มเติม...
-            </button>
-          </div>
+          {visibleCount < transactions.length && (
+            <div className="p-6 bg-slate-50/50 border-t border-slate-100 text-center">
+              <button
+                onClick={() => setVisibleCount(prev => prev + 5)}
+                className="text-sm font-bold text-slate-500 hover:text-ci-blue transition-colors"
+              >
+                โหลดเพิ่มเติม... ({transactions.length - visibleCount} รายการ)
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

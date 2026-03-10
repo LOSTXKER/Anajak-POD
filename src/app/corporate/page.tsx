@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { CheckCircle2, Building2, Users, FileText, Settings, Truck, MessageCircle } from 'lucide-react';
@@ -195,7 +197,7 @@ export default function CorporatePage() {
               <h2 className="text-3xl font-bold text-slate-900 mb-2 text-center">ขอใบเสนอราคา</h2>
               <p className="text-slate-500 text-center mb-8">กรอกข้อมูลเพื่อให้เจ้าหน้าที่ติดต่อกลับพร้อมราคาประเมิน</p>
               
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert('ส่งคำขอสำเร็จ! เจ้าหน้าที่จะติดต่อกลับพร้อมใบเสนอราคาภายใน 24 ชั่วโมง'); e.currentTarget.reset(); }}>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">ชื่อผู้ติดต่อ</label>

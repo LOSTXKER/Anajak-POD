@@ -1,9 +1,15 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import { Check, HelpCircle } from 'lucide-react';
 import LandingHeader from '@/components/LandingHeader';
 import LandingFooter from '@/components/LandingFooter';
 
 export default function PricingPage() {
+  const [baseCost, setBaseCost] = useState(150);
+  const [sellingPrice, setSellingPrice] = useState(390);
+  const profit = sellingPrice - baseCost;
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       <LandingHeader />
@@ -132,19 +138,19 @@ export default function PricingPage() {
              <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 grid md:grid-cols-3 gap-8 items-center">
                 <div className="text-left">
                    <label className="block text-sm font-bold text-slate-700 mb-2">เลือกสินค้า</label>
-                   <select className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 font-medium">
-                      <option value="150">เสื้อยืด Cotton 100% (ทุน ฿150)</option>
-                      <option value="250">เสื้อ Oversize (ทุน ฿250)</option>
-                      <option value="450">เสื้อ Hoodie (ทุน ฿450)</option>
+                   <select className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 font-medium" value={baseCost} onChange={(e) => setBaseCost(Number(e.target.value))}>
+                      <option value={150}>เสื้อยืด Cotton 100% (ทุน ฿150)</option>
+                      <option value={250}>เสื้อ Oversize (ทุน ฿250)</option>
+                      <option value={450}>เสื้อ Hoodie (ทุน ฿450)</option>
                    </select>
                 </div>
                 <div className="text-left">
                    <label className="block text-sm font-bold text-slate-700 mb-2">ราคาที่คุณขาย (บาท)</label>
-                   <input type="number" defaultValue="390" className="w-full p-3 rounded-xl border border-slate-200 bg-white font-bold text-lg text-slate-900" />
+                   <input type="number" value={sellingPrice} onChange={(e) => setSellingPrice(Number(e.target.value))} className="w-full p-3 rounded-xl border border-slate-200 bg-white font-bold text-lg text-slate-900" />
                 </div>
                 <div className="bg-green-50 p-4 rounded-xl text-center">
                    <p className="text-sm text-green-800 font-bold uppercase mb-1">กำไรต่อชิ้น</p>
-                   <p className="text-3xl font-bold text-green-600">฿240</p>
+                   <p className={`text-3xl font-bold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>฿{profit}</p>
                 </div>
              </div>
              <p className="mt-4 text-sm text-slate-400 text-center">

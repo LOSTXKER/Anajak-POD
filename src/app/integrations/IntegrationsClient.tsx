@@ -24,9 +24,8 @@ export default function IntegrationsClient({ initialIntegrations }: Integrations
   const [showApiSecret, setShowApiSecret] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  // Mock Keys (Safe Patterns)
-  const apiKey = 'PUBLIC_KEY_EXAMPLE_123456';
-  const apiSecret = 'SECRET_KEY_EXAMPLE_123456';
+  const [apiKey, setApiKey] = useState('PUBLIC_KEY_EXAMPLE_123456');
+  const [apiSecret, setApiSecret] = useState('SECRET_KEY_EXAMPLE_123456');
 
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
@@ -34,14 +33,14 @@ export default function IntegrationsClient({ initialIntegrations }: Integrations
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  const platforms = [
+  const platforms: Array<{ id: string; name: string; description: string; logo: string; color: string; stats: { products: number; orders: number } | null; isPopular: boolean }> = [
     {
       id: 'shopee',
       name: 'Shopee',
       description: 'ซิงค์สินค้าและออเดอร์อัตโนมัติ',
       logo: '🛍️',
       color: 'from-orange-500 to-red-500',
-      stats: { products: 15, orders: 42 },
+      stats: null,
       isPopular: true
     },
     {
@@ -218,7 +217,10 @@ export default function IntegrationsClient({ initialIntegrations }: Integrations
 
                     <div className="flex gap-3">
                       {/* Updated Button: Outline Slate */}
-                      <button className="flex-1 py-2.5 text-sm font-bold text-slate-700 bg-white border-2 border-slate-100 hover:border-slate-200 rounded-xl transition-colors">
+                      <button 
+                        onClick={() => alert('กำลังพัฒนาฟีเจอร์การตั้งค่า')}
+                        className="flex-1 py-2.5 text-sm font-bold text-slate-700 bg-white border-2 border-slate-100 hover:border-slate-200 rounded-xl transition-colors"
+                      >
                         ตั้งค่า
                       </button>
                       {/* Updated Button: Soft Red */}
@@ -345,11 +347,24 @@ export default function IntegrationsClient({ initialIntegrations }: Integrations
                  </p>
                  <div className="flex gap-3">
                     {/* Updated Button: White Outline Style for secondary */}
-                    <button className="px-4 py-2 bg-white text-indigo-600 font-bold text-sm rounded-xl shadow-sm hover:bg-indigo-50 transition-colors border border-indigo-100">
+                    <button 
+                       onClick={() => window.open('https://docs.anajak.com/api', '_blank')}
+                       className="px-4 py-2 bg-white text-indigo-600 font-bold text-sm rounded-xl shadow-sm hover:bg-indigo-50 transition-colors border border-indigo-100"
+                    >
                        ดู API Docs
                     </button>
                     {/* Updated Button: Primary Color but matched to Indigo context */}
-                    <button className="px-4 py-2 bg-indigo-600 text-white font-bold text-sm rounded-xl shadow-sm hover:bg-indigo-700 transition-colors">
+                    <button 
+                       onClick={() => {
+                         const newKey = 'pk_' + Math.random().toString(36).substring(2, 18);
+                         const newSecret = 'sk_' + Math.random().toString(36).substring(2, 18);
+                         setApiKey(newKey);
+                         setApiSecret(newSecret);
+                         setShowApiKey(true);
+                         setShowApiSecret(true);
+                       }}
+                       className="px-4 py-2 bg-indigo-600 text-white font-bold text-sm rounded-xl shadow-sm hover:bg-indigo-700 transition-colors"
+                    >
                        Generate New Keys
                     </button>
                  </div>

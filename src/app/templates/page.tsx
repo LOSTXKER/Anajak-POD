@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Search, Filter, Grid3x3, List, Edit2, Trash2, Copy, Eye, MoreHorizontal, Plus, Calendar, SlidersHorizontal, CheckCircle2, Clock, AlertCircle, ShoppingCart, Package, PenTool, Globe, Lock, MoreVertical } from 'lucide-react';
 import { publishDesign, deleteDesign } from '@/app/actions/designs';
@@ -10,13 +10,6 @@ export default function TemplatesPage() {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeDropdown, setActiveDropdown] = useState<number | string | null>(null);
-
-  const statuses = [
-    { id: 'all', name: 'ทั้งหมด', count: 12 },
-    { id: 'published', name: 'วางขายแล้ว', count: 8 },
-    { id: 'draft', name: 'แบบร่าง', count: 3 },
-    { id: 'private', name: 'ส่วนตัว', count: 1 },
-  ];
 
   interface Template {
     id: string | number;
@@ -34,6 +27,13 @@ export default function TemplatesPage() {
   }
 
   const [templates, setTemplates] = useState<Template[]>([]);
+
+  const statuses = useMemo(() => [
+    { id: 'all', name: 'ทั้งหมด', count: templates.length },
+    { id: 'published', name: 'วางขายแล้ว', count: templates.filter(t => t.status === 'published').length },
+    { id: 'draft', name: 'แบบร่าง', count: templates.filter(t => t.status === 'draft').length },
+    { id: 'private', name: 'ส่วนตัว', count: templates.filter(t => t.status === 'private').length },
+  ], [templates]);
 
   useEffect(() => {
     const MOCK_TEMPLATES = [
@@ -226,11 +226,11 @@ export default function TemplatesPage() {
             
             <div className="flex gap-4 shrink-0">
               <div className="text-center px-6 py-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
-                <p className="text-3xl font-bold text-white mb-1">12</p>
+                <p className="text-3xl font-bold text-white mb-1">{statuses.find(s => s.id === 'all')?.count ?? 0}</p>
                 <p className="text-xs text-slate-400 uppercase tracking-wider">ผลงานทั้งหมด</p>
               </div>
               <div className="text-center px-6 py-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
-                <p className="text-3xl font-bold text-emerald-400 mb-1">8</p>
+                <p className="text-3xl font-bold text-emerald-400 mb-1">{statuses.find(s => s.id === 'published')?.count ?? 0}</p>
                 <p className="text-xs text-slate-400 uppercase tracking-wider">วางขายแล้ว</p>
               </div>
             </div>
@@ -434,7 +434,7 @@ export default function TemplatesPage() {
                   <div className="flex gap-2">
                     {template.status === 'draft' ? (
                       <>
-                        <button className="flex-1 py-2.5 bg-slate-100 text-slate-600 text-sm font-bold rounded-xl hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
+                        <button onClick={() => window.location.href = '/designer'} className="flex-1 py-2.5 bg-slate-100 text-slate-600 text-sm font-bold rounded-xl hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
                           <Edit2 className="w-4 h-4" />
                           แก้ไข
                         </button>
@@ -447,7 +447,16 @@ export default function TemplatesPage() {
                         </button>
                       </>
                     ) : (
-                      <button className="flex-1 py-2.5 bg-ci-blue text-white text-sm font-bold rounded-xl hover:bg-ci-blueDark shadow-lg shadow-ci-blue/20 transition-all flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => {
+                          const cartItem = { id: template.id, name: template.name, productType: template.productType, price: template.price, cost: template.cost, quantity: 1, image: template.previewImage || '' };
+                          const existing = JSON.parse(localStorage.getItem('anajak_cart') || '[]');
+                          existing.push(cartItem);
+                          localStorage.setItem('anajak_cart', JSON.stringify(existing));
+                          window.location.href = '/cart';
+                        }}
+                        className="flex-1 py-2.5 bg-ci-blue text-white text-sm font-bold rounded-xl hover:bg-ci-blueDark shadow-lg shadow-ci-blue/20 transition-all flex items-center justify-center gap-2"
+                      >
                         <ShoppingCart className="w-4 h-4" />
                         สั่งผลิตเลย
                       </button>

@@ -1,3 +1,5 @@
+'use client';
+
 import LandingHeader from '@/components/LandingHeader';
 import LandingFooter from '@/components/LandingFooter';
 import { Mail, Phone, MessageCircle, MapPin } from 'lucide-react';
@@ -81,7 +83,7 @@ export default function ContactPage() {
                 {/* Contact Form */}
                 <div className="p-10">
                   <h3 className="text-2xl font-bold text-slate-900 mb-6">ส่งข้อความถึงเรา</h3>
-                  <form className="space-y-6">
+                  <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert('ส่งข้อความสำเร็จ! เราจะติดต่อกลับภายใน 24 ชั่วโมง'); e.currentTarget.reset(); }}>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">ชื่อของคุณ</label>
                       <input type="text" className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />

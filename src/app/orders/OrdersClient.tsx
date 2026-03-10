@@ -37,6 +37,8 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
   const [orders, setOrders] = useState(initialOrders);
 
   const filteredOrders = useMemo(() => {
@@ -52,8 +54,44 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
         o.items.some(i => i.product.title.toLowerCase().includes(q))
       );
     }
+
+    if (dateFilter !== 'all') {
+      const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      let cutoff: Date;
+      switch (dateFilter) {
+        case 'today':
+          cutoff = startOfToday;
+          break;
+        case 'yesterday': {
+          const yesterday = new Date(startOfToday);
+          yesterday.setDate(yesterday.getDate() - 1);
+          cutoff = yesterday;
+          break;
+        }
+        case '7days':
+          cutoff = new Date(startOfToday);
+          cutoff.setDate(cutoff.getDate() - 7);
+          break;
+        case '30days':
+          cutoff = new Date(startOfToday);
+          cutoff.setDate(cutoff.getDate() - 30);
+          break;
+        default:
+          cutoff = new Date(0);
+      }
+      result = result.filter(o => new Date(o.createdAt) >= cutoff);
+    }
+
     return result;
-  }, [orders, activeTab, searchQuery]);
+  }, [orders, activeTab, searchQuery, dateFilter]);
+
+  const ITEMS_PER_PAGE = 10;
+  const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const handleCreateOrder = () => {
     window.location.href = '/designer';
@@ -164,7 +202,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                 ].map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => { setActiveTab(tab.id); setCurrentPage(1); }}
                     className={`px-4 py-2 text-sm font-bold rounded-xl whitespace-nowrap flex-shrink-0 transition-all border ${
                       activeTab === tab.id
                         ? 'bg-ci-blue text-white border-ci-blue shadow-md shadow-ci-blue/20'
@@ -197,18 +235,22 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                   type="text"
                   placeholder="ค้นหาด้วยเลขที่ออเดอร์, ชื่อลูกค้า, เบอร์โทร..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                   className="w-full pl-12 pr-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue transition-all hover:border-slate-300"
                 />
               </div>
               <div className="relative w-full md:w-64">
                 <Calendar className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                <select className="w-full pl-12 pr-10 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue appearance-none cursor-pointer transition-all font-medium text-slate-600 hover:border-slate-300">
-                  <option>ทุกช่วงเวลา</option>
-                  <option>วันนี้</option>
-                  <option>เมื่อวาน</option>
-                  <option>7 วันล่าสุด</option>
-                  <option>30 วันล่าสุด</option>
+                <select
+                  value={dateFilter}
+                  onChange={(e) => { setDateFilter(e.target.value); setCurrentPage(1); }}
+                  className="w-full pl-12 pr-10 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue appearance-none cursor-pointer transition-all font-medium text-slate-600 hover:border-slate-300"
+                >
+                  <option value="all">ทุกช่วงเวลา</option>
+                  <option value="today">วันนี้</option>
+                  <option value="yesterday">เมื่อวาน</option>
+                  <option value="7days">7 วันล่าสุด</option>
+                  <option value="30days">30 วันล่าสุด</option>
                 </select>
                 <ChevronDown className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               </div>
@@ -238,14 +280,14 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredOrders.length === 0 ? (
+                {paginatedOrders.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="text-center py-12 text-slate-500">
                       ไม่พบรายการคำสั่งซื้อในสถานะนี้
                     </td>
                   </tr>
                 ) : (
-                  filteredOrders.map((order) => (
+                  paginatedOrders.map((order) => (
                     <tr
                       key={order.id}
                       className={`hover:bg-slate-50 transition-colors group ${selectedOrders.includes(order.id) ? 'bg-ci-blue/5' : ''}`}
@@ -304,7 +346,10 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                             ยกเลิก
                           </button>
                         ) : (
-                          <button className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                          <button
+                            onClick={() => window.location.href = `/orders/${order.id}`}
+                            className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                          >
                             <MoreHorizontal className="w-5 h-5" />
                           </button>
                         )}
@@ -319,19 +364,36 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
           {/* Pagination */}
           <div className="p-6 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
             <span className="text-sm text-slate-500 font-medium">
-              แสดง <b>{filteredOrders.length > 0 ? 1 : 0}-{filteredOrders.length}</b> จาก <b>{filteredOrders.length}</b> รายการ
+              แสดง <b>{filteredOrders.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredOrders.length)}</b> จาก <b>{filteredOrders.length}</b> รายการ
             </span>
             <div className="flex items-center gap-2">
               <button
-                disabled
+                disabled={currentPage <= 1}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 className="p-2 rounded-lg border border-slate-200 text-slate-400 disabled:opacity-50 hover:bg-white hover:text-slate-600 transition-colors"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <div className="flex items-center gap-1 px-2">
-                 <button className="w-8 h-8 rounded-lg bg-ci-blue text-white font-bold text-sm shadow-sm">1</button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 rounded-lg text-sm font-bold transition-colors ${
+                      page === currentPage
+                        ? 'bg-ci-blue text-white shadow-sm'
+                        : 'text-slate-500 hover:bg-slate-100'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
               </div>
-              <button className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-white hover:text-slate-700 transition-colors">
+              <button
+                disabled={currentPage >= totalPages}
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                className="p-2 rounded-lg border border-slate-200 text-slate-500 disabled:opacity-50 hover:bg-white hover:text-slate-700 transition-colors"
+              >
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>

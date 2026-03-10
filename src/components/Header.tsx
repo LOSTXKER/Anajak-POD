@@ -26,6 +26,8 @@ export default function Header({
 }: HeaderProps) {
   const [cartCount, setCartCount] = useState(0);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [searchValue, setSearchValue] = useState('');
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     const updateCount = () => {
@@ -97,6 +99,13 @@ export default function Header({
           <input 
             type="text" 
             placeholder="ค้นหาออเดอร์, สินค้า..." 
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && searchValue.trim()) {
+                window.location.href = `/catalog?q=${encodeURIComponent(searchValue.trim())}`;
+              }
+            }}
             className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue transition-all w-64 shadow-sm"
           />
         </div>
@@ -107,9 +116,9 @@ export default function Header({
             <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Balance</span>
             <span className="text-sm font-bold text-slate-800 leading-none">฿{walletBalance !== null ? walletBalance.toLocaleString() : '—'}</span>
           </div>
-          <button className="w-8 h-8 bg-ci-blue/10 hover:bg-ci-blue/20 text-ci-blue rounded-lg flex items-center justify-center transition-colors">
+          <Link href="/wallet" className="w-8 h-8 bg-ci-blue/10 hover:bg-ci-blue/20 text-ci-blue rounded-lg flex items-center justify-center transition-colors">
             <Plus className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
 
         {/* Cart Shortcut */}
@@ -123,10 +132,21 @@ export default function Header({
         </Link>
 
         {/* Notifications */}
-        <button className="relative p-2.5 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-ci-blue hover:border-ci-blue/30 hover:shadow-md hover:-translate-y-0.5 transition-all group">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white group-hover:scale-110 transition-transform"></span>
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setShowNotifications(prev => !prev)}
+            className="relative p-2.5 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-ci-blue hover:border-ci-blue/30 hover:shadow-md hover:-translate-y-0.5 transition-all group"
+          >
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white group-hover:scale-110 transition-transform"></span>
+          </button>
+          {showNotifications && (
+            <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-xl p-4 z-50">
+              <h4 className="text-sm font-bold text-slate-700 mb-2">การแจ้งเตือน</h4>
+              <p className="text-sm text-slate-400 text-center py-4">ไม่มีการแจ้งเตือนใหม่</p>
+            </div>
+          )}
+        </div>
 
         {/* Create Button */}
         {showCreateButton && (

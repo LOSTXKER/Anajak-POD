@@ -1,7 +1,9 @@
 'use client';
 
 import DashboardLayout from '@/components/DashboardLayout';
+import Link from 'next/link';
 import { TrendingUp, Clock, AlertCircle, Activity, Palette, ArrowRight, ChevronRight, Sparkles, Heart, Store, ShoppingCart } from 'lucide-react';
+import { useState } from 'react';
 
 interface DashboardProps {
   stats: {
@@ -22,6 +24,7 @@ interface DashboardProps {
 
 export default function DashboardClient({ stats, topProducts, weeklySales = [], weeklyTotal = 0, dailyAvg = 0 }: DashboardProps) {
   const maxChartAmount = Math.max(...weeklySales.map(d => d.amount), 1);
+  const [likedAI, setLikedAI] = useState<number[]>([]);
   return (
     <DashboardLayout 
       title="สวัสดีตอนบ่าย, คุณลูกค้า ☀️" 
@@ -52,14 +55,14 @@ export default function DashboardClient({ stats, topProducts, weeklySales = [], 
                 ไม่ว่าจะทำใส่เองชิ้นเดียว หรือสร้างแบรนด์ขายจริงจัง เราพร้อมซัพพอร์ตทุกความฝันของคุณด้วยระบบการผลิตที่ทันสมัย
               </p>
               <div className="flex flex-wrap gap-4">
-                <button className="px-8 py-3.5 bg-ci-yellow text-slate-900 rounded-xl text-sm font-bold hover:bg-yellow-400 hover:scale-105 transition-all flex items-center shadow-lg shadow-ci-yellow/20">
+                <Link href="/designer" className="px-8 py-3.5 bg-ci-yellow text-slate-900 rounded-xl text-sm font-bold hover:bg-yellow-400 hover:scale-105 transition-all flex items-center shadow-lg shadow-ci-yellow/20">
                   <Palette className="w-4 h-4 mr-2" />
                   ออกแบบใส่เอง
-                </button>
-                <button className="px-8 py-3.5 bg-transparent text-white rounded-xl text-sm font-bold hover:bg-white/10 hover:scale-105 transition-all flex items-center border-2 border-white/20 hover:border-white/40">
+                </Link>
+                <Link href="/storefront" className="px-8 py-3.5 bg-transparent text-white rounded-xl text-sm font-bold hover:bg-white/10 hover:scale-105 transition-all flex items-center border-2 border-white/20 hover:border-white/40">
                   <Store className="w-4 h-4 mr-2" />
                   ฉันต้องการทำขาย
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -72,8 +75,8 @@ export default function DashboardClient({ stats, topProducts, weeklySales = [], 
               <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
                 <TrendingUp className="w-6 h-6" />
               </div>
-              <span className="flex items-center text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
-                +12.5% <span className="text-emerald-400 ml-1">↗</span>
+              <span className="flex items-center text-xs font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-full">
+                ทั้งหมด
               </span>
             </div>
             <div>
@@ -112,7 +115,7 @@ export default function DashboardClient({ stats, topProducts, weeklySales = [], 
             </div>
           </div>
 
-          <div className="bg-ci-red/5 p-6 rounded-[1.5rem] border border-ci-red/10 flex flex-col justify-between hover:shadow-lg hover:shadow-red-100/50 transition-all duration-300 group cursor-pointer">
+          <Link href="/orders" className="bg-ci-red/5 p-6 rounded-[1.5rem] border border-ci-red/10 flex flex-col justify-between hover:shadow-lg hover:shadow-red-100/50 transition-all duration-300 group cursor-pointer">
             <div className="flex justify-between items-start mb-4">
               <div className="p-3 bg-white rounded-2xl text-ci-red shadow-sm">
                 <AlertCircle className="w-6 h-6" />
@@ -126,7 +129,7 @@ export default function DashboardClient({ stats, topProducts, weeklySales = [], 
                 ดูรายการที่พบปัญหา <ArrowRight className="w-3 h-3 ml-1" />
               </div>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Factory Status & News */}
@@ -224,9 +227,9 @@ export default function DashboardClient({ stats, topProducts, weeklySales = [], 
               </div>
               {/* Tabs - Updated Style to match Catalog */}
               <div className="flex space-x-2 p-1">
-                <button className="px-4 py-1.5 text-xs font-bold rounded-lg bg-ci-blue text-white shadow-sm border border-ci-blue shadow-ci-blue/20">7 วัน</button>
-                <button className="px-4 py-1.5 text-xs font-bold rounded-lg bg-white text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300">30 วัน</button>
-                <button className="px-4 py-1.5 text-xs font-bold rounded-lg bg-white text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300">ปีนี้</button>
+                <span className="px-4 py-1.5 text-xs font-bold rounded-lg bg-ci-blue text-white shadow-sm border border-ci-blue shadow-ci-blue/20">7 วัน</span>
+                <Link href="/reports" className="px-4 py-1.5 text-xs font-bold rounded-lg bg-white text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300">30 วัน</Link>
+                <Link href="/reports" className="px-4 py-1.5 text-xs font-bold rounded-lg bg-white text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300">ปีนี้</Link>
               </div>
             </div>
             
@@ -272,9 +275,9 @@ export default function DashboardClient({ stats, topProducts, weeklySales = [], 
                 <h3 className="text-lg font-bold text-slate-800">สินค้าขายดี</h3>
                 <p className="text-sm text-slate-500 mt-1">Top 5 ประจำเดือน</p>
               </div>
-              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+              <Link href="/reports" className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
                 <ChevronRight className="w-5 h-5 text-slate-400" />
-              </button>
+              </Link>
             </div>
             
             <div className="space-y-6 flex-1">
@@ -299,9 +302,9 @@ export default function DashboardClient({ stats, topProducts, weeklySales = [], 
               ))}
             </div>
             
-            <button className="w-full mt-6 py-3 text-sm font-bold bg-ci-blue text-white border border-ci-blue/10 rounded-xl hover:bg-ci-blueDark transition-all">
+            <Link href="/reports" className="w-full mt-6 py-3 text-sm font-bold bg-ci-blue text-white border border-ci-blue/10 rounded-xl hover:bg-ci-blueDark transition-all block text-center">
               ดูรายงานฉบับเต็ม
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -324,12 +327,12 @@ export default function DashboardClient({ stats, topProducts, weeklySales = [], 
                  </p>
                  
                  <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                   <button className="px-8 py-4 bg-gradient-to-r from-ci-blue to-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-ci-blue/30 hover:shadow-ci-blue/50 hover:-translate-y-1 transition-all">
+                   <Link href="/pricing" className="px-8 py-4 bg-gradient-to-r from-ci-blue to-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-ci-blue/30 hover:shadow-ci-blue/50 hover:-translate-y-1 transition-all text-center">
                      เริ่มทดลองใช้ฟรี 14 วัน
-                   </button>
-                   <button className="px-8 py-4 bg-transparent text-white rounded-2xl font-bold backdrop-blur-sm border border-white/20 hover:bg-white/10 transition-all">
+                   </Link>
+                   <Link href="/pricing" className="px-8 py-4 bg-transparent text-white rounded-2xl font-bold backdrop-blur-sm border border-white/20 hover:bg-white/10 transition-all text-center">
                      ดูรายละเอียดแพ็กเกจ
-                   </button>
+                   </Link>
                  </div>
                  <p className="mt-4 text-xs text-slate-500">
                    หลังจากนั้นเพียง ฿499/เดือน • ยกเลิกได้ตลอดเวลา
@@ -363,7 +366,7 @@ export default function DashboardClient({ stats, topProducts, weeklySales = [], 
                  <p className="text-slate-500 text-sm">วิเคราะห์จากเทรนด์ตลาดปัจจุบัน</p>
                </div>
              </div>
-             <button className="text-ci-blue font-bold text-sm hover:underline hover:text-ci-blue/80 transition-colors">ดูทั้งหมด</button>
+             <Link href="/catalog" className="text-ci-blue font-bold text-sm hover:underline hover:text-ci-blue/80 transition-colors">ดูทั้งหมด</Link>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -375,9 +378,9 @@ export default function DashboardClient({ stats, topProducts, weeklySales = [], 
             ].map((item, idx) => (
               <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer">
                 <div className={`aspect-square rounded-xl ${item.img} mb-4 relative overflow-hidden`}>
-                  <div className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:text-ci-red">
-                    <Heart className="w-4 h-4" />
-                  </div>
+                  <button onClick={() => setLikedAI(prev => prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx])} className={`absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity ${likedAI.includes(idx) ? 'text-ci-red' : 'hover:text-ci-red'}`}>
+                    <Heart className={`w-4 h-4 ${likedAI.includes(idx) ? 'fill-current' : ''}`} />
+                  </button>
                   <div className="absolute bottom-3 left-3 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">
                     กำไร +{item.profit}%
                   </div>

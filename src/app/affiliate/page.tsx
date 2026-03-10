@@ -67,14 +67,14 @@ export default function AffiliatePage() {
                 <div className="w-10 h-10 bg-ci-yellow/20 rounded-xl flex items-center justify-center text-ci-yellow mb-4">
                   <Users className="w-5 h-5" />
                 </div>
-                <p className="text-3xl font-bold text-white mb-1">128</p>
+                <p className="text-3xl font-bold text-white mb-1">--</p>
                 <p className="text-sm text-slate-400">เพื่อนที่สมัคร</p>
               </div>
               <div className="bg-gradient-to-br from-ci-blue to-blue-600 p-6 rounded-3xl shadow-xl transform translate-y-8">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white mb-4">
                   <DollarSign className="w-5 h-5" />
                 </div>
-                <p className="text-3xl font-bold text-white mb-1">฿12,450</p>
+                <p className="text-3xl font-bold text-white mb-1">฿0</p>
                 <p className="text-sm text-blue-100">รายได้รวมของคุณ</p>
               </div>
             </div>
@@ -90,10 +90,13 @@ export default function AffiliatePage() {
               </div>
               <div>
                 <p className="text-sm text-slate-500 font-bold">ค่าคอมมิชชั่นที่ถอนได้</p>
-                <h3 className="text-2xl font-bold text-slate-800">฿2,450.00</h3>
+                <h3 className="text-2xl font-bold text-slate-800">฿0.00</h3>
               </div>
             </div>
-            <button className="w-full py-3 bg-ci-blue text-white rounded-xl font-bold text-sm hover:bg-ci-blueDark transition-all shadow-lg shadow-ci-blue/20">
+            <button 
+              onClick={() => window.location.href = '/wallet'}
+              className="w-full py-3 bg-ci-blue text-white rounded-xl font-bold text-sm hover:bg-ci-blueDark transition-all shadow-lg shadow-ci-blue/20"
+            >
               แจ้งถอนเงิน
             </button>
           </div>
@@ -103,11 +106,11 @@ export default function AffiliatePage() {
                <div className="p-3 bg-purple-50 rounded-2xl text-purple-600">
                  <Users className="w-6 h-6" />
                </div>
-               <span className="bg-emerald-50 text-emerald-600 text-xs font-bold px-2 py-1 rounded-lg">+3 คนในเดือนนี้</span>
+               <span className="bg-slate-50 text-slate-400 text-xs font-bold px-2 py-1 rounded-lg">ยังไม่มีข้อมูล</span>
              </div>
              <div>
                <p className="text-sm text-slate-500 font-bold">เพื่อนทั้งหมด</p>
-               <h3 className="text-2xl font-bold text-slate-800">128 <span className="text-sm text-slate-400 font-normal">คน</span></h3>
+               <h3 className="text-2xl font-bold text-slate-800">0 <span className="text-sm text-slate-400 font-normal">คน</span></h3>
              </div>
           </div>
 
@@ -119,7 +122,7 @@ export default function AffiliatePage() {
              </div>
              <div>
                <p className="text-sm text-slate-500 font-bold">ยอดขายรวมจากเพื่อน</p>
-               <h3 className="text-2xl font-bold text-slate-800">฿249,000</h3>
+               <h3 className="text-2xl font-bold text-slate-800">฿0</h3>
              </div>
           </div>
         </div>
@@ -162,10 +165,13 @@ export default function AffiliatePage() {
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-slate-800">ประวัติรายได้ล่าสุด</h3>
-              <button className="text-sm font-bold text-ci-blue hover:underline">ดูทั้งหมด</button>
+              <button 
+                onClick={() => document.getElementById('affiliate-history')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-sm font-bold text-ci-blue hover:underline"
+              >ดูทั้งหมด</button>
             </div>
             
-            <div className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm">
+            <div id="affiliate-history" className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
@@ -177,30 +183,12 @@ export default function AffiliatePage() {
                       <th className="px-6 py-4 font-bold text-center">สถานะ</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {[
-                      { date: '12 พ.ย. 67', desc: 'Commission (Order #8823)', from: 'Somchai.K', amount: 45.00, status: 'completed' },
-                      { date: '12 พ.ย. 67', desc: 'Commission (Order #8821)', from: 'Jenny Shop', amount: 120.50, status: 'completed' },
-                      { date: '11 พ.ย. 67', desc: 'Commission (Order #8809)', from: 'T-Shirt 99', amount: 85.00, status: 'pending' },
-                      { date: '10 พ.ย. 67', desc: 'ถอนเงินเข้า Wallet', from: '-', amount: -1500.00, status: 'paid' },
-                      { date: '09 พ.ย. 67', desc: 'Commission (Order #8755)', from: 'Somchai.K', amount: 210.00, status: 'completed' },
-                    ].map((item, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-6 py-4 text-sm text-slate-500 font-medium">{item.date}</td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm font-bold text-slate-700">{item.desc}</span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-500">{item.from}</td>
-                        <td className={`px-6 py-4 text-right font-bold text-sm ${item.amount > 0 ? 'text-emerald-600' : 'text-slate-800'}`}>
-                          {item.amount > 0 ? '+' : ''}{item.amount.toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          {item.status === 'completed' && <span className="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-lg">สำเร็จ</span>}
-                          {item.status === 'pending' && <span className="px-2 py-1 bg-amber-50 text-amber-600 text-[10px] font-bold rounded-lg">รอตรวจสอบ</span>}
-                          {item.status === 'paid' && <span className="px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-lg">จ่ายแล้ว</span>}
-                        </td>
-                      </tr>
-                    ))}
+                  <tbody>
+                    <tr>
+                      <td colSpan={5} className="px-6 py-16 text-center">
+                        <p className="text-slate-400 text-sm">ยังไม่มีข้อมูลการแนะนำ</p>
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
