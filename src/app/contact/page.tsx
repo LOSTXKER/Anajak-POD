@@ -1,4 +1,3 @@
-import React from 'react';
 import LandingHeader from '@/components/LandingHeader';
 import LandingFooter from '@/components/LandingFooter';
 import { Mail, Phone, MessageCircle, MapPin } from 'lucide-react';

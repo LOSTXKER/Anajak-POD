@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { 
   LayoutDashboard, 
   Library, 
@@ -16,31 +17,53 @@ import {
   ChevronRight,
   Users
 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { signOut } from '@/app/actions/auth';
 
-const menuItems = [
-  {
-    title: 'เมนูหลัก',
-    items: [
-      { href: '/dashboard', icon: LayoutDashboard, label: 'ภาพรวม' },
-      { href: '/dashboard/library', icon: Library, label: 'คลังของฉัน', badge: 'New' },
-      { href: '/catalog', icon: Library, label: 'แคตตาล็อกสินค้า' },
-      { href: '/orders', icon: ShoppingCart, label: 'รายการคำสั่งซื้อ', badge: 3 },
-      { href: '/templates', icon: FolderHeart, label: 'เทมเพลตสินค้า' },
-    ]
-  },
-  {
-    title: 'เครื่องมือผู้ขาย',
-    items: [
-      { href: '/storefront', icon: Store, label: 'หน้าร้านของฉัน' },
-      { href: '/integrations', icon: PlugZap, label: 'การเชื่อมต่อ' },
-      { href: '/wallet', icon: Wallet, label: 'กระเป๋าเงิน & รายได้' },
-      { href: '/reports', icon: BarChart3, label: 'รายงานยอดขาย' },
-    ]
-  }
-];
+function getMenuItems(pendingOrders: number | null) {
+  return [
+    {
+      title: 'เมนูหลัก',
+      items: [
+        { href: '/dashboard', icon: LayoutDashboard, label: 'ภาพรวม' },
+        { href: '/dashboard/library', icon: Library, label: 'คลังของฉัน' },
+        { href: '/catalog', icon: Library, label: 'แคตตาล็อกสินค้า' },
+        { href: '/orders', icon: ShoppingCart, label: 'รายการคำสั่งซื้อ', badge: pendingOrders && pendingOrders > 0 ? pendingOrders : undefined },
+        { href: '/templates', icon: FolderHeart, label: 'เทมเพลตสินค้า' },
+      ]
+    },
+    {
+      title: 'เครื่องมือผู้ขาย',
+      items: [
+        { href: '/storefront', icon: Store, label: 'หน้าร้านของฉัน' },
+        { href: '/integrations', icon: PlugZap, label: 'การเชื่อมต่อ' },
+        { href: '/wallet', icon: Wallet, label: 'กระเป๋าเงิน & รายได้' },
+        { href: '/reports', icon: BarChart3, label: 'รายงานยอดขาย' },
+      ]
+    }
+  ];
+}
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [user, setUser] = useState<{ name: string; email: string; avatarUrl?: string } | null>(null);
+  const [pendingOrders, setPendingOrders] = useState<number | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user: authUser } }) => {
+      if (authUser) {
+        setUser({
+          name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'ผู้ใช้งาน',
+          email: authUser.email || '',
+          avatarUrl: authUser.user_metadata?.avatar_url,
+        });
+        fetch('/api/orders/pending-count').then(r => r.json()).then(d => setPendingOrders(d.count)).catch(() => {});
+      }
+    });
+  }, []);
+
+  const menuItems = getMenuItems(pendingOrders);
 
   return (
     <aside className="w-72 bg-white/80 backdrop-blur-xl border-r border-slate-100 hidden lg:flex flex-col z-40 h-screen sticky top-0 transition-all duration-300">
@@ -109,7 +132,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Affiliate Card (New) */}
+      {/* Affiliate Card */}
       <div className="px-4 mb-2">
         <Link href="/affiliate" className="block bg-gradient-to-br from-ci-blue to-indigo-600 rounded-xl p-4 text-white shadow-lg shadow-ci-blue/20 hover:shadow-ci-blue/30 hover:-translate-y-0.5 transition-all group relative overflow-hidden">
           <div className="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full blur-xl -mr-8 -mt-8"></div>
@@ -132,7 +155,7 @@ export default function Sidebar() {
           <div className="flex items-center gap-3">
             <div className="relative">
               <img 
-                src="https://placehold.co/100x100/3973b2/ffffff?text=U" 
+                src={user?.avatarUrl || `https://placehold.co/100x100/3973b2/ffffff?text=${(user?.name?.[0] || 'U').toUpperCase()}`}
                 className="w-10 h-10 rounded-full border border-slate-100 group-hover:ring-2 ring-ci-blue/20 transition-all"
                 alt="User"
               />
@@ -141,28 +164,34 @@ export default function Sidebar() {
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-bold text-slate-800 truncate text-sm group-hover:text-ci-blue transition-colors">คุณลูกค้า</h4>
+              <h4 className="font-bold text-slate-800 truncate text-sm group-hover:text-ci-blue transition-colors">
+                {user?.name || 'ผู้เยี่ยมชม'}
+              </h4>
               <div className="flex items-center text-xs text-slate-500">
-                <span className="truncate">Pro Member</span>
+                <span className="truncate">{user?.email || 'ยังไม่ได้เข้าสู่ระบบ'}</span>
               </div>
-            </div>
-          </div>
-          
-          <div className="mt-3 pt-3 border-t border-slate-50">
-            <div className="flex justify-between text-[10px] font-medium mb-1.5">
-              <span className="text-slate-400">ส่วนลดขั้นถัดไป</span>
-              <span className="text-ci-blue font-bold">38 ชิ้น</span>
-            </div>
-            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-ci-blue to-cyan-400 rounded-full w-[24%] animate-pulse"></div>
             </div>
           </div>
         </div>
 
-        <button className="w-full flex items-center justify-center px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all">
-          <LogOut className="w-4 h-4 mr-2" />
-          ออกจากระบบ
-        </button>
+        {user ? (
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="w-full flex items-center justify-center px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              ออกจากระบบ
+            </button>
+          </form>
+        ) : (
+          <Link
+            href="/auth/login"
+            className="w-full flex items-center justify-center px-4 py-2.5 text-sm font-medium text-ci-blue hover:bg-ci-blue/5 rounded-xl transition-all"
+          >
+            เข้าสู่ระบบ
+          </Link>
+        )}
       </div>
     </aside>
   );

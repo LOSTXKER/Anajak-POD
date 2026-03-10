@@ -1,4 +1,3 @@
-import React from 'react';
 import Image from 'next/image';
 import { MapPin, Phone, Clock } from 'lucide-react';
 import LandingHeader from '@/components/LandingHeader';

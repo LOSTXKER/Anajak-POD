@@ -9,15 +9,19 @@ interface DashboardProps {
     totalOrders: number;
     pendingOrders: number;
     processingOrders: number;
-    recentOrders: number; // Orders this week
+    recentOrders: number;
   };
   topProducts: Array<{
     title: string;
-    sales: number; // Mocked for now as we don't track sales count per product in DB yet
+    sales: number;
   }>;
+  weeklySales?: Array<{ day: string; amount: number }>;
+  weeklyTotal?: number;
+  dailyAvg?: number;
 }
 
-export default function DashboardClient({ stats, topProducts }: DashboardProps) {
+export default function DashboardClient({ stats, topProducts, weeklySales = [], weeklyTotal = 0, dailyAvg = 0 }: DashboardProps) {
+  const maxChartAmount = Math.max(...weeklySales.map(d => d.amount), 1);
   return (
     <DashboardLayout 
       title="สวัสดีตอนบ่าย, คุณลูกค้า ☀️" 
@@ -150,9 +154,9 @@ export default function DashboardClient({ stats, topProducts }: DashboardProps) 
               <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Real-time Production Status</h4>
               
               {[
-                { title: 'คิวพิมพ์ DTG (Epson F3070)', subtitle: 'พิมพ์เสื้อสีเข้ม', progress: 45, status: 'รอผลิต 1-2 วัน', color: 'bg-ci-blue' },
-                { title: 'คิวพิมพ์ DTF (Gongzheng)', subtitle: 'งานเฟล็กซ์, โลโก้, ป้ายคอ', progress: 20, status: 'คิวว่าง (1 วัน)', color: 'bg-emerald-500', isGood: true },
-                { title: 'สต็อก: Gildan Premium (ดำ) - S, M, L, XL', subtitle: 'สินค้าขายดี', progress: 90, status: 'พร้อมส่ง', color: 'bg-emerald-500', isGood: true }
+                { title: `ออเดอร์รอดำเนินการ`, subtitle: `${stats.pendingOrders} รายการรอชำระเงิน`, progress: stats.totalOrders > 0 ? Math.round((stats.pendingOrders / stats.totalOrders) * 100) : 0, status: stats.pendingOrders > 0 ? `${stats.pendingOrders} รายการ` : 'ไม่มี', color: 'bg-ci-yellow' },
+                { title: `กำลังผลิต`, subtitle: `${stats.processingOrders} รายการอยู่ในคิวผลิต`, progress: stats.totalOrders > 0 ? Math.round((stats.processingOrders / stats.totalOrders) * 100) : 0, status: stats.processingOrders > 0 ? `${stats.processingOrders} รายการ` : 'คิวว่าง', color: 'bg-ci-blue', isGood: stats.processingOrders === 0 },
+                { title: `ออเดอร์สำเร็จ`, subtitle: 'จัดส่งเรียบร้อย', progress: stats.totalOrders > 0 ? Math.round(((stats.totalOrders - stats.pendingOrders - stats.processingOrders) / stats.totalOrders) * 100) : 0, status: 'ปกติ', color: 'bg-emerald-500', isGood: true }
               ].map((item, idx) => (
                 <div key={idx} className="group">
                   <div className="flex justify-between items-end mb-2">
@@ -226,42 +230,37 @@ export default function DashboardClient({ stats, topProducts }: DashboardProps) 
               </div>
             </div>
             
-            {/* Simple Bar Chart Visualization */}
+            {/* Bar Chart from real data */}
             <div className="flex items-end justify-between h-64 gap-4 px-2">
-              {[
-                { day: 'จ', amount: 2400, height: 40 },
-                { day: 'อ', amount: 3200, height: 55 },
-                { day: 'พ', amount: 2800, height: 45 },
-                { day: 'พฤ', amount: 4100, height: 70 },
-                { day: 'ศ', amount: 3600, height: 60 },
-                { day: 'ส', amount: 5200, height: 85 },
-                { day: 'อา', amount: 8450, height: 100 },
-              ].map((data, idx) => (
-                <div key={idx} className="flex-1 flex flex-col items-center group cursor-pointer">
-                  <div className="w-full relative flex flex-col justify-end h-full">
-                    <div 
-                      className="w-full bg-slate-100 rounded-t-2xl group-hover:bg-ci-blue transition-all duration-300 relative" 
-                      style={{ height: `${data.height}%` }}
-                    >
-                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap shadow-xl mb-2 transform translate-y-2 group-hover:translate-y-0 z-10">
-                        ฿{data.amount.toLocaleString()}
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-slate-900"></div>
+              {weeklySales.map((data, idx) => {
+                const pct = maxChartAmount > 0 ? (data.amount / maxChartAmount) * 100 : 5;
+                return (
+                  <div key={idx} className="flex-1 flex flex-col items-center group cursor-pointer">
+                    <div className="w-full relative flex flex-col justify-end h-full">
+                      <div 
+                        className="w-full bg-slate-100 rounded-t-2xl group-hover:bg-ci-blue transition-all duration-300 relative" 
+                        style={{ height: `${Math.max(pct, 5)}%` }}
+                      >
+                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap shadow-xl mb-2 transform translate-y-2 group-hover:translate-y-0 z-10">
+                          ฿{data.amount.toLocaleString()}
+                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-slate-900"></div>
+                        </div>
                       </div>
                     </div>
+                    <span className="text-xs font-bold text-slate-400 mt-4 group-hover:text-ci-blue transition-colors">{data.day}</span>
                   </div>
-                  <span className="text-xs font-bold text-slate-400 mt-4 group-hover:text-ci-blue transition-colors">{data.day}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between bg-slate-50/50 p-4 rounded-2xl">
               <div>
                 <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">ยอดรวมสัปดาห์นี้</p>
-                <p className="text-2xl font-bold text-slate-800">฿29,750</p>
+                <p className="text-2xl font-bold text-slate-800">฿{weeklyTotal.toLocaleString()}</p>
               </div>
               <div className="text-right">
                 <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">เฉลี่ยต่อวัน</p>
-                <p className="text-2xl font-bold text-emerald-600">฿4,250</p>
+                <p className="text-2xl font-bold text-emerald-600">฿{Math.round(dailyAvg).toLocaleString()}</p>
               </div>
             </div>
           </div>

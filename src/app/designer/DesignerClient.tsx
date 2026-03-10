@@ -75,7 +75,10 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getProducts, type Product } from '@/lib/mockData';
+import { type Product as MockProduct } from '@/lib/mockData';
+import { saveDesign } from '@/app/actions/designs';
+
+type Product = Omit<MockProduct, 'userId'> & { userId?: string };
 
 // Constants
 const CANVAS_WIDTH = 300;
@@ -205,7 +208,11 @@ interface DesignElement {
   flipY?: boolean;
 }
 
-export default function DesignerClient() {
+interface DesignerClientProps {
+  initialProducts?: Product[];
+}
+
+export default function DesignerClient({ initialProducts }: DesignerClientProps) {
   const router = useRouter();
   // UI State
   const [activeTool, setActiveTool] = useState<'product' | 'text' | 'uploads' | 'elements' | 'layers' | 'ai' | 'text-effects' | null>('text');
@@ -218,7 +225,7 @@ export default function DesignerClient() {
   const [shirtSize, setShirtSize] = useState('M'); // Preview size
   const [selectedSizes, setSelectedSizes] = useState<string[]>(['S', 'M', 'L', 'XL']);
   const [technique, setTechnique] = useState<'dtf' | 'dtg'>('dtf');
-  const products = getProducts();
+  const products = initialProducts ?? [];
   const [selectedProduct, setSelectedProduct] = useState<Product>(products[0]); // Default to first product
   const [showFilters, setShowFilters] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -1415,11 +1422,11 @@ ${svgElements}
       router.push('/cart');
 
     } else {
-      // 2. Save as Template
+      // 2. Save as Template (localStorage for immediate feedback + Server Action for persistence)
       const templateItem = {
         ...itemData,
         productName: itemData.name,
-        status: 'draft' // Default status is always draft now
+        status: 'draft'
       };
 
       const existingTemplates = localStorage.getItem('anajak_templates');
@@ -1433,6 +1440,23 @@ ${svgElements}
       }
       
       localStorage.setItem('anajak_templates', JSON.stringify(templates));
+
+      // Also persist to database if user is logged in
+      saveDesign({
+        productId: selectedProduct.id,
+        canvasData: {
+          elements,
+          shirtColor,
+          technique,
+          viewSide,
+          selectedSizes,
+          availableColors,
+        },
+        previewUrl: itemData.previewImage,
+      }).catch(() => {
+        // Silently fail -- localStorage backup exists
+      });
+
       router.push('/templates');
     }
     
@@ -1495,7 +1519,7 @@ ${svgElements}
                        <button
                          key={effect.id}
                          onClick={() => updateElementWithHistory(selectedId, { 
-                            effectType: effect.id as any,
+                            effectType: effect.id as DesignElement['effectType'],
                             effectColor: effect.id === 'neon' ? '#ec4899' : 
                                    effect.id === 'background' ? '#fcd34d' : 
                                    effect.id === 'shadow' ? '#000000' :
@@ -1808,7 +1832,7 @@ ${svgElements}
                    ].map((t) => (
                        <button 
                          key={t.id}
-                         onClick={() => setTechnique(t.id as any)}
+                         onClick={() => setTechnique(t.id as 'dtf' | 'dtg')}
                        className={`flex-1 py-2 rounded-md text-xs font-bold transition-all ${technique === t.id ? 'bg-white text-ci-blue shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                      >
                        <div className="flex flex-col items-center gap-0.5">

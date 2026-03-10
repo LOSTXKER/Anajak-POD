@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
@@ -75,8 +74,8 @@ export async function generateStaticParams() {
   }));
 }
 
-export default function UseCasePage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default async function UseCasePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const data = useCaseData[slug];
 
   // Fallback for unknown slugs

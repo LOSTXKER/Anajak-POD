@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import { Check, HelpCircle } from 'lucide-react';
 import LandingHeader from '@/components/LandingHeader';

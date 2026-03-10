@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import { Palette, LayoutDashboard, ShoppingBag, Truck, BarChart3, Wallet, Zap, Smartphone } from 'lucide-react';
 import LandingHeader from '@/components/LandingHeader';

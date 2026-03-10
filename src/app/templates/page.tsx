@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Search, Filter, Grid3x3, List, Edit2, Trash2, Copy, Eye, MoreHorizontal, Plus, Calendar, SlidersHorizontal, CheckCircle2, Clock, AlertCircle, ShoppingCart, Package, PenTool, Globe, Lock, MoreVertical } from 'lucide-react';
+import { publishDesign, deleteDesign } from '@/app/actions/designs';
 
 export default function TemplatesPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -17,7 +18,22 @@ export default function TemplatesPage() {
     { id: 'private', name: 'ส่วนตัว', count: 1 },
   ];
 
-  const [templates, setTemplates] = useState<any[]>([]);
+  interface Template {
+    id: string | number;
+    name: string;
+    productType: string;
+    updatedAt: string;
+    status: string;
+    price: number;
+    cost: number;
+    profit: number;
+    image: string;
+    variants: number;
+    previewImage?: string;
+    productName?: string;
+  }
+
+  const [templates, setTemplates] = useState<Template[]>([]);
 
   useEffect(() => {
     const MOCK_TEMPLATES = [
@@ -96,16 +112,16 @@ export default function TemplatesPage() {
     ];
 
     const saved = localStorage.getItem('anajak_templates');
-    let savedTemplates: any[] = [];
+    let savedTemplates: Template[] = [];
     if (saved) {
         try {
             const parsed = JSON.parse(saved);
-            savedTemplates = parsed.map((item: any) => ({
+            savedTemplates = parsed.map((item: Partial<Template> & { productName?: string }) => ({
                 ...item,
                 productType: item.productName || 'Custom Product',
                 updatedAt: 'เมื่อสักครู่',
-                cost: Math.round(item.price * 0.6),
-                profit: Math.round(item.price * 0.4),
+                cost: Math.round((item.price ?? 0) * 0.6),
+                profit: Math.round((item.price ?? 0) * 0.4),
                 image: '',
             }));
         } catch (e) { console.error(e); }
@@ -115,21 +131,39 @@ export default function TemplatesPage() {
   }, []);
 
   const handleUpdateStatus = (id: number | string, newStatus: string) => {
-    // 1. Update State
     const updatedTemplates = templates.map(t => 
       t.id === id ? { ...t, status: newStatus } : t
     );
     setTemplates(updatedTemplates);
     setActiveDropdown(null);
 
-    // 2. Update LocalStorage
     const saved = localStorage.getItem('anajak_templates');
     if (saved) {
       const parsed = JSON.parse(saved);
-      const updatedSaved = parsed.map((t: any) => 
+      const updatedSaved = parsed.map((t: Partial<Template>) =>
         t.id === id ? { ...t, status: newStatus } : t
       );
       localStorage.setItem('anajak_templates', JSON.stringify(updatedSaved));
+    }
+
+    if (typeof id === 'string' && newStatus === 'published') {
+      publishDesign(id).catch(() => {});
+    }
+  };
+
+  const handleDeleteTemplate = (id: number | string) => {
+    if (!confirm('คุณต้องการลบผลงานนี้หรือไม่?')) return;
+    setTemplates(prev => prev.filter(t => t.id !== id));
+    setActiveDropdown(null);
+
+    const saved = localStorage.getItem('anajak_templates');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      localStorage.setItem('anajak_templates', JSON.stringify(parsed.filter((t: Partial<Template>) => t.id !== id)));
+    }
+
+    if (typeof id === 'string') {
+      deleteDesign(id).catch(() => {});
     }
   };
 
@@ -289,10 +323,10 @@ export default function TemplatesPage() {
 
                   {/* Floating Actions (Hover) */}
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
-                    <button className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-slate-700 shadow-lg hover:scale-110 hover:text-ci-blue transition-all" title="แก้ไขดีไซน์">
+                    <button onClick={() => window.location.href = '/designer'} className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-slate-700 shadow-lg hover:scale-110 hover:text-ci-blue transition-all" title="แก้ไขดีไซน์">
                       <Edit2 className="w-5 h-5" />
                     </button>
-                    <button className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-slate-700 shadow-lg hover:scale-110 hover:text-ci-red transition-all" title="ลบ">
+                    <button onClick={() => handleDeleteTemplate(template.id)} className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-slate-700 shadow-lg hover:scale-110 hover:text-ci-red transition-all" title="ลบ">
                       <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
@@ -358,7 +392,10 @@ export default function TemplatesPage() {
                               </button>
                             </div>
                             <div className="border-t border-slate-100 p-1">
-                               <button className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2">
+                               <button
+                                  onClick={() => handleDeleteTemplate(template.id)}
+                                  className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
+                               >
                                   <Trash2 className="w-4 h-4" />
                                   <span>ลบผลงาน</span>
                                </button>
@@ -422,7 +459,7 @@ export default function TemplatesPage() {
             ))}
             
             {/* Add New Card */}
-            <button className="group flex flex-col items-center justify-center min-h-[300px] bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 hover:border-ci-blue/50 hover:bg-blue-50/30 transition-all cursor-pointer">
+            <button onClick={() => window.location.href = '/designer'} className="group flex flex-col items-center justify-center min-h-[300px] bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 hover:border-ci-blue/50 hover:bg-blue-50/30 transition-all cursor-pointer">
               <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all mb-4 text-ci-blue">
                 <Plus className="w-8 h-8" />
               </div>

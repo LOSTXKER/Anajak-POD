@@ -1,10 +1,11 @@
 'use client';
 
 import DashboardLayout from '@/components/DashboardLayout';
-import { useState } from 'react';
-import { Search, Filter, Download, ChevronDown, ChevronLeft, ChevronRight, Package, Clock, AlertTriangle, CheckCircle2, MoreHorizontal, Calendar, XCircle } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Search, Filter, Download, ChevronDown, ChevronLeft, ChevronRight, Package, Clock, AlertTriangle, CheckCircle2, MoreHorizontal, Calendar, XCircle, type LucideIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
+import { cancelOrder } from '@/app/actions/orders';
 
 interface OrderItem {
   id: string;
@@ -35,18 +36,60 @@ interface OrdersClientProps {
 export default function OrdersClient({ initialOrders }: OrdersClientProps) {
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [orders, setOrders] = useState(initialOrders);
 
-  // Filter orders based on activeTab
-  const filteredOrders = activeTab === 'all' 
-    ? initialOrders 
-    : initialOrders.filter(o => o.status === activeTab.toUpperCase());
+  const filteredOrders = useMemo(() => {
+    let result = activeTab === 'all'
+      ? orders
+      : orders.filter(o => o.status === activeTab.toUpperCase());
+    
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(o =>
+        o.orderNumber.toLowerCase().includes(q) ||
+        o.user?.name?.toLowerCase().includes(q) ||
+        o.items.some(i => i.product.title.toLowerCase().includes(q))
+      );
+    }
+    return result;
+  }, [orders, activeTab, searchQuery]);
 
   const handleCreateOrder = () => {
-    console.log('Create new order');
+    window.location.href = '/designer';
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!confirm('คุณต้องการยกเลิกคำสั่งซื้อนี้หรือไม่?')) return;
+    const result = await cancelOrder(orderId);
+    if (result.success) {
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'CANCELLED' } : o));
+    } else {
+      alert(result.error || 'ไม่สามารถยกเลิกได้');
+    }
+  };
+
+  const handleExport = () => {
+    const headers = ['Order #', 'Date', 'Customer', 'Status', 'Total'];
+    const rows = filteredOrders.map(o => [
+      o.orderNumber,
+      format(new Date(o.createdAt), 'yyyy-MM-dd HH:mm'),
+      o.user?.name || 'Guest',
+      o.status,
+      Number(o.totalAmount).toFixed(2),
+    ]);
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const getStatusBadge = (status: string) => {
-    const styles: Record<string, { bg: string, text: string, border: string, icon: any, label: string }> = {
+    const styles: Record<string, { bg: string, text: string, border: string, icon: LucideIcon, label: string }> = {
       CANCELLED: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-100', icon: XCircle, label: 'ยกเลิก' },
       PENDING: { bg: 'bg-ci-yellow/10', text: 'text-yellow-700', border: 'border-yellow-100', icon: Clock, label: 'รอชำระ' },
       PROCESSING: { bg: 'bg-ci-blue/10', text: 'text-ci-blue', border: 'border-blue-100', icon: Package, label: 'กำลังผลิต' },
@@ -139,7 +182,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                    <Filter className="w-5 h-5" />
                 </button>
                 {/* Updated Button: Outline Slate */}
-                <button className="flex items-center px-4 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-colors">
+                <button onClick={handleExport} className="flex items-center px-4 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-colors">
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </button>
@@ -153,6 +196,8 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                 <input
                   type="text"
                   placeholder="ค้นหาด้วยเลขที่ออเดอร์, ชื่อลูกค้า, เบอร์โทร..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue transition-all hover:border-slate-300"
                 />
               </div>
@@ -251,9 +296,18 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <button className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
-                          <MoreHorizontal className="w-5 h-5" />
-                        </button>
+                        {order.status === 'PENDING' ? (
+                          <button
+                            onClick={() => handleCancelOrder(order.id)}
+                            className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors"
+                          >
+                            ยกเลิก
+                          </button>
+                        ) : (
+                          <button className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                            <MoreHorizontal className="w-5 h-5" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))

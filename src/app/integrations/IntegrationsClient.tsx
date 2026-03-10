@@ -3,6 +3,7 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import { useState } from 'react';
 import { Copy, Check, AlertCircle, ExternalLink, RefreshCw, ShieldCheck, Key } from 'lucide-react';
+import { connectPlatform, disconnectPlatform } from '@/app/actions/integrations';
 
 interface Integration {
   id: string;
@@ -92,11 +93,22 @@ export default function IntegrationsClient({ initialIntegrations }: Integrations
 
   const isConnected = (platformId: string) => connectedPlatforms.includes(platformId);
 
-  const toggleConnection = (platformId: string) => {
-    // In a real app, this would call a Server Action to update DB
+  const toggleConnection = async (platformId: string) => {
+    const integration = initialIntegrations.find(i => i.platform.toLowerCase() === platformId);
+    
     if (isConnected(platformId)) {
+      if (integration) {
+        const result = await disconnectPlatform(integration.id);
+        if (result.error) { alert(result.error); return; }
+      }
       setConnectedPlatforms(prev => prev.filter(id => id !== platformId));
     } else {
+      const platformInfo = platforms.find(p => p.id === platformId);
+      const result = await connectPlatform({
+        platform: platformId.toUpperCase(),
+        shopName: platformInfo?.name || platformId,
+      });
+      if (result.error) { alert(result.error); return; }
       setConnectedPlatforms(prev => [...prev, platformId]);
     }
   };

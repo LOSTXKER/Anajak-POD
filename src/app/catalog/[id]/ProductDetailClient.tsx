@@ -260,7 +260,28 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                         <Palette className="w-5 h-5 mr-2" />
                         เริ่มออกแบบ
                     </Link>
-                    <button className="px-6 py-4 bg-white border-2 border-slate-200 text-slate-700 rounded-xl font-bold hover:border-slate-900 hover:text-slate-900 transition-all">
+                    <button
+                      onClick={() => {
+                        const cartItem = {
+                          id: `${product.id}-${selectedSize}-${selectedColor}-${Date.now()}`,
+                          productId: product.id,
+                          name: product.title,
+                          size: selectedSize,
+                          color: selectedColor,
+                          colorName: selectedColor === '#FFFFFF' ? 'ขาว' : selectedColor === '#000000' ? 'ดำ' : selectedColor,
+                          quantity,
+                          price: product.price,
+                          previewImage: product.imageUrl || '',
+                        };
+                        const saved = localStorage.getItem('anajak_cart');
+                        const cart = saved ? JSON.parse(saved) : [];
+                        cart.push(cartItem);
+                        localStorage.setItem('anajak_cart', JSON.stringify(cart));
+                        window.dispatchEvent(new Event('cart-update'));
+                        alert('เพิ่มลงตะกร้าแล้ว!');
+                      }}
+                      className="px-6 py-4 bg-white border-2 border-slate-200 text-slate-700 rounded-xl font-bold hover:border-slate-900 hover:text-slate-900 transition-all"
+                    >
                         <ShoppingCart className="w-5 h-5" />
                     </button>
                  </div>
@@ -281,7 +302,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               ].map((tab) => (
                  <button 
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
+                    onClick={() => setActiveTab(tab.id as typeof activeTab)}
                     className={`px-8 py-5 font-bold whitespace-nowrap transition-all border-b-2 ${
                        activeTab === tab.id 
                          ? 'border-ci-blue bg-white text-slate-900' 

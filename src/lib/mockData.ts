@@ -503,11 +503,6 @@ export function getOrders(): Order[] {
   return [...mockOrders].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 }
 
-// Get order by ID
-export function getOrderById(id: string): Order | undefined {
-  return mockOrders.find((o) => o.id === id);
-}
-
 // Get wallet data
 export function getWallet(): Wallet {
   return mockWallet;

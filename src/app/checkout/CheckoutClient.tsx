@@ -9,6 +9,7 @@ import {
   Sparkles, PartyPopper, ArrowRight, Package, ShoppingCart, MapPin, CheckCircle
 } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
+import { processCheckout, type CheckoutState } from '@/app/actions/checkout';
 
 const CHECKOUT_STEPS = [
   { id: 1, label: 'ตะกร้า', icon: ShoppingCart },
@@ -17,11 +18,26 @@ const CHECKOUT_STEPS = [
   { id: 4, label: 'เสร็จสิ้น', icon: CheckCircle },
 ];
 
+interface CartItem {
+  id: string;
+  productId?: string;
+  designId?: string;
+  name: string;
+  size?: string;
+  color?: string;
+  colorName?: string;
+  quantity: number;
+  price: number;
+  previewImage?: string;
+}
+
 export default function CheckoutClient() {
   const router = useRouter();
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentStep, setCurrentStep] = useState(1); // 1: Shipping, 2: Payment, 3: Success
+  const [currentStep, setCurrentStep] = useState(1);
+  const [completedOrderId, setCompletedOrderId] = useState<string | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', phone: '', email: '',
@@ -46,7 +62,7 @@ export default function CheckoutClient() {
   const shipping = 50;
   const total = subtotal + shipping;
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     if (currentStep === 1) {
       if (!formData.firstName || !formData.address || !formData.phone || !formData.city || !formData.postalCode) {
         alert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
@@ -56,13 +72,42 @@ export default function CheckoutClient() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (currentStep === 2) {
       setIsProcessing(true);
-      setTimeout(() => {
-        localStorage.removeItem('anajak_cart');
-        window.dispatchEvent(new Event('cart-update'));
-        setCurrentStep(3);
+      setCheckoutError(null);
+
+      try {
+        const fd = new FormData();
+        fd.set('items', JSON.stringify(cartItems.map((item) => ({
+          productId: item.productId || item.id,
+          designId: item.designId,
+          size: item.size || 'M',
+          color: item.color || item.colorName || '#000000',
+          quantity: item.quantity || 1,
+        }))));
+        fd.set('name', `${formData.firstName} ${formData.lastName}`.trim());
+        fd.set('phone', formData.phone);
+        fd.set('address', formData.address);
+        fd.set('district', formData.district || formData.subdistrict || '-');
+        fd.set('province', formData.city);
+        fd.set('postalCode', formData.postalCode);
+        fd.set('paymentMethod', paymentMethod === 'credit' ? 'credit_card' : paymentMethod);
+        if (formData.email) fd.set('guestEmail', formData.email);
+
+        const result: CheckoutState = await processCheckout(null, fd);
+
+        if (result?.success && result.orderId) {
+          localStorage.removeItem('anajak_cart');
+          window.dispatchEvent(new Event('cart-update'));
+          setCompletedOrderId(result.orderId);
+          setCurrentStep(3);
+        } else {
+          setCheckoutError(result?.error || 'เกิดข้อผิดพลาดในการสั่งซื้อ');
+        }
+      } catch {
+        setCheckoutError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่');
+      } finally {
         setIsProcessing(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 2000);
+      }
     }
   };
 
@@ -79,7 +124,7 @@ export default function CheckoutClient() {
 
   // Success Page
   if (currentStep === 3) {
-    const orderId = `ORD-${Date.now().toString().slice(-8)}`;
+    const orderId = completedOrderId || `ORD-${Date.now().toString().slice(-8)}`;
     return (
       <DashboardLayout title="สั่งซื้อสำเร็จ" showCreateButton={false}>
         {/* Progress Bar - All Complete */}
@@ -381,6 +426,11 @@ export default function CheckoutClient() {
             {/* Step 2: Payment */}
             {currentStep === 2 && (
               <div className="space-y-6">
+                {checkoutError && (
+                  <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm font-medium">
+                    {checkoutError}
+                  </div>
+                )}
                 {/* Payment Methods */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                   <div className="p-6 sm:p-8">

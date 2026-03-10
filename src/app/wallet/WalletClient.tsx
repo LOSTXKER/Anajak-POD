@@ -2,9 +2,10 @@
 
 import DashboardLayout from '@/components/DashboardLayout';
 import { useState } from 'react';
-import { Wallet, ArrowUpRight, ArrowDownLeft, CreditCard, MoreHorizontal, Calendar, Download, ChevronDown, TrendingUp } from 'lucide-react';
+import { Wallet, ArrowUpRight, ArrowDownLeft, CreditCard, MoreHorizontal, Calendar, Download, ChevronDown, TrendingUp, type LucideIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
+import { requestWithdrawal, type WalletActionState } from '@/app/actions/wallet';
 
 interface Transaction {
   id: string;
@@ -24,6 +25,8 @@ interface WalletClientProps {
 
 export default function WalletClient({ wallet, transactions }: WalletClientProps) {
   const [selectedPeriod, setSelectedPeriod] = useState('30days');
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
 
   // Calculate stats from real data (simple version)
   const totalIncome = transactions
@@ -35,7 +38,7 @@ export default function WalletClient({ wallet, transactions }: WalletClientProps
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   const getTransactionIcon = (type: string) => {
-    const icons: Record<string, { icon: any, bg: string, text: string, label: string }> = {
+    const icons: Record<string, { icon: LucideIcon, bg: string, text: string, label: string }> = {
       SALE: { icon: ArrowDownLeft, bg: 'bg-emerald-100', text: 'text-emerald-600', label: 'รายได้จากการขาย' },
       DEPOSIT: { icon: Wallet, bg: 'bg-ci-blue/10', text: 'text-ci-blue', label: 'เติมเงินเข้ากระเป๋า' },
       WITHDRAWAL: { icon: ArrowUpRight, bg: 'bg-rose-100', text: 'text-rose-600', label: 'ถอนเงินออก' },
@@ -72,11 +75,11 @@ export default function WalletClient({ wallet, transactions }: WalletClientProps
               </div>
               <h2 className="text-4xl font-bold mb-8 tracking-tight">฿{wallet.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h2>
               <div className="flex gap-3">
-                <button className="flex-1 bg-white text-slate-900 hover:bg-slate-50 px-4 py-3 rounded-xl text-sm font-bold transition-all shadow-lg hover:-translate-y-0.5 active:scale-95 flex items-center justify-center">
+                <button onClick={() => alert('ฟีเจอร์เติมเงินจะพร้อมใช้งานเร็วๆ นี้')} className="flex-1 bg-white text-slate-900 hover:bg-slate-50 px-4 py-3 rounded-xl text-sm font-bold transition-all shadow-lg hover:-translate-y-0.5 active:scale-95 flex items-center justify-center">
                   <ArrowDownLeft className="w-4 h-4 mr-2" />
                   เติมเงิน
                 </button>
-                <button className="flex-1 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md px-4 py-3 rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5 active:scale-95 border border-white/10 flex items-center justify-center">
+                <button onClick={() => setShowWithdrawModal(true)} className="flex-1 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md px-4 py-3 rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5 active:scale-95 border border-white/10 flex items-center justify-center">
                   <ArrowUpRight className="w-4 h-4 mr-2" />
                   ถอนเงิน
                 </button>
@@ -132,7 +135,15 @@ export default function WalletClient({ wallet, transactions }: WalletClientProps
               </div>
               <div className="flex items-center gap-3">
                 {/* Updated Button: Outline Slate */}
-                <button className="flex items-center px-4 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all">
+                <button onClick={() => {
+                  const headers = ['ID', 'Type', 'Amount', 'Date'];
+                  const rows = transactions.map(t => [t.id, t.type, t.amount.toString(), format(new Date(t.createdAt), 'yyyy-MM-dd HH:mm')]);
+                  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+                  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a'); a.href = url; a.download = `transactions-${format(new Date(), 'yyyy-MM-dd')}.csv`; a.click();
+                  URL.revokeObjectURL(url);
+                }} className="flex items-center px-4 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all">
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </button>
@@ -198,6 +209,50 @@ export default function WalletClient({ wallet, transactions }: WalletClientProps
           </div>
         </div>
       </div>
+
+      {showWithdrawModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-4">ถอนเงิน</h3>
+            <form action={async (fd: FormData) => {
+              setWithdrawing(true);
+              const result = await requestWithdrawal(null, fd);
+              setWithdrawing(false);
+              if (result?.success) {
+                setShowWithdrawModal(false);
+                window.location.reload();
+              } else {
+                alert(result?.error || 'เกิดข้อผิดพลาด');
+              }
+            }} className="space-y-4">
+              <div>
+                <label className="text-sm font-bold text-slate-700">จำนวนเงิน (บาท)</label>
+                <input name="amount" type="number" min="100" required placeholder="100" className="w-full mt-1 p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue" />
+              </div>
+              <div>
+                <label className="text-sm font-bold text-slate-700">ธนาคาร</label>
+                <select name="bankName" required className="w-full mt-1 p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue">
+                  <option value="">เลือกธนาคาร</option>
+                  <option value="SCB">ไทยพาณิชย์</option>
+                  <option value="KBANK">กสิกรไทย</option>
+                  <option value="BBL">กรุงเทพ</option>
+                  <option value="KTB">กรุงไทย</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-bold text-slate-700">เลขบัญชี</label>
+                <input name="bankAccount" type="text" required placeholder="xxx-x-xxxxx-x" className="w-full mt-1 p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-ci-blue/20 focus:border-ci-blue" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowWithdrawModal(false)} className="flex-1 py-3 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50">ยกเลิก</button>
+                <button type="submit" disabled={withdrawing} className="flex-1 py-3 bg-ci-blue text-white rounded-xl font-bold hover:bg-ci-blueDark disabled:opacity-50">
+                  {withdrawing ? 'กำลังดำเนินการ...' : 'ยืนยันถอนเงิน'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

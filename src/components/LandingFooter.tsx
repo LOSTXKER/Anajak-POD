@@ -74,10 +74,10 @@ export default function LandingFooter() {
             <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-5">ช่วยเหลือ</h3>
             <ul className="space-y-3">
               {[
-                { href: '/help', label: 'วิธีการสั่งซื้อ' },
-                { href: '/shipping', label: 'การจัดส่งสินค้า' },
-                { href: '/returns', label: 'การรับประกัน/เปลี่ยนคืน' },
-                { href: '/faq', label: 'คำถามที่พบบ่อย' },
+                { href: '/contact', label: 'วิธีการสั่งซื้อ' },
+                { href: '/contact', label: 'การจัดส่งสินค้า' },
+                { href: '/contact', label: 'การรับประกัน/เปลี่ยนคืน' },
+                { href: '/contact', label: 'คำถามที่พบบ่อย' },
                 { href: '/contact', label: 'ติดต่อเรา' },
               ].map((link) => (
                 <li key={link.href}>
@@ -136,13 +136,13 @@ export default function LandingFooter() {
         <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
           <p>© {currentYear} Anajak POD. All rights reserved.</p>
           <div className="flex flex-wrap justify-center gap-6">
-            <Link href="/privacy" className="hover:text-white transition-colors">
+            <Link href="/legal/privacy" className="hover:text-white transition-colors">
               นโยบายความเป็นส่วนตัว
             </Link>
-            <Link href="/terms" className="hover:text-white transition-colors">
+            <Link href="/legal/terms" className="hover:text-white transition-colors">
               ข้อกำหนดการใช้งาน
             </Link>
-            <Link href="/refund" className="hover:text-white transition-colors">
+            <Link href="/legal/refund" className="hover:text-white transition-colors">
               นโยบายคืนเงิน
             </Link>
           </div>

@@ -1,0 +1,212 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  SELLER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum TransactionType {
+  SALE
+  WITHDRAWAL
+  DEPOSIT
+}
+
+model Profile {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  phone     String?
+  role      Role     @default(USER)
+  lineId    String?  @map("line_id")
+  googleId  String?  @map("google_id")
+  tier      String?
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  designs      Design[]
+  orders       Order[]
+  wallet       Wallet?
+  integrations Integration[]
+  seller       Seller?
+
+  @@map("profiles")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  imageUrl    String?  @map("image_url")
+  sku         String?  @unique
+  isPublished Boolean  @default(false) @map("is_published")
+  fabricGrade String?  @map("fabric_grade")
+  fiberType   String?  @map("fiber_type")
+  thickness   String?
+  sizes       String[]
+  colors      String[]
+  badge       String?
+  suitableFor String?  @map("suitable_for")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  designs    Design[]
+  orderItems OrderItem[]
+
+  @@map("products")
+}
+
+model Design {
+  id           String   @id @default(uuid())
+  profileId    String   @map("profile_id")
+  productId    String   @map("product_id")
+  canvasData   Json     @map("canvas_data")
+  previewUrl   String?  @map("preview_url")
+  printFileUrl String?  @map("print_file_url")
+  status       String   @default("draft")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  profile    Profile     @relation(fields: [profileId], references: [id])
+  product    Product     @relation(fields: [productId], references: [id])
+  orderItems OrderItem[]
+
+  @@map("designs")
+}
+
+model Order {
+  id              String        @id @default(uuid())
+  orderNumber     String        @unique @map("order_number")
+  profileId       String?       @map("profile_id")
+  guestEmail      String?       @map("guest_email")
+  totalAmount     Decimal       @db.Decimal(10, 2) @map("total_amount")
+  status          OrderStatus   @default(PENDING)
+  shippingAddress Json?         @map("shipping_address")
+  paymentMethod   String?       @map("payment_method")
+  paymentStatus   PaymentStatus @default(PENDING) @map("payment_status")
+  trackingNumber  String?       @map("tracking_number")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  profile Profile?    @relation(fields: [profileId], references: [id])
+  items   OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String  @map("order_id")
+  designId  String? @map("design_id")
+  productId String  @map("product_id")
+  size      String
+  color     String
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2) @map("unit_price")
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  design  Design? @relation(fields: [designId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  profileId String   @unique @map("profile_id")
+  balance   Decimal  @default(0) @db.Decimal(10, 2)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  profile      Profile       @relation(fields: [profileId], references: [id])
+  transactions Transaction[]
+
+  @@map("wallets")
+}
+
+model Transaction {
+  id        String          @id @default(uuid())
+  walletId  String          @map("wallet_id")
+  amount    Decimal         @db.Decimal(10, 2)
+  type      TransactionType
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  wallet Wallet @relation(fields: [walletId], references: [id])
+
+  @@map("transactions")
+}
+
+model Integration {
+  id          String   @id @default(uuid())
+  profileId   String   @map("profile_id")
+  platform    String
+  apiKey      String?  @map("api_key")
+  shopName    String?  @map("shop_name")
+  isConnected Boolean  @default(false) @map("is_connected")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  profile Profile @relation(fields: [profileId], references: [id])
+
+  @@map("integrations")
+}
+
+model Seller {
+  id             String   @id @default(uuid())
+  profileId      String   @unique @map("profile_id")
+  storeName      String   @map("store_name")
+  storeSlug      String   @unique @map("store_slug")
+  tier           String   @default("free")
+  commissionRate Decimal  @default(0) @db.Decimal(5, 2) @map("commission_rate")
+  balance        Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  profile    Profile          @relation(fields: [profileId], references: [id])
+  storefront StorefrontSettings?
+
+  @@map("sellers")
+}
+
+model StorefrontSettings {
+  id              String  @id @default(uuid())
+  sellerId        String  @unique @map("seller_id")
+  storeUrl        String? @map("store_url")
+  title           String?
+  description     String?
+  primaryColor    String  @default("#3973b2") @map("primary_color")
+  logoUrl         String? @map("logo_url")
+  shippingFee     Decimal @default(50) @db.Decimal(10, 2) @map("shipping_fee")
+  freeShipMinimum Decimal @default(500) @db.Decimal(10, 2) @map("free_ship_minimum")
+  fbPixelId       String? @map("fb_pixel_id")
+  gaTrackingId    String? @map("ga_tracking_id")
+  lineTagId       String? @map("line_tag_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  seller Seller @relation(fields: [sellerId], references: [id])
+
+  @@map("storefront_settings")
+}

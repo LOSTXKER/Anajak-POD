@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { 
   ArrowRight, CheckCircle2, Zap, Star, ShieldCheck, Truck, Package, 
   Palette, Store, TrendingUp, Clock, BadgeCheck, ChevronDown,
-  Shirt, ShoppingBag, Building2, Users, Gift, PartyPopper,
+  Shirt, ShoppingBag, Building2, Users, Gift,
   Sparkles, Play, Factory, Ban, RefreshCw, Lock, MapPin,
   MessageCircle
 } from 'lucide-react';
@@ -31,19 +31,18 @@ export default function LandingPage() {
   };
 
   const products = [
-    { name: "เสื้อยืดคอกลม Premium", price: "฿120", image: "/shirt/front.png", colors: 12, badge: "ขายดี" },
-    { name: "เสื้อ Oversize", price: "฿140", image: "/shirt/front.png", colors: 8, badge: null },
-    { name: "Hoodie Classic", price: "฿350", image: "/shirt/front.png", colors: 6, badge: "ใหม่" },
-    { name: "กระเป๋าผ้า Canvas", price: "฿80", image: "/shirt/front.png", colors: 4, badge: null },
+    { id: "0085c157-117d-46dc-b737-aa233c9ae86b", name: "เสื้อยืดคอกลม Semi 32", price: "฿120", image: "/shirt/front.png", colors: 6, badge: "ขายดี" },
+    { id: "77505c6d-833a-47e9-8843-f29a2072c109", name: "เสื้อ Oversize Street", price: "฿250", image: "/shirt/front.png", colors: 5, badge: null },
+    { id: "aeb8b736-7412-4dd0-a15b-3164c7ee6348", name: "Hoodie Heavy", price: "฿450", image: "/shirt/front.png", colors: 3, badge: "ใหม่" },
+    { id: "92beb2fe-b22b-4631-a863-8d5418da9d31", name: "กระเป๋าผ้า Canvas", price: "฿89", image: "/shirt/front.png", colors: 3, badge: null },
   ];
 
   const useCases = [
-    { icon: Users, label: "เสื้อรุ่น", href: "/use-cases/class-shirt" },
-    { icon: Gift, label: "งานบวช", href: "/use-cases/ordination" },
-    { icon: PartyPopper, label: "งานแต่ง", href: "/use-cases/wedding" },
+    { icon: Users, label: "เสื้อรุ่น", href: "/use-cases/graduation" },
+    { icon: Gift, label: "งานบวช/งานแต่ง", href: "/use-cases/event" },
     { icon: Shirt, label: "เสื้อทีม", href: "/use-cases/team" },
-    { icon: Users, label: "เสื้อแก๊ง", href: "/use-cases/gang" },
-    { icon: Sparkles, label: "เทศกาล", href: "/use-cases/festival" },
+    { icon: Users, label: "ยูนิฟอร์ม", href: "/use-cases/uniform" },
+    { icon: Sparkles, label: "เสื้อวง/Merch", href: "/use-cases/band" },
   ];
 
   const faqs = [
@@ -432,7 +431,7 @@ export default function LandingPage() {
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {products.map((product, i) => (
-                <Link href="/catalog/1" key={i} className="group">
+                <Link href={`/catalog/${product.id}`} key={i} className="group">
                   <div className="bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 hover:shadow-xl transition-all hover:-translate-y-1">
                     <div className="aspect-square relative p-6 flex items-center justify-center">
                       {product.badge && (

@@ -2,10 +2,29 @@
 
 import DashboardLayout from '@/components/DashboardLayout';
 import { useState } from 'react';
-import { Save, Settings, Package, Truck, Megaphone, FileText, ExternalLink, Palette, Image as ImageIcon, MousePointerClick } from 'lucide-react';
+import { Save, Settings, Package, Truck, Megaphone, FileText, ExternalLink, Palette, Image as ImageIcon, MousePointerClick, Loader2 } from 'lucide-react';
+import { saveStorefrontSettings, type StorefrontState } from '@/app/actions/storefront';
 
 export default function StorefrontPage() {
   const [activeTab, setActiveTab] = useState('general');
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveMessage(null);
+    const form = document.getElementById('storefront-form') as HTMLFormElement;
+    if (!form) { setSaving(false); return; }
+    const fd = new FormData(form);
+    const result: StorefrontState = await saveStorefrontSettings(null, fd);
+    setSaving(false);
+    if (result?.success) {
+      setSaveMessage('บันทึกสำเร็จ!');
+      setTimeout(() => setSaveMessage(null), 3000);
+    } else {
+      alert(result?.error || 'เกิดข้อผิดพลาด');
+    }
+  };
 
   return (
     <DashboardLayout title="หน้าร้านของฉัน" subtitle="ตั้งค่าและปรับแต่งหน้าเว็บ E-commerce ของคุณ" showCreateButton={false}>
@@ -41,7 +60,7 @@ export default function StorefrontPage() {
           </nav>
         </div>
 
-        <div className="max-w-4xl mx-auto space-y-6">
+        <form id="storefront-form" className="max-w-4xl mx-auto space-y-6">
           {/* General Settings Tab */}
           {activeTab === 'general' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -66,7 +85,8 @@ export default function StorefrontPage() {
                     <span className="pl-4 text-slate-400 font-medium text-sm">https://</span>
                     <input 
                       type="text" 
-                      defaultValue="my-awesome-store" 
+                      name="storeUrl"
+                      defaultValue="my-awesome-store"
                       className="w-full pl-1 pr-32 py-3 text-sm font-bold text-slate-800 bg-transparent focus:outline-none"
                     />
                     <span className="absolute right-4 text-sm font-bold text-slate-400 pointer-events-none">
@@ -119,8 +139,9 @@ export default function StorefrontPage() {
                         </label>
                         <input 
                           type="text" 
-                          id="store-title" 
-                          defaultValue="My Awesome Store" 
+                          id="store-title"
+                          name="title"
+                          defaultValue="My Awesome Store"
                           className="w-full px-4 py-3 text-sm font-medium bg-slate-50 border-2 border-transparent focus:bg-white focus:border-ci-blue/30 rounded-xl focus:outline-none transition-all"
                         />
                       </div>
@@ -129,8 +150,9 @@ export default function StorefrontPage() {
                         <label className="block text-sm font-bold text-slate-700 mb-2">สีธีม (Theme Color)</label>
                         <div className="flex items-center gap-3 p-2 bg-slate-50 rounded-xl border border-slate-100">
                           <input 
-                            type="color" 
-                            defaultValue="#3973b2" 
+                            type="color"
+                            name="primaryColor"
+                            defaultValue="#3973b2"
                             className="w-12 h-12 rounded-lg border-0 cursor-pointer p-1 bg-white shadow-sm"
                           />
                           <div className="flex-1">
@@ -153,6 +175,7 @@ export default function StorefrontPage() {
                       id="store-desc" 
                       rows={3} 
                       className="w-full px-4 py-3 text-sm font-medium bg-slate-50 border-2 border-transparent focus:bg-white focus:border-ci-blue/30 rounded-xl focus:outline-none transition-all resize-none" 
+                      name="description"
                       placeholder="บอกเล่าเกี่ยวกับแบรนด์ของคุณ..."
                       defaultValue="เสื้อยืดลายเท่ๆ สำหรับคนคูลๆ ผลิตด้วยใจ ใส่ใจทุกรายละเอียด"
                     />
@@ -243,8 +266,9 @@ export default function StorefrontPage() {
                         <span className="text-sm font-medium text-slate-600">ราคา:</span>
                         <div className="relative w-32">
                           <input 
-                            type="number" 
-                            defaultValue="40" 
+                            type="number"
+                            name="shippingFee"
+                            defaultValue="40"
                             className="w-full pl-8 pr-4 py-2 text-sm font-bold border-2 border-slate-200 rounded-xl focus:outline-none focus:border-ci-blue focus:ring-0 transition-all"
                           />
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">฿</span>
@@ -294,17 +318,25 @@ export default function StorefrontPage() {
               </div>
             </div>
           )}
-        </div>
 
         {/* Floating Save Button */}
         <div className="fixed bottom-8 right-8 z-50 animate-in zoom-in duration-300">
-          <button 
-            className="flex items-center px-8 py-4 text-base font-bold text-white rounded-2xl shadow-2xl shadow-ci-blue/30 hover:shadow-ci-blue/50 hover:-translate-y-1 transition-all active:scale-95 bg-gradient-to-r from-ci-blue to-blue-600"
+          {saveMessage && (
+            <div className="mb-3 px-4 py-2 bg-emerald-50 text-emerald-700 font-bold text-sm rounded-xl border border-emerald-200">
+              {saveMessage}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center px-8 py-4 text-base font-bold text-white rounded-2xl shadow-2xl shadow-ci-blue/30 hover:shadow-ci-blue/50 hover:-translate-y-1 transition-all active:scale-95 bg-gradient-to-r from-ci-blue to-blue-600 disabled:opacity-50"
           >
-            <Save className="w-5 h-5 mr-2.5" />
-            บันทึกการเปลี่ยนแปลง
+            {saving ? <Loader2 className="w-5 h-5 mr-2.5 animate-spin" /> : <Save className="w-5 h-5 mr-2.5" />}
+            {saving ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
           </button>
         </div>
+      </form>
       </div>
     </DashboardLayout>
   );

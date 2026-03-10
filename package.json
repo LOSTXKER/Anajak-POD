@@ -1,34 +1,50 @@
 {
   "name": "anajak-pod-nextjs",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "cross-env NODE_OPTIONS=--max-http-header-size=65536 next dev --turbopack",
+    "build": "prisma generate && next build",
+    "start": "cross-env NODE_OPTIONS=--max-http-header-size=65536 next start",
+    "lint": "next lint",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@opentelemetry/api": "1.9.0",
+    "@prisma/adapter-pg": "^7.4.0",
+    "@prisma/client": "^7.4.0",
+    "@supabase/ssr": "^0.5.0",
+    "@supabase/supabase-js": "^2.49.0",
     "client-only": "^0.0.1",
     "date-fns": "^4.1.0",
+    "dotenv": "^16.4.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.4",
-    "lucide-react": "^0.323.0",
-    "next": "14.1.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "lucide-react": "^0.470.0",
+    "next": "^16.1.0",
+    "pg": "^8.13.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@types/markdown-it": "14.1.2",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "acorn": "8.15.0",
+    "@types/node": "^22",
+    "@types/pg": "^8",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
     "autoprefixer": "^10.0.1",
-    "markdown-it": "14.1.0",
+    "cross-env": "^10.1.0",
     "postcss": "^8",
+    "prisma": "^7.4.0",
     "tailwindcss": "^3.3.0",
-    "typescript": "^5"
+    "tsx": "^4.19.0",
+    "typescript": "^5.5"
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   Search, 
   Filter, 
@@ -13,12 +13,25 @@ import {
   FileText,
   FolderOpen,
   LayoutGrid,
-  List
+  List,
+  Loader2
 } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
+import { createClient } from '@/lib/supabase/client';
 
-// Mock Data
-const MOCK_ASSETS = [
+const BUCKET_DESIGNS = 'designs';
+
+interface Asset {
+  id: string;
+  type: string;
+  url: string;
+  name: string;
+  date: string;
+  size: string;
+  dimensions: string;
+}
+
+const FALLBACK_ASSETS: Asset[] = [
   { id: '1', type: 'image', url: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=300&q=80', name: 'My Dog Logo', date: '2023-11-20', size: '1.2 MB', dimensions: '1024x1024' },
   { id: '2', type: 'image', url: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?auto=format&fit=crop&w=300&q=80', name: 'Vintage Badge', date: '2023-11-18', size: '0.8 MB', dimensions: '800x800' },
   { id: '3', type: 'image', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=300&q=80', name: 'Abstract Art', date: '2023-11-15', size: '2.5 MB', dimensions: '2048x2048' },
@@ -28,11 +41,58 @@ const MOCK_ASSETS = [
 export default function LibraryPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
+  const [assets, setAssets] = useState<Asset[]>(FALLBACK_ASSETS);
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const filteredAssets = MOCK_ASSETS.filter(asset => {
-    const matchesSearch = asset.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { alert('กรุณาเข้าสู่ระบบ'); return; }
+
+      const ext = file.name.split('.').pop();
+      const path = `${user.id}/${Date.now()}.${ext}`;
+
+      const { error } = await supabase.storage.from(BUCKET_DESIGNS).upload(path, file, { cacheControl: '3600' });
+      if (error) { alert(`อัปโหลดล้มเหลว: ${error.message}`); return; }
+
+      const { data: { publicUrl } } = supabase.storage.from(BUCKET_DESIGNS).getPublicUrl(path);
+      
+      const newAsset: Asset = {
+        id: path,
+        type: 'image',
+        url: publicUrl,
+        name: file.name,
+        date: new Date().toISOString().split('T')[0],
+        size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+        dimensions: 'auto',
+      };
+      setAssets(prev => [newAsset, ...prev]);
+    } catch {
+      alert('เกิดข้อผิดพลาดในการอัปโหลด');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleDelete = async (asset: Asset) => {
+    if (!confirm('ต้องการลบรูปนี้หรือไม่?')) return;
+    
+    if (!asset.id.startsWith('http') && asset.id.includes('/')) {
+      const supabase = createClient();
+      await supabase.storage.from(BUCKET_DESIGNS).remove([asset.id]);
+    }
+    setAssets(prev => prev.filter(a => a.id !== asset.id));
+  };
+
+  const filteredAssets = assets.filter(asset => {
+    return asset.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   return (
@@ -45,13 +105,14 @@ export default function LibraryPage() {
             <p className="text-slate-500">จัดการรูปภาพและไฟล์กราฟิกของคุณ</p>
           </div>
           <div className="flex items-center gap-3">
-            <input type="file" ref={fileInputRef} className="hidden" />
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleUpload} />
             <button 
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-ci-blue to-blue-600 text-white rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-ci-blue/20 hover:-translate-y-0.5 transition-all"
+              disabled={uploading}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-ci-blue to-blue-600 text-white rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-ci-blue/20 hover:-translate-y-0.5 transition-all disabled:opacity-50"
             >
-              <Plus className="w-4 h-4" />
-              <span>อัปโหลดรูปใหม่</span>
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              <span>{uploading ? 'กำลังอัปโหลด...' : 'อัปโหลดรูปใหม่'}</span>
             </button>
           </div>
         </div>
@@ -101,7 +162,7 @@ export default function LibraryPage() {
                        <button className="p-2 bg-white rounded-full text-slate-700 hover:text-ci-blue hover:scale-110 transition-all" title="ดาวน์โหลด">
                          <Download className="w-4 h-4" />
                        </button>
-                       <button className="p-2 bg-white rounded-full text-slate-700 hover:text-red-500 hover:scale-110 transition-all" title="ลบ">
+                       <button onClick={() => handleDelete(asset)} className="p-2 bg-white rounded-full text-slate-700 hover:text-red-500 hover:scale-110 transition-all" title="ลบ">
                          <Trash2 className="w-4 h-4" />
                        </button>
                     </div>
