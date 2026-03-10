@@ -2487,9 +2487,9 @@ ${svgElements}
                     </div>
                     <Divider />
                     <div className="flex items-center bg-slate-100 rounded">
-                       <button onClick={() => updateTextElementWithAutoResize(selectedId, { fontSize: Math.max(12, (selectedElement.fontSize || 32) - 4) })} className="p-1 hover:bg-slate-200 rounded-l text-slate-600"><Minus className="w-3 h-3" /></button>
+                       <button onClick={() => selectedId && updateTextElementWithAutoResize(selectedId, { fontSize: Math.max(12, (selectedElement.fontSize || 32) - 4) })} className="p-1 hover:bg-slate-200 rounded-l text-slate-600"><Minus className="w-3 h-3" /></button>
                        <span className="w-6 text-center text-[10px] font-bold">{Math.round(selectedElement.fontSize || 0)}</span>
-                       <button onClick={() => updateTextElementWithAutoResize(selectedId, { fontSize: Math.min(200, (selectedElement.fontSize || 32) + 4) })} className="p-1 hover:bg-slate-200 rounded-r text-slate-600"><Plus className="w-3 h-3" /></button>
+                       <button onClick={() => selectedId && updateTextElementWithAutoResize(selectedId, { fontSize: Math.min(200, (selectedElement.fontSize || 32) + 4) })} className="p-1 hover:bg-slate-200 rounded-r text-slate-600"><Plus className="w-3 h-3" /></button>
                     </div>
                     <Divider />
                     <div className="flex items-center relative">
@@ -2581,10 +2581,10 @@ ${svgElements}
               )}
               <Divider />
               <div className="flex items-center gap-1">
-                 <button onClick={() => moveLayer('up')} className="p-1.5 hover:bg-slate-100 rounded text-slate-500" title="เลื่อนขึ้น">
+                 <button onClick={() => selectedId && moveLayer(selectedId, 'up')} className="p-1.5 hover:bg-slate-100 rounded text-slate-500" title="เลื่อนขึ้น">
                     <ArrowUp className="w-4 h-4" />
                  </button>
-                 <button onClick={() => moveLayer('down')} className="p-1.5 hover:bg-slate-100 rounded text-slate-500" title="เลื่อนลง">
+                 <button onClick={() => selectedId && moveLayer(selectedId, 'down')} className="p-1.5 hover:bg-slate-100 rounded text-slate-500" title="เลื่อนลง">
                     <ArrowDown className="w-4 h-4" />
                  </button>
               </div>

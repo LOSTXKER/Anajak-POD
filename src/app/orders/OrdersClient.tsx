@@ -22,8 +22,9 @@ interface Order {
   totalAmount: number;
   status: string;
   items: OrderItem[];
-  user: {
-    name: string | null;
+  user?: {
+    name: string;
+    email: string;
   };
 }
 
@@ -227,7 +228,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-bold text-slate-800 text-sm">{order.user.name || 'ลูกค้าทั่วไป'}</div>
+                        <div className="font-bold text-slate-800 text-sm">{order.user?.name || 'ลูกค้าทั่วไป'}</div>
                         <div className="flex items-center gap-1 mt-1">
                            <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500 font-bold border border-slate-200">
                              Anajak Store
